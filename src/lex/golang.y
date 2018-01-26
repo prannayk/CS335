@@ -91,21 +91,21 @@ extern "C" int yylex();
 %token   <str>          INTER_STRING
 %token   <str>          STRING_LIT
 
-/* %token   <i32>          UINT8 */
-/* %token   <i32>          UINT16 */
-/* %token   <i64>          UINT32 */
-/* %token   <i64>          UINT64 */
-/* %token   <i32>          INT8 */
-/* %token   <i32>          INT16 */
-/* %token   <i32>          INT32 */
-/* %token   <i64>          INT64 */
-/* %token   <f32>          FLOAT32 */
-/* %token   <f64>          FLOAT64 */
-/* %token   <str>          BYTE */
-/* %token   <i32>          BOOL */
-/* %token   <i64>          UINT */
-/* %token   <i32>          INT */
-/* %token   <i64>          UINTPTR */
+%token   <str>          UINT8
+%token   <str>          UINT16
+%token   <str>          UINT32
+%token   <str>          UINT64
+%token   <str>          INT8
+%token   <str>          INT16
+%token   <str>          INT32
+%token   <str>          INT64
+%token   <str>          FLOAT32
+%token   <str>          FLOAT64
+%token   <str>          BYTE
+%token   <str>          BOOL
+%token   <str>          UINT
+%token   <str>          INT
+%token   <str>          UINTPTR
 
 %token   <str>          OR
 %token   <str>          AND
@@ -159,4 +159,3 @@ expr:   OCTAL_BYTE
             ;
 
 %%
-
