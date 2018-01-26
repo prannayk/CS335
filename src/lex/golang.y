@@ -7,151 +7,133 @@ extern "C" int yylex();
     char* str;
 };
 
-%token   <str>          BREAK
-%token   <str>          DEFAULT
-%token   <str>          FUNC
-%token   <str>          INTERFACE
-%token   <str>          SELECT
-%token   <str>          CASE
-%token   <str>          DEFER
-%token   <str>          GO
-%token   <str>          MAP
-%token   <str>          STRUCT
-%token   <str>          CHAN
-%token   <str>          ELSE
-%token   <str>          GOTO
-%token   <str>          PACKAGE
-%token   <str>          SWITCH
-%token   <str>          CONST
-%token   <str>          FALLTHROUGH
-%token   <str>          IF
-%token   <str>          RANGE
-%token   <str>          TYPE
-%token   <str>          CONTINUE
-%token   <str>          FOR
-%token   <str>          IMPORT
-%token   <str>          RETURN
-%token   <str>          VAR
-%token   <str>          NIL
-
-%token   <str>          COMMENT_ST
-%token   <str>          COMMENT_EN
-%token   <str>          COMMENT_LN
-
-%token   <str>          FOLDL
-%token   <str>          FOLDR
-%token   <str>          MMAP
-%token   <str>          YIELD
-%token   <str>          APPEND
-%token   <str>          CAP
-%token   <str>          CLOSE
-%token   <str>          COPY
-%token   <str>          DELETE
-%token   <str>          LEN
-%token   <str>          MAKE
-%token   <str>          NEW
-%token   <str>          PRINT
-%token   <str>          PRINTLN
-%token   <str>          GEN
-
-%token   <str>          GENERIC_CONCAT
-%token   <str>          GENERIC_NAME
-%token   <str>          GENERIC_BNAME
-%token   <str>          GENERIC_LIST
-
-%token   <str>          NEWLINE
-%token   <str>          UNICODE_CHAR
-%token   <str>          UNICODE_LETTER
-%token   <str>          LETTER
-
-%token   <str>          DECIMAL_DIGIT
-%token   <str>          OCTAL_DIGIT
-%token   <str>          HEX_DIGIT
-
-%token   <str>          ID
-
-%token   <str>          DECIMAL_LIT
-%token   <str>          OCTAL_LIT
-%token   <str>          HEX_LIT
-
-%token   <str>          INT_LIT
-
-
-%token   <str>          DECIMALS
-%token   <str>          EXP
-
-%token   <str>          FLOAT_LIT
-
-%token   <str>          OCTAL_BYTE
-%token   <str>          HEX_BYTE
-%token   <str>          BYTE_VAL
-%token   <str>          ESCAPE
-
-%token   <str>          RAW_STRING
-%token   <str>          INTER_STRING
-%token   <str>          STRING_LIT
-
-%token   <str>          UINT8
-%token   <str>          UINT16
-%token   <str>          UINT32
-%token   <str>          UINT64
-%token   <str>          INT8
-%token   <str>          INT16
-%token   <str>          INT32
-%token   <str>          INT64
-%token   <str>          FLOAT32
-%token   <str>          FLOAT64
-%token   <str>          BYTE
-%token   <str>          BOOL
-%token   <str>          UINT
-%token   <str>          INT
-%token   <str>          UINTPTR
-
-%token   <str>          OR
-%token   <str>          AND
-%token   <str>          LE
-%token   <str>          LT
-%token   <str>          GE
-%token   <str>          GT
-%token   <str>          EQ
-%token   <str>          NE
-%token   <str>          LS
-%token   <str>          RS
-%token   <str>          NOT_AND
-%token   <str>          INC
-%token   <str>          DEC
-%token   <str>          DECL
-%token   <str>          ADD
-%token   <str>          SUB
-%token   <str>          MUL
-%token   <str>          DIV
-%token   <str>          MOD
-%token   <str>          BIT_OR
-%token   <str>          BIT_AND
-%token   <str>          EXP_OP
-%token   <str>          NOT_OP
-%token   <str>          BIT_NOT
-%token   <str>          PTR_OP
-%token   <str>          REF_OP
-%token   <str>          STMTEND
-
-%token   <str>          TRUE
-%token   <str>          FALSE
-
-%token   <str>          REL_OP
-%token   <str>          ADD_OP
-%token   <str>          MUL_OP
-%token   <str>          UNARY_OP
-%token   <str>          BIN_OP
-
-%token   <str>          VARIADIC
-%token   <str>          ASSGN_OP
-
-%token   <str>          PAREN_OPEN
-%token   <str>          PAREN_CLOSE
-%token   <str>          BLOCK_OPEN
-%token   <str>          BLOCK_CLOSE
-%token   <str>          DOT
+%token   <str>          BREAK 0
+%token   <str>          DEFAULT 1
+%token   <str>          FUNC 2
+%token   <str>          INTERFACE 3
+%token   <str>          SELECT 4
+%token   <str>          CASE 5
+%token   <str>          DEFER 6
+%token   <str>          GO 7
+%token   <str>          MAP 8
+%token   <str>          STRUCT 9
+%token   <str>          CHAN 10
+%token   <str>          ELSE 11
+%token   <str>          GOTO 12
+%token   <str>          PACKAGE 13
+%token   <str>          SWITCH 14
+%token   <str>          CONST 15
+%token   <str>          FALLTHROUGH 16
+%token   <str>          IF 17
+%token   <str>          RANGE 18
+%token   <str>          TYPE 19
+%token   <str>          CONTINUE 20
+%token   <str>          FOR 21
+%token   <str>          IMPORT 22
+%token   <str>          RETURN 23
+%token   <str>          VAR 24
+%token   <str>          NIL 25
+%token   <str>          COMMENT_ST 26
+%token   <str>          COMMENT_EN 27
+%token   <str>          COMMENT_LN 28
+%token   <str>          FOLDL 29
+%token   <str>          FOLDR 30
+%token   <str>          MMAP 31
+%token   <str>          YIELD 32
+%token   <str>          APPEND 33
+%token   <str>          CAP 34
+%token   <str>          CLOSE 35
+%token   <str>          COPY 36
+%token   <str>          DELETE 37
+%token   <str>          LEN 38
+%token   <str>          MAKE 39
+%token   <str>          NEW 40
+%token   <str>          PRINT 41
+%token   <str>          PRINTLN 42
+%token   <str>          GEN 43
+%token   <str>          GENERIC_CONCAT 44
+%token   <str>          GENERIC_NAME 45
+%token   <str>          GENERIC_BNAME 46
+%token   <str>          GENERIC_LIST 47
+%token   <str>          NEWLINE 48
+%token   <str>          UNICODE_CHAR 49
+%token   <str>          UNICODE_LETTER 50
+%token   <str>          LETTER 51
+%token   <str>          DECIMAL_DIGIT 52
+%token   <str>          OCTAL_DIGIT 53
+%token   <str>          HEX_DIGIT 54
+%token   <str>          ID 55
+%token   <str>          DECIMAL_LIT 56
+%token   <str>          OCTAL_LIT 57
+%token   <str>          HEX_LIT 58
+%token   <str>          INT_LIT 59
+%token   <str>          DECIMALS 60
+%token   <str>          EXP 61
+%token   <str>          FLOAT_LIT 62
+%token   <str>          OCTAL_BYTE 63
+%token   <str>          HEX_BYTE 64
+%token   <str>          BYTE_VAL 65
+%token   <str>          ESCAPE 66
+%token   <str>          RAW_STRING 67
+%token   <str>          INTER_STRING 68
+%token   <str>          STRING_LIT 69
+%token   <str>          UINT8 70
+%token   <str>          UINT16 71
+%token   <str>          UINT32 72
+%token   <str>          UINT64 73
+%token   <str>          INT8 74
+%token   <str>          INT16 75
+%token   <str>          INT32 76
+%token   <str>          INT64 77
+%token   <str>          FLOAT32 78
+%token   <str>          FLOAT64 79
+%token   <str>          BYTE 80
+%token   <str>          BOOL 81
+%token   <str>          UINT 82
+%token   <str>          INT 83
+%token   <str>          UINTPTR 84
+%token   <str>          OR 85
+%token   <str>          AND 86
+%token   <str>          LE 87
+%token   <str>          LT 88
+%token   <str>          GE 89
+%token   <str>          GT 90
+%token   <str>          EQ 91
+%token   <str>          NE 92
+%token   <str>          LS 93
+%token   <str>          RS 94
+%token   <str>          NOT_AND 95
+%token   <str>          INC 96
+%token   <str>          DEC 97
+%token   <str>          DECL 98
+%token   <str>          ADD 99
+%token   <str>          SUB 100
+%token   <str>          STAR 101
+%token   <str>          DIV 102
+%token   <str>          MOD 103
+%token   <str>          BIT_OR 104
+%token   <str>          BIT_AND 105
+%token   <str>          CARET 106
+%token   <str>          NOT_OP 107
+%token   <str>          BIT_NOT 108
+%token   <str>          PTR_OP 109
+%token   <str>          AMPERSAND 110
+%token   <str>          STMTEND 111
+%token   <str>          TRUE 112
+%token   <str>          FALSE 113
+%token   <str>          REL_OP 114
+%token   <str>          ADD_OP 115
+%token   <str>          MUL_OP 116
+%token   <str>          UNARY_OP 117
+%token   <str>          BIN_OP 118
+%token   <str>          VARIADIC 119
+%token   <str>          ASSGN_OP 120
+%token   <str>          PAREN_OPEN 121
+%token   <str>          PAREN_CLOSE 122
+%token   <str>          BLOCK_OPEN 123
+%token   <str>          BLOCK_CLOSE 124
+%token   <str>          DOT 125
+%token   <str>          COMMA 126
 
 %%
 

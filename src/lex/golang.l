@@ -134,25 +134,22 @@ DEC "--"
 DECL ":="
 ADD "+"
 SUB "-"
-MUL "*"
+STAR "*"
 DIV "/"
 MOD "%"
 BIT_OR "|"
-BIT_AND "&"
-EXP_OP "^"
+AMPERSAND "&"
+CARET "^"
 NOT_OP "!"
-BIT_NOT "^"
-PTR_OP "*"
-REF_OP "&"
 STMTEND ";"
 
 TRUE true
 FALSE false
 
 REL_OP  {EQ}|{NE}|{GE}|{GT}|{LE}|{LT}
-ADD_OP {ADD}|{SUB}|{BIT_OR}|{EXP_OP}
-MUL_OP {MUL}|{DIV}|{MOD}|{LS}|{RS}|{BIT_AND}|{NOT_AND}
-UNARY_OP {ADD}|{SUB}|{NOT_OP}|{BIT_NOT}|{PTR_OP}|{REF_OP}
+ADD_OP {ADD}|{SUB}|{BIT_OR}|{CARET}
+MUL_OP {STAR}|{DIV}|{MOD}|{LS}|{RS}|{AMPERSAND}|{NOT_AND}
+UNARY_OP {ADD}|{SUB}|{NOT_OP}|{CARET}|{STAR}|{AMPERSAND}
 BIN_OP {OR}|{AND}|{REL_OP}|{ADD_OP}|{MUL_OP}
 
 VARIADIC "..."
@@ -163,6 +160,7 @@ PAREN_CLOSE ")"
 BLOCK_OPEN "{"
 BLOCK_CLOSE "}"
 DOT "."
+COMMA ","
 
 %%
 {BREAK} { yylval.str = strdup(yytext);
@@ -252,52 +250,6 @@ DOT "."
 {GEN} { yylval.str = strdup(yytext);
           return GEN; }
 
-{GENERIC_CONCAT} { yylval.str = strdup(yytext);
-          return GENERIC_CONCAT; }
-{GENERIC_NAME} { yylval.str = strdup(yytext);
-          return GENERIC_NAME; }
-{GENERIC_BNAME} { yylval.str = strdup(yytext);
-          return GENERIC_BNAME; }
-{GENERIC_LIST} { yylval.str = strdup(yytext);
-          return GENERIC_LIST; }
-
-{NEWLINE} { yylval.str = strdup(yytext);
-          return NEWLINE; }
-{UNICODE_CHAR} { yylval.str = strdup(yytext);
-          return UNICODE_CHAR; }
-
-{ID} { yylval.str = strdup(yytext);
-          return ID; }
-
-
-{INT_LIT} { yylval.str = strdup(yytext);
-          return INT_LIT; }
-{DECIMAL_LIT} { yylval.str = strdup(yytext);
-          return DECIMAL_LIT; }
-{OCTAL_LIT} { yylval.str = strdup(yytext);
-          return OCTAL_LIT; }
-{HEX_LIT} { yylval.str = strdup(yytext);
-          return HEX_LIT; }
-
-{FLOAT_LIT} { yylval.str = strdup(yytext);
-          return FLOAT_LIT; }
-
-{OCTAL_BYTE} { yylval.str = strdup(yytext);
-          return OCTAL_BYTE; }
-{HEX_BYTE} { yylval.str = strdup(yytext);
-          return HEX_BYTE; }
-{BYTE_VAL} { yylval.str = strdup(yytext);
-          return BYTE_VAL; }
-{ESCAPE} { yylval.str = strdup(yytext);
-          return ESCAPE; }
-
-{RAW_STRING} { yylval.str = strdup(yytext);
-          return RAW_STRING; }
-{INTER_STRING} { yylval.str = strdup(yytext);
-          return INTER_STRING; }
-{STRING_LIT} { yylval.str = strdup(yytext);
-          return STRING_LIT; }
-
 {UINT8} { yylval.str = strdup(yytext);
           return UINT8; }
 {UINT16} { yylval.str = strdup(yytext);
@@ -328,6 +280,43 @@ DOT "."
           return INT; }
 {UINTPTR} { yylval.str = strdup(yytext);
           return UINTPTR; }
+
+{TRUE} { yylval.str = strdup(yytext);
+          return TRUE; }
+{FALSE} { yylval.str = strdup(yytext);
+          return FALSE; }
+
+{ID} { yylval.str = strdup(yytext);
+          return ID; }
+
+{GENERIC_CONCAT} { yylval.str = strdup(yytext);
+          return GENERIC_CONCAT; }
+{GENERIC_BNAME} { yylval.str = strdup(yytext);
+          return GENERIC_BNAME; }
+{GENERIC_LIST} { yylval.str = strdup(yytext);
+          return GENERIC_LIST; }
+
+{HEX_LIT} { yylval.str = strdup(yytext);
+          return HEX_LIT; }
+{OCTAL_LIT} { yylval.str = strdup(yytext);
+          return OCTAL_LIT; }
+{DECIMAL_LIT} { yylval.str = strdup(yytext);
+          return DECIMAL_LIT; }
+
+{FLOAT_LIT} { yylval.str = strdup(yytext);
+          return FLOAT_LIT; }
+
+{OCTAL_BYTE} { yylval.str = strdup(yytext);
+          return OCTAL_BYTE; }
+{HEX_BYTE} { yylval.str = strdup(yytext);
+          return HEX_BYTE; }
+{ESCAPE} { yylval.str = strdup(yytext);
+          return ESCAPE; }
+
+{RAW_STRING} { yylval.str = strdup(yytext);
+          return RAW_STRING; }
+{INTER_STRING} { yylval.str = strdup(yytext);
+          return INTER_STRING; }
 
 {OR} { yylval.str = strdup(yytext);
           return OR; }
@@ -361,44 +350,24 @@ DOT "."
           return ADD; }
 {SUB} { yylval.str = strdup(yytext);
           return SUB; }
-{MUL} { yylval.str = strdup(yytext);
-          return MUL; }
+{STAR} { yylval.str = strdup(yytext);
+          return STAR; }
 {DIV} { yylval.str = strdup(yytext);
           return DIV; }
 {MOD} { yylval.str = strdup(yytext);
           return MOD; }
 {BIT_OR} { yylval.str = strdup(yytext);
           return BIT_OR; }
-{BIT_AND} { yylval.str = strdup(yytext);
-          return BIT_AND; }
-{EXP_OP} { yylval.str = strdup(yytext);
-          return EXP_OP; }
+{AMPERSAND} { yylval.str = strdup(yytext);
+          return AMPERSAND; }
+{CARET} { yylval.str = strdup(yytext);
+          return CARET; }
 {NOT_OP} { yylval.str = strdup(yytext);
           return NOT_OP; }
-{BIT_NOT} { yylval.str = strdup(yytext);
-          return BIT_NOT; }
-{PTR_OP} { yylval.str = strdup(yytext);
-          return PTR_OP; }
-{REF_OP} { yylval.str = strdup(yytext);
-          return REF_OP; }
 {STMTEND} { yylval.str = strdup(yytext);
           return STMTEND; }
 
-{TRUE} { yylval.str = strdup(yytext);
-          return TRUE; }
-{FALSE} { yylval.str = strdup(yytext);
-          return FALSE; }
 
-{REL_OP} { yylval.str = strdup(yytext);
-          return REL_OP; }
-{ADD_OP} { yylval.str = strdup(yytext);
-          return ADD_OP; }
-{MUL_OP} { yylval.str = strdup(yytext);
-          return MUL_OP; }
-{UNARY_OP} { yylval.str = strdup(yytext);
-          return UNARY_OP; }
-{BIN_OP} { yylval.str = strdup(yytext);
-          return BIN_OP; }
 
 {VARIADIC} { yylval.str = strdup(yytext);
           return VARIADIC; }
@@ -415,12 +384,16 @@ DOT "."
           return BLOCK_CLOSE; }
 {DOT} { yylval.str = strdup(yytext);
           return DOT; }
+{COMMA} { yylval.str = strdup(yytext);
+          return COMMA; }
+
 
 [ \t\n]+ /* removal of whitespace */
 
-. printf("Do not understand symbol");
+. printf("Do not understand symbol (%s)\n", yytext);
 %%
 
+const char* tokens[] = {"BREAK", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA"};
 int main (int argc, char** argv)
 {
     ++argv, --argc;
@@ -431,8 +404,6 @@ int main (int argc, char** argv)
     while(1){
         int k = yylex();
         if ( k== 0 ) break;
-        printf("%d %s\n", k, yylval.str);
+        printf("%s\t\t%s\n", tokens[k], yylval.str);
     }
-    for (auto t : counter[1])
-         printf("%s\n", t);
 }
