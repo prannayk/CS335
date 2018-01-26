@@ -1,6 +1,7 @@
 /* Scanner / lexer for Golang */
 %{
 #include <math.h>
+#include "golang.tab.h"
 extern "C" int yylex();
 %}
 
@@ -160,6 +161,8 @@ DOT "."
 
 {OCTAL_BYTE} {
     printf("Octal digit recognized : %s\n", yytext);
+    yylval.str = strdup(yytext);
+    return OCTAL_BYTE;
 }
 {HEX_BYTE} {
     printf("Hexadecimal digit recognized : %s\n", yytext);
@@ -178,5 +181,7 @@ int main (int argc, char** argv)
         yyin = fopen(argv[0], "r");
     else
         yyin = stdin;
-    yylex();
+    int k = yylex();
+    printf("%d\n", k == OCTAL_BYTE);
+    printf("%s", yylval.str);
 }

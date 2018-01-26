@@ -12,7 +12,6 @@ test:
 	${BINLEX}test.run ${TEST}start.txt
 
 golang:
-	bison -d ${LEX_FOLDER}golang.yy
 	flex -o ${LEX_FOLDER}golang.yy.c ${LEX_FOLDER}golang.l
 	${CC} ${LEX_FOLDER}golang.yy.c ${FLAGS} -o ${BINLEX}golang.run
 	${BINLEX}golang.run ${TEST}start.txt
