@@ -95,7 +95,6 @@ ESCAPE \\[nr\\t\'\"\`]
 
 RAW_STRING \`([\`]|{ESCAPE})*\`
 INTER_STRING \"([^\n\"]|{BYTE_VAL}|{ESCAPE})*\"
-
 STRING_LIT ({INTER_STRING}|{RAW_STRING})
 
 UINT8 uint8
@@ -168,7 +167,6 @@ DOT "."
 {HEX_BYTE} {
     printf("Hexadecimal digit recognized : %s\n", yytext);
 }
-
 
 
 [ \t\n]+ /* removal of whitespace */
