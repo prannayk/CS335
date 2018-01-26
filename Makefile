@@ -1,5 +1,5 @@
 CC=g++
-FLAGS=-lfl
+FLAGS=-lfl -std=c++17
 BIN=bin/
 TEST=tests/
 # Lexer make [testing]

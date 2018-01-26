@@ -6,7 +6,8 @@
 #include <string.h>
 #include <set>
 extern "C" int yylex();
-#define YY_USER_ACTION ++ctr[yy_act];
+#define YY_USER_ACTION ++ctr[yy_act]; \
+    counter[yy_act].insert(strdup(yytext)); 
 using namespace std;
 
 int ctr[YY_NUM_RULES];
@@ -167,12 +168,8 @@ DOT "."
 
 %%
 
-{OCTAL_BYTE} {
-    printf("Octal digit recognized : %s\n", yytext);
-    yylval.str = strdup(yytext);
-    return OCTAL_BYTE;
-}
-{HEX_BYTE} {
+{OCTAL_BYTE}    { yylval.str = strdup(yytext); return OCTAL_BYTE; }
+HEX_BYTE} {
     printf("Hexadecimal digit recognized : %s\n", yytext);
 }
 
@@ -185,16 +182,15 @@ DOT "."
 int main (int argc, char** argv)
 {
     ++argv, --argc;
-//    for ( int i = 0 ;i < YY_NUM_RULES ; i++ )
-//        counter[i] = new set<char*>;
     if (argc > 0)
         yyin = fopen(argv[0], "r");
     else
         yyin = stdin;
     while(1){
         int k = yylex();
-        if ( k== 0) break;
+        if ( k== 0 ) break;
         printf("%d %s\n", k, yylval.str);
-        counter[k-1].insert(yylval.str);
     }
+    for (auto t : counter[1])
+         printf("%s\n", t);
 }
