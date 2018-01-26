@@ -1,9 +1,6 @@
 /* Scanner / lexer for Golang */
 %{
 #include <math.h>
-//#include <iostream>
-
-//using namespace std;
 extern "C" int yylex();
 %}
 
