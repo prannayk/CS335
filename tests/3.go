@@ -1,14 +1,14 @@
-package main
+package main;
 
-import "fmt"
+import "fmt";
 
 func second(x, y string) (string) {
-    return y
+    return y;
 }
 
 func main() {
-    a:= second("hello", "world")
-    fmt.Println(a)
+    a:= second("hello", "world");
+    fmt.Println(a);
 }
 
 
