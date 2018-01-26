@@ -134,6 +134,8 @@ extern "C" int yylex();
 %token   <str>          BLOCK_CLOSE 124
 %token   <str>          DOT 125
 %token   <str>          COMMA 126
+%token   <str>          SQUARE_OPEN 127
+%token   <str>          SQUARE_CLOSE 128
 
 %%
 
