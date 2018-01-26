@@ -44,16 +44,16 @@ FOLDL FoldL
 FOLDR FoldR
 MMAP MMap
 YIELD yield
-APPEND  append 
-CAP  cap 
-CLOSE  close 
-COPY  copy 
-DELETE  delete 
+APPEND  append
+CAP  cap
+CLOSE  close
+COPY  copy
+DELETE  delete
 LEN len
-MAKE  make 
-NEW  new 
-PRINT  print 
-PRINTLN  println 
+MAKE  make
+NEW  new
+PRINT  print
+PRINTLN  println
 GEN gen
 
 GENERIC_CONCAT "$"
@@ -63,7 +63,7 @@ GENERIC_LIST "<"({GENERIC_BLIST}(","{GENERIC_BLIST})*)">"
 
 /* end define keywords */
 
-/* entering numbers, unicode etc */ 
+/* entering numbers, unicode etc */
 
 NEWLINE [\n]
 UNICODE_CHAR [^\n]
@@ -91,11 +91,10 @@ FLOAT_LIT (({DECIMALS}"."{DECIMALS}?{EXP}?)|({DECIMALS}{EXP})|("."{DECIMALS}{EXP
 OCTAL_BYTE \\({OCTAL_DIGIT}{3})
 HEX_BYTE \\"x"{HEX_DIGIT}{2}
 BYTE_VAL ({OCTAL_BYTE}|{HEX_BYTE})
-ESCAPE \\[nr\\t\'\"]
+ESCAPE \\[nr\\t\'\"\`]
 
-RAW_STRING \`({UNICODE_CHAR}|{NEWLINE})*\`
-/* INTER_STRING \"({UNICODE_CHAR}|{BYTE_VAL})*\"
-
+RAW_STRING \`([\`]|{ESCAPE})*\`
+INTER_STRING \"([^\n\"]|{BYTE_VAL}|{ESCAPE})*\"
 STRING_LIT ({INTER_STRING}|{RAW_STRING})
 
 UINT8 uint8
@@ -154,12 +153,18 @@ BIN_OP {OR}|{AND}|{REL_OP}|{ADD_OP}|{MUL_OP}
 VARIADIC "..."
 ASSGN_OP ({ADD_OP}|{MUL_OP})?"="
 
+PAREN_OPEN "("
+PAREN_CLOSE ")"
+BLOCK_OPEN "{"
+BLOCK_CLOSE "}"
+DOT "."
+
 %%
 
-{OCTAL_BYTE} { 
+{OCTAL_BYTE} {
     printf("Octal digit recognized : %s\n", yytext);
 }
-{HEX_BYTE} { 
+{HEX_BYTE} {
     printf("Hexadecimal digit recognized : %s\n", yytext);
 }
 
@@ -167,15 +172,14 @@ ASSGN_OP ({ADD_OP}|{MUL_OP})?"="
 [ \t\n]+ /* removal of whitespace */
 
 . printf("Do not understand symbol");
-%% 
+%%
 
 int main (int argc, char** argv)
 {
     ++argv, --argc;
     if (argc > 0)
         yyin = fopen(argv[0], "r");
-    else 
+    else
         yyin = stdin;
     yylex();
 }
-
