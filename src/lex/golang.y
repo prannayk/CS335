@@ -1,9 +1,10 @@
+%{
+#define yyerror atoi
+extern "C" int yylex();
+%}
+
 %union {
     char* str;
-    double f64;
-    float f32;
-    int32_t i32;
-    int64_t i64;
 };
 
 %token   <str>          BREAK
@@ -90,21 +91,21 @@
 %token   <str>          INTER_STRING
 %token   <str>          STRING_LIT
 
-%token   <i32>          UINT8
-%token   <i32>          UINT16
-%token   <i64>          UINT32
-%token   <i64>          UINT64
-%token   <i32>          INT8
-%token   <i32>          INT16
-%token   <i32>          INT32
-%token   <i64>          INT64
-%token   <f32>          FLOAT32
-%token   <f64>          FLOAT64
-%token   <str>          BYTE
-%token   <i32>          BOOL
-%token   <i64>          UINT
-%token   <i32>          INT
-%token   <i64>          UINTPTR
+/* %token   <i32>          UINT8 */
+/* %token   <i32>          UINT16 */
+/* %token   <i64>          UINT32 */
+/* %token   <i64>          UINT64 */
+/* %token   <i32>          INT8 */
+/* %token   <i32>          INT16 */
+/* %token   <i32>          INT32 */
+/* %token   <i64>          INT64 */
+/* %token   <f32>          FLOAT32 */
+/* %token   <f64>          FLOAT64 */
+/* %token   <str>          BYTE */
+/* %token   <i32>          BOOL */
+/* %token   <i64>          UINT */
+/* %token   <i32>          INT */
+/* %token   <i64>          UINTPTR */
 
 %token   <str>          OR
 %token   <str>          AND
@@ -155,6 +156,7 @@
 %%
 
 expr:   OCTAL_BYTE
-        ;
+            ;
 
 %%
+

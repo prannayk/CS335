@@ -2,7 +2,15 @@
 %{
 #include <math.h>
 #include "golang.tab.h"
+#include <stdlib.h>
+#include <string.h>
+#include <set>
 extern "C" int yylex();
+#define YY_USER_ACTION ++ctr[yy_act];
+using namespace std;
+
+int ctr[YY_NUM_RULES];
+set<char*>* counter = new set<char*>[YY_NUM_RULES];
 %}
 
 /* start define keywords */
@@ -177,11 +185,16 @@ DOT "."
 int main (int argc, char** argv)
 {
     ++argv, --argc;
+//    for ( int i = 0 ;i < YY_NUM_RULES ; i++ )
+//        counter[i] = new set<char*>;
     if (argc > 0)
         yyin = fopen(argv[0], "r");
     else
         yyin = stdin;
-    int k = yylex();
-    printf("%d\n", k == OCTAL_BYTE);
-    printf("%s", yylval.str);
+    while(1){
+        int k = yylex();
+        if ( k== 0) break;
+        printf("%d %s\n", k, yylval.str);
+        counter[k-1].insert(yylval.str);
+    }
 }

@@ -1,4 +1,6 @@
 *.run
 *.yy.c
 *.swp
-
+*.tab.h
+*.tab.c
+*.yy
