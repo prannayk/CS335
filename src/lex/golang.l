@@ -94,7 +94,7 @@ BYTE_VAL ({OCTAL_BYTE}|{HEX_BYTE})
 ESCAPE \\[nr\\t\'\"]
 
 RAW_STRING \`({UNICODE_CHAR}|{NEWLINE})*\`
-INTER_STRING \"({UNICODE_CHAR}|{BYTE_VAL})*\"
+/* INTER_STRING \"({UNICODE_CHAR}|{BYTE_VAL})*\"
 
 STRING_LIT ({INTER_STRING}|{RAW_STRING})
 
@@ -162,7 +162,6 @@ ASSGN_OP ({ADD_OP}|{MUL_OP})?"="
 {HEX_BYTE} { 
     printf("Hexadecimal digit recognized : %s\n", yytext);
 }
-
 
 
 [ \t\n]+ /* removal of whitespace */
