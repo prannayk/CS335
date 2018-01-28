@@ -66,8 +66,10 @@ GEN gen
 
 GENERIC_CONCAT "$"
 GENERIC_NAME {ID}
-GENERIC_BNAME {GENERIC_NAME}(":"{ID}("$"{ID})+)?
-GENERIC_LIST "<"({GENERIC_BNAME}" "*(","" "*{GENERIC_BNAME}" "*)*)">"
+GENERIC_BNAME [ \t]*{ID}[ \t]*
+GENERIC_BLIST {GENERIC_BNAME}([ \t]*"$"[ \t]*({GENERIC_BNAME}))*
+GENERIC_BTYPE {ID}[ \t]*(:[ \t]*{GENERIC_BLIST}[ \t]*)?
+GENERIC_LIST "<"[ \t]*{GENERIC_BTYPE}([ \t]*,[ \t]*{GENERIC_BTYPE}[ \t]*)*[ \t]*">"
 /* end define keywords */
 
 /* entering numbers, unicode etc */
@@ -166,6 +168,8 @@ COMMA ","
 
 SQUARE_OPEN "["
 SQUARE_CLOSE "]"
+
+%x COMMENT
 %%
 {BREAK} { yylval.str = strdup(yytext);
           return BREAK; }
@@ -220,8 +224,7 @@ SQUARE_CLOSE "]"
 {NIL} { yylval.str = strdup(yytext);
           return NIL; }
 
-{COMMENT_LN} { yylval.str = strdup(yytext);
-          return COMMENT_LN; }
+{COMMENT_LN} { BEGIN(COMMENT); }
 
 {FOLDL} { yylval.str = strdup(yytext);
           return FOLDL; }
@@ -395,7 +398,8 @@ SQUARE_CLOSE "]"
 {COMMA} { yylval.str = strdup(yytext);
           return COMMA; }
 
-
+<COMMENT>[\n] { BEGIN(INITIAL); }
+<COMMENT>. /* ignore */
 [ \t\n]+ /* removal of whitespace */
 
 . printf("Do not understand symbol (%s)\n", yytext);
