@@ -4,14 +4,17 @@
 #include "golang.tab.h"
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
 #include <set>
+#include <vector>
 extern "C" int yylex();
-#define YY_USER_ACTION ++ctr[yy_act]; \
-    counter[yy_act].insert(strdup(yytext)); 
-using namespace std;
+#define YY_USER_ACTION ++ctr[yy_act]; 
+//    counter[yy_act].insert(strdup(yytext)); 
 
+#define NUM_TOKENS 129
+using namespace std;
 int ctr[YY_NUM_RULES];
-set<char*>* counter = new set<char*>[YY_NUM_RULES];
+vector<set<char*>> counter (NUM_TOKENS);
 %}
 
 /* start define keywords */
@@ -393,7 +396,7 @@ COMMA ","
 . printf("Do not understand symbol (%s)\n", yytext);
 %%
 
-const char* tokens[] = {"BREAK", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA"};
+const char* tokens[] = {"PADDING","BREAK", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA"};
 int main (int argc, char** argv)
 {
     ++argv, --argc;
@@ -404,6 +407,13 @@ int main (int argc, char** argv)
     while(1){
         int k = yylex();
         if ( k== 0 ) break;
-        printf("%s\t\t%s\n", tokens[k], yylval.str);
+        printf("%s\t\t%s\n", tokens[k+1], yylval.str);
+        counter[k].insert(strdup("yylval.str")); 
+    }
+    printf("Token \t\t\t Occurences \t\t\t Lexemes \n");
+    int po;
+    for (po = 0; po < NUM_TOKENS; po++) {
+        if (counter[po].size())
+            cout << tokens[po+1] << "\t\t\t " << counter[po].size() << endl;
     }
 }
