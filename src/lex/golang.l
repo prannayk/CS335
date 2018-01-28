@@ -421,37 +421,37 @@ int main (int argc, char** argv)
         counter[k].insert(strdup(yylval.str)); 
     }
     int po, tempcount;
-    cout << std::left
-         << std::setfill(' ')
-         << std::setw(20)
+    cout << left
+         << setfill(' ')
+         << setw(20)
          << "Tokens"
-         << std::left
-         << std::setfill(' ')
-         << std::setw(20)
+         << left
+         << setfill(' ')
+         << setw(20)
          << "Occurances"
-         << std::left
-         << std::setfill(' ')
-         << std::setw(20)
+         << left
+         << setfill(' ')
+         << setw(20)
          << "Lexemes"
          << endl;
     for (po = 1; po < NUM_TOKENS; po++) {
         if(counter[po].size() > 0) {
             tempcount = counter[po].size();
             set<string>::iterator it = counter[po].begin();
-            cout << std::left
-                 << std::setfill(' ')
-                 << std::setw(20)
+            cout << left
+                 << setfill(' ')
+                 << setw(20)
                  << tokens[po]
-                 << std::left
-                 << std::setfill(' ')
-                 << std::setw(20)
+                 << left
+                 << setfill(' ')
+                 << setw(20)
                  << counter[po].size()
                  << (*it)
                  << endl;
             while(tempcount > 1) {
                  it++;
                  tempcount--;
-                 cout << std::string(40, ' ')
+                 cout << string(40, ' ')
                       << (*it)
                       <<endl;
                  
