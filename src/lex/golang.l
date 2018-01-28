@@ -14,7 +14,7 @@ extern "C" int yylex();
 #define NUM_TOKENS 130
 using namespace std;
 int ctr[YY_NUM_RULES];
-vector<set<char*>> counter (NUM_TOKENS);
+vector<set<string>> counter (NUM_TOKENS);
 %}
 
 /* start define keywords */
@@ -410,11 +410,10 @@ int main (int argc, char** argv)
         yyin = fopen(argv[0], "r");
     else
         yyin = stdin;
-    printf("\n\n\n\n\n");
     while(1){
         int k = yylex();
-        if ( k== 0 ) break;
-        printf("%s\t\t%s\t\t%d\n", tokens[k], yylval.str, k);
+        if(k == 0) break;
+        // printf("%s\t\t%s\t\t%d\n", tokens[k], yylval.str, k);
         counter[k].insert(strdup(yylval.str)); 
     }
     int po, tempcount;
@@ -434,7 +433,7 @@ int main (int argc, char** argv)
     for (po = 1; po < NUM_TOKENS; po++) {
         if(counter[po].size() > 0) {
             tempcount = counter[po].size();
-            set<char*>::iterator it = counter[po].begin();
+            set<string>::iterator it = counter[po].begin();
             cout << std::left
                  << std::setfill(' ')
                  << std::setw(20)
