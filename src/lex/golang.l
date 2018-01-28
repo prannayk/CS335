@@ -296,10 +296,6 @@ SQUARE_CLOSE "]"
 {ID} { yylval.str = strdup(yytext);
           return ID; }
 
-{GENERIC_CONCAT} { yylval.str = strdup(yytext);
-          return GENERIC_CONCAT; }
-{GENERIC_BNAME} { yylval.str = strdup(yytext);
-          return GENERIC_BNAME; }
 {GENERIC_LIST} { yylval.str = strdup(yytext);
           return GENERIC_LIST; }
 
