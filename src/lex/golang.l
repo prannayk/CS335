@@ -9,7 +9,6 @@
 #include <vector>
 extern "C" int yylex();
 #define YY_USER_ACTION ++ctr[yy_act]; 
-//    counter[yy_act].insert(strdup(yytext)); 
 
 #define NUM_TOKENS 129
 using namespace std;
@@ -67,8 +66,7 @@ GEN gen
 GENERIC_CONCAT "$"
 GENERIC_NAME {ID}
 GENERIC_BNAME {GENERIC_NAME}(":"{ID}("$"{ID})+)?
-GENERIC_LIST "<"({GENERIC_BNAME}(","{GENERIC_BNAME})*)">"
-
+GENERIC_LIST "<"({GENERIC_BNAME}" "*(","" "*{GENERIC_BNAME}" "*)*)">"
 /* end define keywords */
 
 /* entering numbers, unicode etc */
@@ -101,7 +99,7 @@ HEX_BYTE \\"x"{HEX_DIGIT}{2}
 BYTE_VAL ({OCTAL_BYTE}|{HEX_BYTE})
 ESCAPE \\[nr\\t\'\"\`]
 
-RAW_STRING \`([\`]|{ESCAPE})*\`
+RAW_STRING \`([^\`]|{ESCAPE})*\`
 INTER_STRING \"([^\n\"]|{BYTE_VAL}|{ESCAPE})*\"
 STRING_LIT ({INTER_STRING}|{RAW_STRING})
 
@@ -165,6 +163,8 @@ BLOCK_CLOSE "}"
 DOT "."
 COMMA ","
 
+SQUARE_OPEN "["
+SQUARE_CLOSE "]"
 %%
 {BREAK} { yylval.str = strdup(yytext);
           return BREAK; }
@@ -385,6 +385,10 @@ COMMA ","
           return BLOCK_OPEN; }
 {BLOCK_CLOSE} { yylval.str = strdup(yytext);
           return BLOCK_CLOSE; }
+{SQUARE_OPEN} { yylval.str = strdup(yytext);
+          return SQUARE_OPEN; }
+{SQUARE_CLOSE} { yylval.str = strdup(yytext);
+          return SQUARE_CLOSE; }
 {DOT} { yylval.str = strdup(yytext);
           return DOT; }
 {COMMA} { yylval.str = strdup(yytext);
@@ -397,6 +401,7 @@ COMMA ","
 %%
 
 const char* tokens[] = {"PADDING","BREAK", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA"};
+
 int main (int argc, char** argv)
 {
     ++argv, --argc;
