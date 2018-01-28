@@ -5,12 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <iomanip>
 #include <set>
 #include <vector>
 extern "C" int yylex();
 #define YY_USER_ACTION ++ctr[yy_act]; 
 
-#define NUM_TOKENS 129
+#define NUM_TOKENS 130
 using namespace std;
 int ctr[YY_NUM_RULES];
 vector<set<char*>> counter (NUM_TOKENS);
@@ -400,7 +401,7 @@ SQUARE_CLOSE "]"
 . printf("Do not understand symbol (%s)\n", yytext);
 %%
 
-const char* tokens[] = {"PADDING","BREAK", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA"};
+const char* tokens[] = {"PADDING", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA", "SQUARE_OPEN", "SQUARE_CLOSE", "BREAK"};
 
 int main (int argc, char** argv)
 {
@@ -409,16 +410,50 @@ int main (int argc, char** argv)
         yyin = fopen(argv[0], "r");
     else
         yyin = stdin;
+    printf("\n\n\n\n\n");
     while(1){
         int k = yylex();
         if ( k== 0 ) break;
-        printf("%s\t\t%s\n", tokens[k+1], yylval.str);
-        counter[k].insert(strdup("yylval.str")); 
+        printf("%s\t\t%s\t\t%d\n", tokens[k], yylval.str, k);
+        counter[k].insert(strdup(yylval.str)); 
     }
-    printf("Token \t\t\t Occurences \t\t\t Lexemes \n");
-    int po;
-    for (po = 0; po < NUM_TOKENS; po++) {
-        if (counter[po].size())
-            cout << tokens[po+1] << "\t\t\t " << counter[po].size() << endl;
+    int po, tempcount;
+    cout << std::left
+         << std::setfill(' ')
+         << std::setw(20)
+         << "Tokens"
+         << std::left
+         << std::setfill(' ')
+         << std::setw(20)
+         << "Occurances"
+         << std::left
+         << std::setfill(' ')
+         << std::setw(20)
+         << "Lexemes"
+         << endl;
+    for (po = 1; po < NUM_TOKENS; po++) {
+        if(counter[po].size() > 0) {
+            tempcount = counter[po].size();
+            set<char*>::iterator it = counter[po].begin();
+            cout << std::left
+                 << std::setfill(' ')
+                 << std::setw(20)
+                 << tokens[po]
+                 << std::left
+                 << std::setfill(' ')
+                 << std::setw(20)
+                 << counter[po].size()
+                 << (*it)
+                 << endl;
+            while(tempcount > 1) {
+                 it++;
+                 tempcount--;
+                 cout << std::string(40, ' ')
+                      << (*it)
+                      <<endl;
+                 
+            }
+        }
+
     }
 }

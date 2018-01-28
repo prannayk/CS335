@@ -7,7 +7,6 @@ extern "C" int yylex();
     char* str;
 };
 
-%token   <str>          BREAK 0
 %token   <str>          DEFAULT 1
 %token   <str>          FUNC 2
 %token   <str>          INTERFACE 3
@@ -136,6 +135,7 @@ extern "C" int yylex();
 %token   <str>          COMMA 126
 %token   <str>          SQUARE_OPEN 127
 %token   <str>          SQUARE_CLOSE 128
+%token   <str>          BREAK 129
 
 %%
 
