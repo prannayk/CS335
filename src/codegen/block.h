@@ -1,112 +1,117 @@
+#pragma once
+
 #include "enums.h"
 #include "symboltable.h"
 
+#include <map>
 #include <string.h>
 #include <vector>
-#include <map>
 
 using namespace std;
 
-class Instruction {
-private:
-  OpCode op;
+class ComplexBlock;
+class SimpleBlock;
+class Instruction;
 
-  void* v1;
-  void* v2;
-  void* v3;
+class Instruction
+{
+  private:
+    OpCode op;
 
-  Variability v1var;
-  Variability v2var;
-  Variability v3var;
+    void* v1;
+    void* v2;
+    void* v3;
 
-  Type v1type;
-  Type v2type;
-  Type v3type;
+    AddressingMode v1AddMode;
+    AddressingMode v2AddMode;
+    AddressingMode v3AddMode;
 
-public:
+    Type v1Type;
+    Type v2Type;
+    Type v3Type;
 
-  // Getters
-  OpCode opGet()                { return op; }
+  public:
+    // Getters
+    OpCode getOp() { return op; }
 
-  void* v1Get()                  { return v1; }
-  void* v2Get()                  { return v2; }
-  void* v3Get()                  { return v3; }
+    void* getV1() { return v1; }
+    void* getV2() { return v2; }
+    void* getV3() { return v3; }
 
-  Variability v1varGet()               { return v1var; }
-  Variability v2varGet()               { return v2var; }
-  Variability v3varGet()               { return v3var; }
+    AddressingMode getV1AddMode() { return v1AddMode; }
+    AddressingMode getV2AddMode() { return v2AddMode; }
+    AddressingMode getV3AddMode() { return v3AddMode; }
 
-  Type v1typeGet()              { return v1type; }
-  Type v2typeGet()              { return v2type; }
-  Type v3typeGet()              { return v3type; }
+    Type getV1Type() { return v1Type; }
+    Type getV2Type() { return v2Type; }
+    Type getV3Type() { return v3Type; }
 
-  // Setters
-  void opSet(OpCode a)          { op = a; }
+    // Setters
+    void setOp(OpCode a) { op = a; }
 
-  void v1Set(void* a)            { v1 = a; }
-  void v2Set(void* a)            { v2 = a; }
-  void v3Set(void* a)            { v3 = a; }
+    void setV1(void* a) { v1 = a; }
+    void setV2(void* a) { v2 = a; }
+    void setV3(void* a) { v3 = a; }
 
-  void v1varSet(Variability a)  { v1var = a; }
-  void v2varSet(Variability a)  { v2var = a; }
-  void v3varSet(Variability a)  { v3var = a; }
+    void setV1AddMode(AddressingMode a) { v1AddMode = a; }
+    void setV2AddMode(AddressingMode a) { v2AddMode = a; }
+    void setV3AddMode(AddressingMode a) { v3AddMode = a; }
 
-  void v1typeSet(Type a)        { v1type = a; }
-  void v2typeSet(Type a)        { v2type = a; }
-  void v3typeSet(Type a)        { v3type = a; }
-
+    void setV1Type(Type a) { v1Type = a; }
+    void setV2Type(Type a) { v2Type = a; }
+    void setV3Type(Type a) { v3Type = a; }
 };
 
-class SimpleBlock {
-
+class SimpleBlock
+{
   private:
-
     vector<Instruction*> instructions;
     int label;
-    class ComplexBlock* reverse;  // the class keyword is since its not yet declared
+    ComplexBlock* reverse;
     SymbolTable* symboltable;
 
   public:
-
-    Intruction* firstInstruction();
-    int length();
+    Instruction* firstInstruction() const;
+    int length() const;
     void addInstruction(Instruction* a);
 
-    //Getters
-    int labelGet()                       { return label; }
-    ComplexBlock* reverseGet()           { return reverse; }
-    SymbolTable* symboltableGet()        { return symboltable; }
+    // Getters
+    int getLabel() const { return label; }
+    ComplexBlock* getReverse() const { return reverse; }
+    SymbolTable* getSymboltable() const { return symboltable; }
 
-    //Setters
-    void labelGet(int a)                 { label = a;}
-    void reverseGet(ComplexBlock* a)     { reverse = a;}
-    void symboltableGet(SymbolTable* a)  { symboltable = a;}
+    // Setters
+    void setLabel(int a) { label = a; }
+    void setReverse(ComplexBlock* a) { reverse = a; }
+    void setSymboltable(SymbolTable* a) { symboltable = a; }
 
+    // Constructor
+    // SimpleBlock(...);
 };
 
-class ComplexBlock {
-
+class ComplexBlock
+{
   private:
-
     map<int, SimpleBlock*> blocks;
     int firstblock;
     string label;
     int numlabel;
 
   public:
-
     void addBlock(SimpleBlock* a);
-    int length();
-    SimpleBlock* firstBasicBlock();
+    int length() const;
+    SimpleBlock* firstBasicBlock() const;
 
-    //Getters
-    int firstblockGet()          { return firstblock; }   
-    string labelGet()            { return label; }
-    int numlabelGet()            { return numlabel; }
+    // Getters
+    int getFirstblock() { return firstblock; }
+    string getLabel() { return label; }
+    int getNumlabel() { return numlabel; }
 
-    //Setters
-    void firstblockSet(int a)    { firstblock = a; }
-    void labelSet(string a)      { label = a; }
-    void numlabelSet(int a)      { numlabel = a; }
+    // Setters
+    void setFirstblock(int a) { firstblock = a; }
+    void setLabel(string a) { label = a; }
+    void setNumlabel(int a) { numlabel = a; }
 
+    // Constructor
+    // ComplexBlock(...);
 };

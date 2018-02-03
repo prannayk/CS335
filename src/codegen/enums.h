@@ -1,20 +1,21 @@
-#ifndef ENUM_INC
-#define ENUM_INC
+#pragma once
 
-enum OpCode{
-	ADD=0,
-	SUB=1,
-	MUL=2,
-	DIV=3
+enum OpCode
+{
+    ADD = 0,
+    SUB = 1,
+    MUL = 2,
+    DIV = 3,
 };
 
-enum Variability{
-  VAR=0,
-  CONST=1
+enum AddressingMode
+{
+    REGISTER = 0,
+    CONSTANT = 1,
+    ADDRESS = 2,
 };
 
-enum Type{
-  INT=1
+enum Type
+{
+    INT = 1,
 };
-
-#endif

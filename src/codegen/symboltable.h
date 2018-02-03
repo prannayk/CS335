@@ -1,12 +1,14 @@
-#include <string>
+#pragma once
+
+#include "enums.h"
 #include <map>
+#include <string>
 
 using namespace std;
 
-class SymbolTableEntry {
-
+class SymbolTableEntry
+{
   private:
-
     string name;
 
     bool dirty;
@@ -14,48 +16,67 @@ class SymbolTableEntry {
 
     int reg;
 
+    Type type;
+
   public:
-
     // Getters
-    string nameGet()           { return name; }
+    string getName() const { return name; }
 
-    bool dirtyGet()            { return dirty; }
-    bool validGet()            { return valid; }
+    bool getDirty() const { return dirty; }
+    bool getValid() const { return valid; }
 
-    int regGet()               { return reg; }
+    int getReg() const { return reg; }
+
+    Type getType() const { return type; }
 
     // Setters
-    void nameSet(string a)     { name = a; }
+    void setName(string a) { name = a; }
 
-    void dirtySet(bool a)      { dirty = a; }
-    void validSet(bool a)      { valid = a; }
+    void setDirty(bool a) { dirty = a; }
+    void setValid(bool a) { valid = a; }
 
-    void regSet(int a)         { reg = a; }
+    void setReg(int a) { reg = a; }
 
+    void setType(Type a) { type = a; }
+
+    // Constructor
+    // Note: please move this to .cpp file, this is for demo.
+    SymbolTableEntry(string aName)
+      : name(aName)
+      , valid(false)
+      , dirty(false)
+      , reg(0)
+      , type(Type::INT)
+    {
+    }
 };
 
-class SymbolTable {
-
+class SymbolTable
+{
   private:
+    map<string, SymbolTableEntry*> table;
 
-     map<string, SymbolTableEntry*> table;
-
-     SymbolTable* parentscope;
-     SymbolTable* globalscope;
+    SymbolTable* parentscope;
+    SymbolTable* globalscope;
 
   public:
-
     void addEntry(SymbolTableEntry* a);
-    void getEntry(string a);
+    void getEntry(string a) const;
 
     // Getters
-    SymbolTable* parentscopeGet()          { return parentscope; }
-    SymbolTable* globalscopeGet()          { return globalscope; }
+    SymbolTable* getParentscope() const { return parentscope; }
+    SymbolTable* getGlobalscope() const { return globalscope; }
 
     // Setters
-    void parentscopeSet(SymbolTable* a)    { parentscope = a; }
-    void globalscopeSet(SymbolTable* a)    { globalscope = a; }
+    void setParentscope(SymbolTable* a) { parentscope = a; }
+    void setGlobalscope(SymbolTable* a) { globalscope = a; }
 
-
-
+    // Constructor
+    // Note: please move this to .cpp file, this is for demo.
+    SymbolTable(SymbolTable* aParentscope, SymbolTable* aGlobalscope)
+      : globalscope(aGlobalscope)
+      , parentscope(aParentscope)
+      , table()
+    {
+    }
 };
