@@ -41,6 +41,7 @@ class SymbolTableEntry
 
     // Constructor
     // Note: please move this to .cpp file, this is for demo.
+    /*
     SymbolTableEntry(string aName)
       : name(aName)
       , valid(false)
@@ -48,7 +49,7 @@ class SymbolTableEntry
       , reg(0)
       , type(Type::INT)
     {
-    }
+    } */
 };
 
 class SymbolTable
@@ -73,10 +74,11 @@ class SymbolTable
 
     // Constructor
     // Note: please move this to .cpp file, this is for demo.
+    /*
     SymbolTable(SymbolTable* aParentscope, SymbolTable* aGlobalscope)
       : globalscope(aGlobalscope)
       , parentscope(aParentscope)
       , table()
     {
-    }
+    } */
 };
