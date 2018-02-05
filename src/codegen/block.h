@@ -96,37 +96,37 @@ class SimpleBlock
     // Getters
     int getLabel() const { return label; }
     ComplexBlock* getReverse() const { return reverse; }
-    SymbolTable* getSymboltable() const { return symbolTable; }
+    SymbolTable* getSymbolTable() const { return symbolTable; }
 
     // Setters
     void setLabel(int a) { label = a; }
     void setReverse(ComplexBlock* a) { reverse = a; }
-    void setSymboltable(SymbolTable* a) { symbolTable = a; }
+    void setSymbolTable(SymbolTable* a) { symbolTable = a; }
 };
 
 class ComplexBlock
 {
   private:
     map<int, SimpleBlock*> blocks;
-    int firstblock;
+    int firstBlock;
     string label;
-    int numlabel;
+    int numLabel;
 
   public:
     void addBlock(SimpleBlock* a);
     int length() const;
-    SimpleBlock* firstBasicBlock() const;
+    SimpleBlock* firstBasicBlock();
 
     // Constructor
-    // ComplexBlock(...);
+    ComplexBlock(string aLabel, int aNumLabel);
 
     // Getters
-    int getFirstblock() { return firstblock; }
+    int getFirstBlock() { return firstBlock; }
     string getLabel() { return label; }
-    int getNumlabel() { return numlabel; }
+    int getNumLabel() { return numLabel; }
 
     // Setters
-    void setFirstblock(int a) { firstblock = a; }
+    void setFirstBlock(int a) { firstBlock = a; }
     void setLabel(string a) { label = a; }
-    void setNumlabel(int a) { numlabel = a; }
+    void setNumLabel(int a) { numLabel = a; }
 };

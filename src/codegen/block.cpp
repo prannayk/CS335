@@ -65,8 +65,39 @@ SimpleBlock::firstInstruction() const
 {
     return instructions.front();
 }
+
 int
 SimpleBlock::length() const
 {
     return instructions.size();
 }
+
+// Complex Block
+
+ComplexBlock::ComplexBlock(string aLabel, int aNumLabel) {
+  label = aLabel;
+  numLabel = aNumLabel;
+}
+
+void
+ComplexBlock::addBlock(SimpleBlock* a) {
+  blocks[a->getLabel()] = a;
+  if (blocks.size() == 1) { // if first, then store it
+    firstBlock = a->getLabel();
+  }
+}
+
+int
+ComplexBlock::length() const {
+  return blocks.size();
+}
+
+
+SimpleBlock*
+ComplexBlock::firstBasicBlock() {
+  if (blocks.size() > 0) {
+    return blocks[firstBlock];
+  } 
+  return NULL;
+}
+
