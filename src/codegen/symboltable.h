@@ -19,6 +19,9 @@ class SymbolTableEntry
     Type type;
 
   public:
+    // Constructor
+    SymbolTableEntry(string aName, Type aType);
+
     // Getters
     string getName() const { return name; }
 
@@ -38,18 +41,6 @@ class SymbolTableEntry
     void setReg(int a) { reg = a; }
 
     void setType(Type a) { type = a; }
-
-    // Constructor
-    // Note: please move this to .cpp file, this is for demo.
-    /*
-    SymbolTableEntry(string aName)
-      : name(aName)
-      , valid(false)
-      , dirty(false)
-      , reg(0)
-      , type(Type::INT)
-    {
-    } */
 };
 
 class SymbolTable
@@ -57,28 +48,21 @@ class SymbolTable
   private:
     map<string, SymbolTableEntry*> table;
 
-    SymbolTable* parentscope;
-    SymbolTable* globalscope;
+    SymbolTable* parentScope;
+    SymbolTable* globalScope;
 
   public:
     void addEntry(SymbolTableEntry* a);
-    void getEntry(string a) const;
-
-    // Getters
-    SymbolTable* getParentscope() const { return parentscope; }
-    SymbolTable* getGlobalscope() const { return globalscope; }
-
-    // Setters
-    void setParentscope(SymbolTable* a) { parentscope = a; }
-    void setGlobalscope(SymbolTable* a) { globalscope = a; }
+    SymbolTableEntry* getEntry(string a);
 
     // Constructor
-    // Note: please move this to .cpp file, this is for demo.
-    /*
-    SymbolTable(SymbolTable* aParentscope, SymbolTable* aGlobalscope)
-      : globalscope(aGlobalscope)
-      , parentscope(aParentscope)
-      , table()
-    {
-    } */
+    SymbolTable(SymbolTable* aParentScope, SymbolTable* aGlobalScope);
+
+    // Getters
+    SymbolTable* getParentScope() const { return parentScope; }
+    SymbolTable* getGlobalScope() const { return globalScope; }
+
+    // Setters
+    void setParentScope(SymbolTable* a) { parentScope = a; }
+    void setGlobalScope(SymbolTable* a) { globalScope = a; }
 };

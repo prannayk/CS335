@@ -15,8 +15,12 @@ class IR
     string globalComplexName;
 
   public:
+    void addGlobalComplex(ComplexBlock* a);
+    void addComplexBlock(ComplexBlock* a);
+    ComplexBlock* getComplexBlock(string a);
+
     // Constructor
-    // IR(...);
+    IR();
 
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }

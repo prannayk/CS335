@@ -74,30 +74,32 @@ SimpleBlock::length() const
 
 // Complex Block
 
-ComplexBlock::ComplexBlock(string aLabel, int aNumLabel) {
-  label = aLabel;
-  numLabel = aNumLabel;
+ComplexBlock::ComplexBlock(string aLabel, int aNumLabel)
+{
+    label = aLabel;
+    numLabel = aNumLabel;
 }
 
 void
-ComplexBlock::addBlock(SimpleBlock* a) {
-  blocks[a->getLabel()] = a;
-  if (blocks.size() == 1) { // if first, then store it
-    firstBlock = a->getLabel();
-  }
+ComplexBlock::addBlock(SimpleBlock* a)
+{
+    blocks[a->getLabel()] = a;
+    if (blocks.size() == 1) { // if first, then store it
+        firstBlock = a->getLabel();
+    }
 }
 
 int
-ComplexBlock::length() const {
-  return blocks.size();
+ComplexBlock::length() const
+{
+    return blocks.size();
 }
-
 
 SimpleBlock*
-ComplexBlock::firstBasicBlock() {
-  if (blocks.size() > 0) {
-    return blocks[firstBlock];
-  } 
-  return NULL;
+ComplexBlock::firstBasicBlock()
+{
+    if (blocks.size() > 0) {
+        return blocks[firstBlock];
+    }
+    return NULL;
 }
-
