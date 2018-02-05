@@ -4,3 +4,4 @@
 *.tab.h
 *.tab.c
 *.yy
+*.gch

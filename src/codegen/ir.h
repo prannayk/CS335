@@ -1,30 +1,31 @@
-#include "opcode.h"
+#include "block.h"
+#include "enums.h"
+#include "symboltable.h"
+
+#include <map>
 #include <string.h>
+#include <vector>
 
-class IR {
-private:
+class IR
+{
+  private:
+    SymbolTable* rootSymbolTable;
+    map<string, ComplexBlock*> complexBlocks;
 
-public:
-	
-};
+    string globalComplexName;
 
-class ComplexBlock {
-private:
+  public:
+    void addGlobalComplex(ComplexBlock* a);
+    void addComplexBlock(ComplexBlock* a);
+    ComplexBlock* getComplexBlock(string a);
 
-public:
+    // Constructor
+    IR();
 
-};
+    // Getters
+    SymbolTable* getRootSymbolTable() { return rootSymbolTable; }
+    string getGlobalComplexName() { return globalComplexName; }
 
-class SimpleBlock {
-private:
-
-public:
-
-};
-
-class Instruction {
-private:
-
-public:
-
+    // Setters
+    void setRootSymbolTable(SymbolTable* a) { rootSymbolTable = a; }
 };
