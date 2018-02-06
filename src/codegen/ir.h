@@ -20,7 +20,7 @@ class IR
     ComplexBlock* getComplexBlock(string a);
 
     // Constructor
-    IR();
+    IR(char** lines, int size);
 
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }

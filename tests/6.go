@@ -1,4 +1,5 @@
 package main;
+	b:= a << 3;
 
 import "fmt";
 

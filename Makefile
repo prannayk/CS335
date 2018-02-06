@@ -5,6 +5,8 @@ TEST=tests/
 # Lexer make [testing]
 
 LEX_FOLDER=src/lex/
+GEN_FOLDER=src/codegen/
+BIN_GEN=bin/codegen/
 BINLEX=bin/lex/
 .PHONY: clean golang
 test:
@@ -15,6 +17,7 @@ test:
 setup:
 	mkdir -p bin
 	mkdir -p bin/lex
+	mkdir -p bin/codegen
 
 golang:
 	make setup
@@ -25,6 +28,16 @@ golang:
 		echo "Testing with $$number.go"; \
 		${BINLEX}golang.run ${TEST}$$number.go; \
 	done
+
+codegen:
+	make setup
+	bison --defines=${GEN_FOLDER}ir_lang.tab.h ${GEN_FOLDER}ir_lang.y -o ${GEN_FOLDER}ir_lang.tab.c
+	flex -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
+	${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${FLAGS} -o ${BIN_GEN}ir_lang.run
+
+test_codegen:
+	make codegen
+	${BIN_GEN}ir_lang.run ${TEST}start.txt
 
 clean:
 	rm -r bin
