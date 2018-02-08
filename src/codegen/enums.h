@@ -2,16 +2,53 @@
 
 enum OpCode
 {
+    // Enum numbering, if not assigned, is +1 the previous one
+    // Binary math/bit operations
     ADD = 0,
-    SUB = 1,
-    MUL = 2,
-    DIV = 3,
-    SL = 4,
-    SR = 5,
-    GT = 6,
-    LT = 7,
-    GEQ = 8,
-    LEQ = 9,
+    SUB,
+    SL,
+    SR,
+    ASHR,
+    AND,
+    OR,
+    XOR,
+    MUL,
+    DIV,
+    MOD,
+
+    // Binary relops
+    GT = 50,
+    LT,
+    GEQ,
+    LEQ,
+    EQ,
+    NEQ,
+
+    // Binary control flow ops
+    GOTOEQ = 100,
+    GOTONEQ,
+    GOTOLT,
+    GOTOLEQ,
+    GOTOGT,
+    GOTOGEQ,
+
+    // Memory/vector ops
+    GETADDR = 150,
+    FOLLOWPTR,
+    EELEM,
+    IELEM,
+
+    // Unary math/bit operations
+    NOT = 200,
+    NEG,
+    ASG,
+
+    // Unary control flow operations
+    GOTO = 250,
+    CALL,
+
+    // Nullary operations
+    RET = 300,
 
 };
 
