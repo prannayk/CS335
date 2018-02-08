@@ -6,7 +6,7 @@ SymbolTableEntry::SymbolTableEntry(string aName, Type aType)
 {
     name = aName;
     dirty = valid = false;
-    reg = 0;
+    reg = NONE;
     type = aType;
 }
 

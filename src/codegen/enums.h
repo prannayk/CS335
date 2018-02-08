@@ -19,13 +19,13 @@ enum AddressingMode
 {
     REGISTER = 0,
     CONSTANT_VAL = 1,
-    ADDRESS = 2,
 };
 
 enum Type
 {
     INT = 1,
 };
+
 enum Register
 {
     // Special registers, should never be returned from getReg

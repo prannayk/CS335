@@ -14,7 +14,7 @@ class SymbolTableEntry
     bool dirty;
     bool valid;
 
-    int reg;
+    Register reg;
 
     Type type;
 
@@ -28,7 +28,7 @@ class SymbolTableEntry
     bool getDirty() const { return dirty; }
     bool getValid() const { return valid; }
 
-    int getReg() const { return reg; }
+    Register getReg() const { return reg; }
 
     Type getType() const { return type; }
 
@@ -38,7 +38,7 @@ class SymbolTableEntry
     void setDirty(bool a) { dirty = a; }
     void setValid(bool a) { valid = a; }
 
-    void setReg(int a) { reg = a; }
+    void setReg(Register a) { reg = a; }
 
     void setType(Type a) { type = a; }
 };
