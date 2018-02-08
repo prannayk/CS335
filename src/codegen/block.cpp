@@ -2,12 +2,18 @@
 
 // Instructions
 
-Instruction::Instruction(OpCode op, void* aV1, void* aV2, void* aV3,
-                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
-                         AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         void* aV2,
+                         void* aV3,
+                         AddressingMode aV1AddMode,
+                         AddressingMode aV2AddMode,
+                         AddressingMode aV3AddMode,
+                         Type aV1Type,
+                         Type aV2Type,
                          Type aV3Type)
 {
-
+    op = aOp;
     numOps = 3;
     v1 = aV1;
     v2 = aV2;
@@ -20,11 +26,15 @@ Instruction::Instruction(OpCode op, void* aV1, void* aV2, void* aV3,
     v3Type = aV3Type;
 }
 
-Instruction::Instruction(OpCode op, void* aV1, void* aV2,
-                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
-                         Type aV1Type, Type aV2Type)
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         void* aV2,
+                         AddressingMode aV1AddMode,
+                         AddressingMode aV2AddMode,
+                         Type aV1Type,
+                         Type aV2Type)
 {
-
+    op = aOp;
     numOps = 2;
     v1 = aV1;
     v2 = aV2;
@@ -34,10 +44,12 @@ Instruction::Instruction(OpCode op, void* aV1, void* aV2,
     v2Type = aV2Type;
 }
 
-Instruction::Instruction(OpCode op, void* aV1, AddressingMode aV1AddMode,
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         AddressingMode aV1AddMode,
                          Type aV1Type)
 {
-
+    op = aOp;
     numOps = 1;
     v1 = aV1;
     v1AddMode = aV1AddMode;
@@ -46,7 +58,8 @@ Instruction::Instruction(OpCode op, void* aV1, AddressingMode aV1AddMode,
 
 // Simple Blocks
 
-SimpleBlock::SimpleBlock(int aLabel, ComplexBlock* aReverse,
+SimpleBlock::SimpleBlock(int aLabel,
+                         ComplexBlock* aReverse,
                          SymbolTable* aSymbolTable)
 {
     label = aLabel;

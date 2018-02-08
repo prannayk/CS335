@@ -34,15 +34,26 @@ class Instruction
 
   public:
     // Constructors
-    Instruction(OpCode op, void* aV1, void* aV2, void* aV3,
-                AddressingMode aV1AddMode, AddressingMode aV2AddMode,
-                AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
+    Instruction(OpCode aOp,
+                void* aV1,
+                void* aV2,
+                void* aV3,
+                AddressingMode aV1AddMode,
+                AddressingMode aV2AddMode,
+                AddressingMode aV3AddMode,
+                Type aV1Type,
+                Type aV2Type,
                 Type aV3Type);
 
-    Instruction(OpCode op, void* aV1, void* aV2, AddressingMode aV1AddMode,
-                AddressingMode aV2AddMode, Type aV1Type, Type aV2Type);
+    Instruction(OpCode aOp,
+                void* aV1,
+                void* aV2,
+                AddressingMode aV1AddMode,
+                AddressingMode aV2AddMode,
+                Type aV1Type,
+                Type aV2Type);
 
-    Instruction(OpCode op, void* aV1, AddressingMode aV1AddMode, Type aV1Type);
+    Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type aV1Type);
 
     // Getters
     OpCode getOp() { return op; }
