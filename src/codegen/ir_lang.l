@@ -47,6 +47,10 @@ LEQ "<="
 GT ">"
 LT "<"
 EQ "=="
+NOT "~"
+NEG "-"
+LNOT "lnot"
+UNOP ({NOT}|{NEG}|{LNOT})
 RELOP ({EQ}|{LT}|{GT}|{GEQ}|{LEQ})
 OP ({ARITHMETIC}|{SR}|{SL}|{RELOP})
 VAR_DECL ({VAR}" "*":"" "*{TYPE})
@@ -61,7 +65,8 @@ F_END "!"
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
-{VAR}" "*":"" "*{TYPE}" "*" "" "*{CONSTANT} { yylval.str = strdup(yytext); return UN_ASSIGNMENT; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR} { yylval.str = strdup(yytext); return UN_ASSIGNMENT; }
+{VAR}" "*":"" "*{TYPE}" "*"="{UNOP}" "*{VAR} { yylval.str = strdup(yytext); return UN_OP; }
 {GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
 {GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
@@ -126,8 +131,51 @@ OpCode operation(char* operation){
                 case '/' : op = DIV; break;
                 case '>' : if(operation[1] == '>')  op = SR; else if(operation[1] == '=') op = GEQ; else op = GT; break;
                 case '<' : if(operation[1] == '<')  op = SL; else if(operation[1] == '=') op = LEQ; else op = LT; break;
+                case '=' : if(operation[1] == '=')  op = EQ; break;
             }
             return op;
+    
+}
+
+OpCode unary_op(char* op_string){
+    switch(op_string[0]){
+        case '-' : return NEG;
+        case '~' : return NOT;
+        case 'l' : return LNOT;
+    }
+}
+
+void unary_op(int flag){
+            char* a;
+            a = strtok(yylval.str," :%");
+            int i = 0;
+            char* target;
+            char* op_string;
+            char* arg1;
+            char* arg2;
+            char* type_var;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : 
+                        target = strdup(a); break;
+                    case 1 :
+                        type_var = strdup(a); break; 
+                    case 2 :
+                        if(flag)    op_string = strdup(a); else arg1 = strdup(a); break;
+                    case 3 :
+                        arg1 = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " ,=.:%");
+            }
+            Type type_code = type_parse(type_var);
+            Instruction* new_inst;
+            OpCode op;
+            if(flag) op = unary_op(op_string); else op = ASG;
+            new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
+            i_list.push_back(*new_inst); return;
     
 }
 
@@ -162,7 +210,8 @@ void operation(int imme){
             Type type_code = type_parse(type_var);
             if(imme == 2)   {
                 Instruction* new_inst;
-                new_inst = new Instruction(ASG, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
+                OpCode op = unary_op(op_string);
+                new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
                 i_list.push_back(*new_inst); return;
             }
             OpCode op = operation(op_string);

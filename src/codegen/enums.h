@@ -44,14 +44,15 @@ enum OpCode
     ASG,
     LNOT,
 
-    // Single op control flow operations
+    // Unary control flow operations
     GOTO = 250,
     CALL,
     FUNC_ST, FUNC_ET, // function start and end operation
     PDECL_OP,
-    LABEL_ST,
     // Nullary operations
     RET = 300,
+    LABEL_ST,
+
 };
 
 enum AddressingMode

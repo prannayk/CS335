@@ -33,6 +33,8 @@ extern "C" int yylex();
 %token <str> UN_ASSIGNMENT 24
 %token <str> FUNCTION_END 23
 %token <str> LABELSTMT 25
+%token <str> UN_OP 26
+
 %%
 
 expr:   I32
