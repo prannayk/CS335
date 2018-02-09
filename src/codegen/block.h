@@ -94,11 +94,11 @@ class SimpleBlock
     vector<Instruction*> instructions;
     int label;
     ComplexBlock* reverse;
-    SymbolTable* symbolTable;
+    SimpleBlock* nextBlock;
 
   public:
     // Constructor
-    SimpleBlock(int aLabel, ComplexBlock* aReverse, SymbolTable* aSymbolTable);
+    SimpleBlock(int aLabel, ComplexBlock* aReverse);
 
     void addInstruction(Instruction* a);
     Instruction* firstInstruction() const;
@@ -107,12 +107,12 @@ class SimpleBlock
     // Getters
     int getLabel() const { return label; }
     ComplexBlock* getReverse() const { return reverse; }
-    SymbolTable* getSymbolTable() const { return symbolTable; }
+    SimpleBlock* getNextBlock() const { return nextBlock; }
 
     // Setters
     void setLabel(int a) { label = a; }
     void setReverse(ComplexBlock* a) { reverse = a; }
-    void setSymbolTable(SymbolTable* a) { symbolTable = a; }
+    void setNextBlock(SimpleBlock* a) {nextBlock = a; }
 };
 
 class ComplexBlock

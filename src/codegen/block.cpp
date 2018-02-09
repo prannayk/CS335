@@ -59,12 +59,10 @@ Instruction::Instruction(OpCode aOp,
 // Simple Blocks
 
 SimpleBlock::SimpleBlock(int aLabel,
-                         ComplexBlock* aReverse,
-                         SymbolTable* aSymbolTable)
+                         ComplexBlock* aReverse)
 {
     label = aLabel;
     reverse = aReverse;
-    symbolTable = aSymbolTable;
 }
 
 void
