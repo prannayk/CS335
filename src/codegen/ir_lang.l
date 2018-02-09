@@ -58,6 +58,7 @@ VAR_LIST ({VAR_DECL}(" "*","" "{VAR_DECL})*)
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPERATION; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
+{GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
 \n { yylval.str = strdup(""); }
 . {yylval.str = strdup(yytext); 
@@ -123,7 +124,7 @@ Instruction* operation(int imme){
             printf("OPERATION : %s %s %s %s %s\n", target, type_var, arg1, op_string, arg2);
 }
 
-void parse_goto(){
+void parse_goto(int flag){
             char* a;
             a = strtok(yylval.str," :%?");
             int i = 0;
@@ -148,18 +149,22 @@ void parse_goto(){
                 i++;
                 a = strtok(NULL, " :?%");
             }
-    OpCode op = operation(op_string);
-    OpCode gotoop;
-    switch (op) {
-        case EQ : gotoop = GOTOEQ; break; 
-        case LT : gotoop = GOTOLT; break; 
-        case GT : gotoop = GOTOGT; break; 
-        case GEQ: gotoop = GOTOGEQ; break; 
-        case LEQ: gotoop = GOTOLEQ; break; 
-        case NEQ: gotoop = GOTONEQ; break; 
-    }
     Instruction* new_inst;
-    new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH);
+    if(!flag){   
+        OpCode op = operation(op_string);
+        OpCode gotoop;
+        switch (op) {
+            case EQ : gotoop = GOTOEQ; break; 
+            case LT : gotoop = GOTOLT; break; 
+            case GT : gotoop = GOTOGT; break; 
+            case GEQ: gotoop = GOTOGEQ; break; 
+            case LEQ: gotoop = GOTOLEQ; break; 
+            case NEQ: gotoop = GOTONEQ; break; 
+        }
+        new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH);
+    } else {
+        new_inst = new Instruction(GOTO, arg1, CONSTANT_VAL, BRANCH);     
+    }
     i_list.push_back(*new_inst);
 }
 
@@ -230,7 +235,8 @@ int main (int argc, char** argv)
             switch(k){
                 case OPERATION : operation(0); break;
                 case OPIM : operation(1); break;
-                case GOTOSTMT : parse_goto(); break;
+                case GOTOSTMT : parse_goto(1); break;
+                case GOTO : parse_goto(0); break;
                 case FUNCTION_START : parse_function(); break;
             }
         counter[k].insert(strdup(yylval.str)); 
