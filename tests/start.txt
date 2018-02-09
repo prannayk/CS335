@@ -4,4 +4,4 @@
 %a10 : .i32 = %a12 / %a13
 %a10 : .i32 = %a12 << $30
 %a10 : .i32 = %a12 >> $30
-goto %a >= %b ? yolo : yolo2
+goto %a >= %b ? yolo

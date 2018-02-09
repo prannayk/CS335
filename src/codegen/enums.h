@@ -47,6 +47,8 @@ enum OpCode
     // Single op control flow operations
     GOTO = 250,
     CALL,
+    FUNC_OP,
+    PDECL_OP,
 
     // Nullary operations
     RET = 300,
@@ -62,6 +64,7 @@ enum Type
 {
     INT = 1,
     BRANCH = 2,
+    STRING,
 };
 
 enum Register
