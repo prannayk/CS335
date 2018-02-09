@@ -13,6 +13,7 @@ class IR
     map<string, ComplexBlock*> complexBlocks;
     vector<Instruction> i_list;
     string globalComplexName;
+    map<string, int> basicBlockMap;
 
   public:
     void addGlobalComplex(ComplexBlock* a);
@@ -23,11 +24,13 @@ class IR
 
     // Constructor
     IR(vector<Instruction>);
-
+    
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }
     string getGlobalComplexName() { return globalComplexName; }
 
     // Setters
     void setRootSymbolTable(SymbolTable* a) { rootSymbolTable = a; }
+    // Print instruction opCode
+    void printInstruction();
 };

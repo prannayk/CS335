@@ -19,6 +19,7 @@ using namespace std;
 int ctr[YY_NUM_RULES];
 vector<set<string>> counter (NUM_TOKENS);
 vector<Instruction> i_list;
+SymbolTable symtab;
 %}
 
 /* start define keywords */
@@ -46,25 +47,73 @@ LEQ "<="
 GT ">"
 LT "<"
 EQ "=="
+NOT "~"
+NEG "-"
+LNOT "lnot"
+UNOP ({NOT}|{NEG}|{LNOT})
 RELOP ({EQ}|{LT}|{GT}|{GEQ}|{LEQ})
 OP ({ARITHMETIC}|{SR}|{SL}|{RELOP})
 VAR_DECL ({VAR}" "*":"" "*{TYPE})
 VAR_LIST ({VAR_DECL}(" "*","" "{VAR_DECL})*)
+F_END "!"
 %x COMMENT
 %%
 
-{TYPE} { yylval.str = strdup(yytext); return I32;}
+{LABEL}" "*{VNAME} { yylval.str = strdup(yytext); return LABELSTMT; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*\n { yylval.str = strdup(yytext); return ASSIGNMENT; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPERATION; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPIM; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR} { yylval.str = strdup(yytext); return UN_ASSIGNMENT; }
+{VAR}" "*":"" "*{TYPE}" "*"="{UNOP}" "*{VAR} { yylval.str = strdup(yytext); return UN_OP; }
 {GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
 {GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
+{F_END} { yylval.str = strdup(yytext); return FUNCTION_END; }
 \n { yylval.str = strdup(""); }
 . {yylval.str = strdup(yytext); 
     return UNMATCH; }
 
 %%
+
+int getNum(char* entry){
+            char* a;
+            a = strtok(yylval.str,"%abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
+            int i = 0;
+            char* name;
+            while(a!=NULL){
+                name = strdup(a);
+                i++;
+                a = strtok(NULL, " ;");
+            }
+            return atoi(name);
+}
+
+AddressingMode getMode(char* entry){
+    if(entry[0] == '$') return CONSTANT_VAL;
+    return REGISTER;
+}
+
+void * getConst(char* entry, Type type_val){
+    if (type_val == INT){
+        long * ptr = new long;
+        *ptr = atoi(entry);
+        return ptr;
+    }
+}
+
+void* getEntry(char* entry, Type type_val){
+    if(entry[0] == '$') return getConst(entry, type_val);
+    if(symtab.checkEntry(entry)){
+        SymbolTableEntry * newEntry ; 
+        newEntry = new SymbolTableEntry(entry, type_val);
+        symtab.addEntry(newEntry);
+        return newEntry;
+    }
+    return symtab.getEntry(entry);
+}
+
 
 Type type_parse(char* type_var){
     Type type_code;
@@ -82,14 +131,57 @@ OpCode operation(char* operation){
                 case '/' : op = DIV; break;
                 case '>' : if(operation[1] == '>')  op = SR; else if(operation[1] == '=') op = GEQ; else op = GT; break;
                 case '<' : if(operation[1] == '<')  op = SL; else if(operation[1] == '=') op = LEQ; else op = LT; break;
+                case '=' : if(operation[1] == '=')  op = EQ; break;
             }
             return op;
     
 }
 
-Instruction* operation(int imme){
+OpCode unary_op(char* op_string){
+    switch(op_string[0]){
+        case '-' : return NEG;
+        case '~' : return NOT;
+        case 'l' : return LNOT;
+    }
+}
+
+void unary_op(int flag){
             char* a;
-            if(imme) a = strtok(yylval.str," :$%");
+            a = strtok(yylval.str," :%");
+            int i = 0;
+            char* target;
+            char* op_string;
+            char* arg1;
+            char* arg2;
+            char* type_var;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : 
+                        target = strdup(a); break;
+                    case 1 :
+                        type_var = strdup(a); break; 
+                    case 2 :
+                        if(flag)    op_string = strdup(a); else arg1 = strdup(a); break;
+                    case 3 :
+                        arg1 = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " ,=.:%");
+            }
+            Type type_code = type_parse(type_var);
+            Instruction* new_inst;
+            OpCode op;
+            if(flag) op = unary_op(op_string); else op = ASG;
+            new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
+            i_list.push_back(*new_inst); return;
+    
+}
+
+void operation(int imme){
+            char* a;
+            if(imme) a = strtok(yylval.str," :%");
             else a = strtok(yylval.str," :%");
             int i = 0;
             char* target;
@@ -113,15 +205,41 @@ Instruction* operation(int imme){
                         break;
                 }
                 i++;
-                a = strtok(NULL, " ,=.:");
+                a = strtok(NULL, " ,=.:%");
+            }
+            Type type_code = type_parse(type_var);
+            if(imme == 2)   {
+                Instruction* new_inst;
+                OpCode op = unary_op(op_string);
+                new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
+                i_list.push_back(*new_inst); return;
             }
             OpCode op = operation(op_string);
-            Type type_code = type_parse(type_var);
             Instruction* new_inst;
-            if(!imme) new_inst = new Instruction(op, target, arg1, arg2, REGISTER, REGISTER, REGISTER, type_code, type_code , type_code);
-            else new_inst = new Instruction(op, target, arg1, arg2, REGISTER, REGISTER, CONSTANT_VAL, type_code, type_code , type_code);
+            new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getEntry(arg2, type_code), getMode(target), getMode(arg1), getMode(arg2), type_code, type_code, type_code, getNum(target), getNum(arg1), getNum(arg2));
             i_list.push_back(*new_inst);
-            printf("OPERATION : %s %s %s %s %s\n", target, type_var, arg1, op_string, arg2);
+}
+
+void parse_label(){
+            char *a;
+            a = strtok(yylval.str," :%?");
+            int i = 0;
+            char* name;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : break; 
+                    case 1 :
+                        name = strdup(a); break; 
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " :?%");
+            }
+            Instruction * new_inst ; 
+            new_inst = new Instruction(LABEL_ST, name, CONSTANT_VAL, STRING);
+            printf("label\n");
+            i_list.push_back(*new_inst);
 }
 
 void parse_goto(int flag){
@@ -161,7 +279,8 @@ void parse_goto(int flag){
             case LEQ: gotoop = GOTOLEQ; break; 
             case NEQ: gotoop = GOTONEQ; break; 
         }
-        new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH);
+        Type type_val = INT;
+        new_inst = new Instruction(op, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, getNum(arg1), getNum(arg2), -1);
     } else {
         new_inst = new Instruction(GOTO, arg1, CONSTANT_VAL, BRANCH);     
     }
@@ -215,10 +334,14 @@ void parse_function(){ // function to parse the start of function
     num = new int;
     *num = num_args(arg_list);
     Instruction* new_inst;
-    /* new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH); */
-    new_inst = new Instruction(FUNC_OP, name, rtype, num,CONSTANT_VAL, CONSTANT_VAL, CONSTANT_VAL, STRING, STRING, INT );
+    new_inst = new Instruction(FUNC_ST, name, rtype, num,CONSTANT_VAL, CONSTANT_VAL, CONSTANT_VAL, STRING, STRING, INT );
     i_list.push_back(*new_inst);
     push_args(arg_list);
+}
+
+void function_end(){
+    Instruction* new_instr;
+    new_instr = new Instruction(FUNC_ET);
 }
 
 int main (int argc, char** argv)
@@ -238,8 +361,13 @@ int main (int argc, char** argv)
                 case GOTOSTMT : parse_goto(1); break;
                 case GOTO : parse_goto(0); break;
                 case FUNCTION_START : parse_function(); break;
+                case UN_ASSIGNMENT : operation(2); break;
+                case FUNCTION_END : function_end();  break;
+                case LABELSTMT : parse_label(); break;
             }
         counter[k].insert(strdup(yylval.str)); 
     }
+    for(int iter = 0; iter < i_list.size() ; iter++)
+        i_list[iter].printInstruction();
     IR ir(i_list);
 }

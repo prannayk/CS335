@@ -42,15 +42,22 @@ enum OpCode
     NOT = 200,
     NEG,
     ASG,
+    LNOT,
 
     // Unary control flow operations
     GOTO = 250,
     CALL,
+<<<<<<< HEAD
     FUNC_OP,
     PDECL_OP,
 
+=======
+    FUNC_ST, FUNC_ET, // function start and end operation
+    PDECL_OP,
+>>>>>>> f892bd98582f82111b4d327822072e360751efdf
     // Nullary operations
     RET = 300,
+    LABEL_ST,
 
 };
 
@@ -58,6 +65,7 @@ enum AddressingMode
 {
     REGISTER = 0,
     CONSTANT_VAL = 1,
+    NONE_MODE,
 };
 
 enum Type
@@ -65,6 +73,10 @@ enum Type
     INT = 1,
     BRANCH = 2,
     STRING,
+<<<<<<< HEAD
+=======
+    NONE_TYPE,
+>>>>>>> f892bd98582f82111b4d327822072e360751efdf
 };
 
 enum Register
@@ -72,6 +84,7 @@ enum Register
     // Special registers, should never be returned from getReg
     RBP = -1,
     RSP = -2,
+    RIP = -3,
 
     // Special value denoting no register, should not be returned by getReg
     NONE = 0,

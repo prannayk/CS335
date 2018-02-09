@@ -30,20 +30,32 @@ class Instruction
     Type v2Type;
     Type v3Type;
 
+    int v1num, v2num, v3num;
+
     int numOps;
 
   public:
     // Constructors
-    Instruction(OpCode aOp,
-                void* aV1,
-                void* aV2,
-                void* aV3,
-                AddressingMode aV1AddMode,
-                AddressingMode aV2AddMode,
-                AddressingMode aV3AddMode,
-                Type aV1Type,
-                Type aV2Type,
+    Instruction(OpCode aOp, void* aV1, void* aV2, void* aV3,
+                AddressingMode aV1AddMode, AddressingMode aV2AddMode,
+                AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
                 Type aV3Type);
+    Instruction(OpCode aOp,
+                         void* aV1,
+                         void* aV2,
+                         void* aV3,
+                         AddressingMode aV1AddMode,
+                         AddressingMode aV2AddMode,
+                         AddressingMode aV3AddMode,
+                         Type aV1Type,
+                         Type aV2Type,
+                         Type aV3Type, 
+                         int aV1num, 
+                         int aV2num, 
+                         int aV3num);
+
+    Instruction(OpCode aOp, void* aV1, void* aV2, AddressingMode aV1AddMode,
+                AddressingMode aV2AddMode, Type aV1Type, Type aV2Type);
 
     Instruction(OpCode aOp,
                 void* aV1,
@@ -51,10 +63,10 @@ class Instruction
                 AddressingMode aV1AddMode,
                 AddressingMode aV2AddMode,
                 Type aV1Type,
-                Type aV2Type);
-
+                Type aV2Type, 
+                int aV1num, int aV2num);
     Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type aV1Type);
-
+    Instruction(OpCode aOp);
     // Getters
     OpCode getOp() { return op; }
 
@@ -86,6 +98,9 @@ class Instruction
     void setV1Type(Type a) { v1Type = a; }
     void setV2Type(Type a) { v2Type = a; }
     void setV3Type(Type a) { v3Type = a; }
+
+    // Print Instruction 
+    void printInstruction();
 };
 
 class SimpleBlock
@@ -94,11 +109,11 @@ class SimpleBlock
     vector<Instruction*> instructions;
     int label;
     ComplexBlock* reverse;
-    SymbolTable* symbolTable;
+    SimpleBlock* nextBlock;
 
   public:
     // Constructor
-    SimpleBlock(int aLabel, ComplexBlock* aReverse, SymbolTable* aSymbolTable);
+    SimpleBlock(int aLabel, ComplexBlock* aReverse);
 
     void addInstruction(Instruction* a);
     Instruction* firstInstruction() const;
@@ -107,12 +122,12 @@ class SimpleBlock
     // Getters
     int getLabel() const { return label; }
     ComplexBlock* getReverse() const { return reverse; }
-    SymbolTable* getSymbolTable() const { return symbolTable; }
+    SimpleBlock* getNextBlock() const { return nextBlock; }
 
     // Setters
     void setLabel(int a) { label = a; }
     void setReverse(ComplexBlock* a) { reverse = a; }
-    void setSymbolTable(SymbolTable* a) { symbolTable = a; }
+    void setNextBlock(SimpleBlock* a) { nextBlock = a; }
 };
 
 class ComplexBlock
