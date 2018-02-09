@@ -2,11 +2,9 @@
 
 // IR
 
-IR::IR(char **lines, int size)
+IR::IR(vector<Instruction> instr_list)
 {
-    for(int i=0; i<size; i++) { // iterate through the lines and extract instructions / code and create complex blocks
-        // put in lexer stuff        
-    }
+    i_list = instr_list;
 }
 
 void

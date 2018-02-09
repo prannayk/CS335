@@ -11,7 +11,7 @@ class IR
   private:
     SymbolTable* rootSymbolTable;
     map<string, ComplexBlock*> complexBlocks;
-
+    vector<Instruction> i_list;
     string globalComplexName;
 
   public:
@@ -20,7 +20,7 @@ class IR
     ComplexBlock* getComplexBlock(string a);
 
     // Constructor
-    IR(char** lines, int size);
+    IR(vector<Instruction>);
 
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }

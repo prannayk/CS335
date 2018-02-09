@@ -61,6 +61,7 @@ enum AddressingMode
 enum Type
 {
     INT = 1,
+    BRANCH = 2,
 };
 
 enum Register

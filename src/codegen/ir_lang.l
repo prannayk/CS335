@@ -10,6 +10,7 @@
 #include <vector>
 #include<string.h>
 #include"block.cpp"
+#include"ir.cpp"
 extern "C" int yylex();
 #define YY_USER_ACTION ++ctr[yy_act]; 
 
@@ -31,7 +32,8 @@ I64 ".i64"
 CHAR ".char"
 GOTO "goto"
 LETTER [a-zA-Z]
-VAR \%{LETTER}*[0-9]*
+VNAME {LETTER}*[0-9]*
+VAR \%{VNAME}
 PTR ".ptr"
 TYPE I8|I16|{I32}|I64|CHAR|PTR
 DIGIT [0-9]
@@ -46,6 +48,8 @@ LT "<"
 EQ "=="
 RELOP ({EQ}|{LT}|{GT}|{GEQ}|{LEQ})
 OP ({ARITHMETIC}|{SR}|{SL}|{RELOP})
+VAR_DECL ({VAR}" "*":"" "*{TYPE})
+VAR_LIST ({VAR_DECL}(" "*","" "{VAR_DECL})*)
 %x COMMENT
 %%
 
@@ -53,6 +57,8 @@ OP ({ARITHMETIC}|{SR}|{SL}|{RELOP})
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*\n { yylval.str = strdup(yytext); return ASSIGNMENT; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPERATION; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
+{GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
+{DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
 \n { yylval.str = strdup(""); }
 . {yylval.str = strdup(yytext); 
     return UNMATCH; }
@@ -117,6 +123,46 @@ Instruction* operation(int imme){
             printf("OPERATION : %s %s %s %s %s\n", target, type_var, arg1, op_string, arg2);
 }
 
+void parse_goto(){
+            char* a;
+            a = strtok(yylval.str," :%?");
+            int i = 0;
+            char* branch;
+            char* op_string;
+            char* arg1;
+            char* arg2;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : break; 
+                    case 1 :
+                        arg1 = strdup(a); break; 
+                    case 2 :
+                        op_string = strdup(a); break;
+                    case 3 :
+                        arg2 = strdup(a); break;
+                    case 4 :
+                        branch = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " :?%");
+            }
+    OpCode op = operation(op_string);
+    OpCode gotoop;
+    switch (op) {
+        case EQ : gotoop = GOTOEQ; break; 
+        case LT : gotoop = GOTOLT; break; 
+        case GT : gotoop = GOTOGT; break; 
+        case GEQ: gotoop = GOTOGEQ; break; 
+        case LEQ: gotoop = GOTOLEQ; break; 
+        case NEQ: gotoop = GOTONEQ; break; 
+    }
+    Instruction* new_inst;
+    new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH);
+    i_list.push_back(*new_inst);
+}
+
 int main (int argc, char** argv)
 {
     ++argv, --argc;
@@ -131,7 +177,9 @@ int main (int argc, char** argv)
             switch(k){
                 case OPERATION : operation(0); break;
                 case OPIM : operation(1); break;
+                case GOTOSTMT : parse_goto(); break;
             }
         counter[k].insert(strdup(yylval.str)); 
     }
+    IR ir(i_list);
 }
