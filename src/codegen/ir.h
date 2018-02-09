@@ -19,6 +19,8 @@ class IR
     void addComplexBlock(ComplexBlock* a);
     ComplexBlock* getComplexBlock(string a);
 
+    void fillStructure();
+
     // Constructor
     IR(vector<Instruction>);
 
