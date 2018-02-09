@@ -29,3 +29,19 @@ IR::getComplexBlock(string a)
 {
     return complexBlocks[a];
 }
+
+void
+IR::fillStructure() {
+
+  vector<int> leaders;
+  vector<int> complexBegin;
+  vector<int> complexEnd;
+
+  using Iter = vector<int>::const_iterator;
+  int num = 0;
+  for (Iter it = i_list.begin(); it!= i_list.end(); it++) {
+    
+    num = num + 1;
+  }
+
+}
