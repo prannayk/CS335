@@ -7,6 +7,7 @@ IR::IR(vector<Instruction> instr_list)
     i_list = instr_list;
 }
 
+
 void
 IR::addGlobalComplex(ComplexBlock* a)
 {

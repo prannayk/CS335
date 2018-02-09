@@ -54,9 +54,9 @@ class SymbolTable
   public:
     void addEntry(SymbolTableEntry* a);
     SymbolTableEntry* getEntry(string a);
-
+    bool checkEntry(string a);
     // Constructor
-    SymbolTable(SymbolTable* aParentScope, SymbolTable* aGlobalScope);
+    SymbolTable();
 
     // Getters
     SymbolTable* getParentScope() const { return parentScope; }
