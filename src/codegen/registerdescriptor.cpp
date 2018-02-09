@@ -34,6 +34,8 @@ RegisterDescriptor::getX86Name(Register aReg)
             return "%rbp";
         case RSP:
             return "%rsp";
+        case RIP:
+            return "%rip";
         case RAX:
             return "%rax";
         case RBX:

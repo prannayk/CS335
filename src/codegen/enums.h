@@ -42,14 +42,14 @@ enum OpCode
     NOT = 200,
     NEG,
     ASG,
+    LNOT,
 
-    // Unary control flow operations
+    // Single op control flow operations
     GOTO = 250,
     CALL,
 
     // Nullary operations
     RET = 300,
-
 };
 
 enum AddressingMode
@@ -69,6 +69,7 @@ enum Register
     // Special registers, should never be returned from getReg
     RBP = -1,
     RSP = -2,
+    RIP = -3,
 
     // Special value denoting no register, should not be returned by getReg
     NONE = 0,
