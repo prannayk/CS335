@@ -34,24 +34,13 @@ class Instruction
 
   public:
     // Constructors
-    Instruction(OpCode aOp,
-                void* aV1,
-                void* aV2,
-                void* aV3,
-                AddressingMode aV1AddMode,
-                AddressingMode aV2AddMode,
-                AddressingMode aV3AddMode,
-                Type aV1Type,
-                Type aV2Type,
+    Instruction(OpCode aOp, void* aV1, void* aV2, void* aV3,
+                AddressingMode aV1AddMode, AddressingMode aV2AddMode,
+                AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
                 Type aV3Type);
 
-    Instruction(OpCode aOp,
-                void* aV1,
-                void* aV2,
-                AddressingMode aV1AddMode,
-                AddressingMode aV2AddMode,
-                Type aV1Type,
-                Type aV2Type);
+    Instruction(OpCode aOp, void* aV1, void* aV2, AddressingMode aV1AddMode,
+                AddressingMode aV2AddMode, Type aV1Type, Type aV2Type);
 
     Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type aV1Type);
 
@@ -112,7 +101,7 @@ class SimpleBlock
     // Setters
     void setLabel(int a) { label = a; }
     void setReverse(ComplexBlock* a) { reverse = a; }
-    void setNextBlock(SimpleBlock* a) {nextBlock = a; }
+    void setNextBlock(SimpleBlock* a) { nextBlock = a; }
 };
 
 class ComplexBlock

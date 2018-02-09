@@ -2,15 +2,9 @@
 
 // Instructions
 
-Instruction::Instruction(OpCode aOp,
-                         void* aV1,
-                         void* aV2,
-                         void* aV3,
-                         AddressingMode aV1AddMode,
-                         AddressingMode aV2AddMode,
-                         AddressingMode aV3AddMode,
-                         Type aV1Type,
-                         Type aV2Type,
+Instruction::Instruction(OpCode aOp, void* aV1, void* aV2, void* aV3,
+                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
+                         AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
                          Type aV3Type)
 {
     op = aOp;
@@ -26,13 +20,9 @@ Instruction::Instruction(OpCode aOp,
     v3Type = aV3Type;
 }
 
-Instruction::Instruction(OpCode aOp,
-                         void* aV1,
-                         void* aV2,
-                         AddressingMode aV1AddMode,
-                         AddressingMode aV2AddMode,
-                         Type aV1Type,
-                         Type aV2Type)
+Instruction::Instruction(OpCode aOp, void* aV1, void* aV2,
+                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
+                         Type aV1Type, Type aV2Type)
 {
     op = aOp;
     numOps = 2;
@@ -44,9 +34,7 @@ Instruction::Instruction(OpCode aOp,
     v2Type = aV2Type;
 }
 
-Instruction::Instruction(OpCode aOp,
-                         void* aV1,
-                         AddressingMode aV1AddMode,
+Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
                          Type aV1Type)
 {
     op = aOp;
@@ -58,8 +46,7 @@ Instruction::Instruction(OpCode aOp,
 
 // Simple Blocks
 
-SimpleBlock::SimpleBlock(int aLabel,
-                         ComplexBlock* aReverse)
+SimpleBlock::SimpleBlock(int aLabel, ComplexBlock* aReverse)
 {
     label = aLabel;
     reverse = aReverse;
