@@ -30,7 +30,9 @@ extern "C" int yylex();
 %token <str> UNMATCH 50
 %token <str> GOTOSTMT 21
 %token <str> FUNCTION_START 22
-
+%token <str> UN_ASSIGNMENT 24
+%token <str> FUNCTION_END 23
+%token <str> LABELSTMT 25
 %%
 
 expr:   I32

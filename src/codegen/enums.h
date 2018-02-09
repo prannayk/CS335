@@ -47,9 +47,9 @@ enum OpCode
     // Single op control flow operations
     GOTO = 250,
     CALL,
-    FUNC_OP,
+    FUNC_ST, FUNC_ET, // function start and end operation
     PDECL_OP,
-
+    LABEL_ST,
     // Nullary operations
     RET = 300,
 };
@@ -58,6 +58,7 @@ enum AddressingMode
 {
     REGISTER = 0,
     CONSTANT_VAL = 1,
+    NONE_MODE,
 };
 
 enum Type
@@ -65,6 +66,7 @@ enum Type
     INT = 1,
     BRANCH = 2,
     STRING,
+    NONE_TYPE,
 };
 
 enum Register

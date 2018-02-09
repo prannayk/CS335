@@ -12,10 +12,10 @@ SymbolTableEntry::SymbolTableEntry(string aName, Type aType)
 
 // SymbolTable
 
-SymbolTable::SymbolTable(SymbolTable* aParentScope, SymbolTable* aGlobalScope)
+SymbolTable::SymbolTable()
 {
-    globalScope = aGlobalScope;
-    parentScope = aParentScope;
+    globalScope = NULL;
+    parentScope = NULL;
 }
 
 void
@@ -32,3 +32,5 @@ SymbolTable::getEntry(string a)
     }
     return NULL;
 }
+
+bool SymbolTable::checkEntry(string a){ if(getEntry(a) == NULL) return true; return false; }

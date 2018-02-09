@@ -24,11 +24,13 @@ class IR
 
     // Constructor
     IR(vector<Instruction>);
-
+    
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }
     string getGlobalComplexName() { return globalComplexName; }
 
     // Setters
     void setRootSymbolTable(SymbolTable* a) { rootSymbolTable = a; }
+    // Print instruction opCode
+    void printInstruction();
 };
