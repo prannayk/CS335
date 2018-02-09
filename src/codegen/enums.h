@@ -42,15 +42,15 @@ enum OpCode
     NOT = 200,
     NEG,
     ASG,
-
+    LNOT,
     // Unary control flow operations
     GOTO = 250,
     CALL,
     FUNC_ST, FUNC_ET, // function start and end operation
     PDECL_OP,
-    LABEL_ST,
     // Nullary operations
     RET = 300,
+    LABEL_ST,
 
 };
 
