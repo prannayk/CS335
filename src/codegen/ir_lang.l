@@ -163,6 +163,59 @@ void parse_goto(){
     i_list.push_back(*new_inst);
 }
 
+int num_args(char* arg_list){
+            int i = 0;
+            char* a;
+            a = strtok(arg_list," ,");
+            while(a!=NULL){
+                i++;
+                a = strtok(NULL, " ,");
+            }
+            return i;
+}
+
+void push_args(char * arg_list){
+    char * a;
+    a = strtok(arg_list, " ,.");
+    do {
+       Instruction *new_inst;
+       new_inst = new Instruction(PDECL_OP, strdup(a), CONSTANT_VAL, STRING);
+       i_list.push_back(*new_inst);
+    } while((a = strtok(NULL, " ,.")) != NULL);
+}
+
+void parse_function(){ // function to parse the start of function
+            char* a;
+            a = strtok(yylval.str,";");
+            int i = 0;
+            char* name;
+            char* arg_list;
+            char* rtype;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : break; 
+                    case 1 :
+                        name = strdup(a); break; 
+                    case 2 :
+                        arg_list = strdup(a); break;
+                    case 3 :
+                        rtype = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " ;");
+            }
+    int* num ; 
+    num = new int;
+    *num = num_args(arg_list);
+    Instruction* new_inst;
+    /* new_inst = new Instruction(op, arg1, arg2, branch, CONSTANT_VAL, REGISTER, REGISTER, INT , INT, BRANCH); */
+    new_inst = new Instruction(FUNC_OP, name, rtype, num,CONSTANT_VAL, CONSTANT_VAL, CONSTANT_VAL, STRING, STRING, INT );
+    i_list.push_back(*new_inst);
+    push_args(arg_list);
+}
+
 int main (int argc, char** argv)
 {
     ++argv, --argc;
@@ -178,6 +231,7 @@ int main (int argc, char** argv)
                 case OPERATION : operation(0); break;
                 case OPIM : operation(1); break;
                 case GOTOSTMT : parse_goto(); break;
+                case FUNCTION_START : parse_function(); break;
             }
         counter[k].insert(strdup(yylval.str)); 
     }
