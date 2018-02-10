@@ -17,6 +17,7 @@ class IR
     vector<Instruction> i_list;
     string globalComplexName;
     map<string, int> basicBlockMap;
+    vector<SimpleBlock*> simpleBlockList;
 
   public:
     void addGlobalComplex(ComplexBlock* a);

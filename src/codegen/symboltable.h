@@ -18,6 +18,9 @@ class SymbolTableEntry
 
     Type type;
 
+    bool live;
+    int nextUse;
+
   public:
     // Constructor
     SymbolTableEntry(string aName, Type aType);
@@ -32,6 +35,9 @@ class SymbolTableEntry
 
     Type getType() const { return type; }
 
+    bool getLive() const { return live; }
+    int getNextUse() const { return nextUse; }
+
     // Setters
     void setName(string a) { name = a; }
 
@@ -41,6 +47,9 @@ class SymbolTableEntry
     void setReg(Register a) { reg = a; }
 
     void setType(Type a) { type = a; }
+
+    void setLive(bool a) { live = a; }
+    void setNextUse(int a) {nextUse = a; }
 };
 
 class SymbolTable
@@ -55,6 +64,8 @@ class SymbolTable
     void addEntry(SymbolTableEntry* a);
     SymbolTableEntry* getEntry(string a);
     bool checkEntry(string a);
+    void resetNextUseInfo(int a);
+
     // Constructor
     SymbolTable();
 

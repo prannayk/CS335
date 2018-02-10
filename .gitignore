@@ -6,3 +6,4 @@
 *.tab.c
 *.yy
 *.gch
+*.out
