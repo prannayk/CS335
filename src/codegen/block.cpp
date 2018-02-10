@@ -92,6 +92,25 @@ Instruction::Instruction(OpCode aOp,
     v1num = aV1num;
     v2num = aV2num;
 }
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         void* aV2,
+                         AddressingMode aV1AddMode,
+                         AddressingMode aV2AddMode,
+                         Type aV1Type,
+                         Type aV2Type, 
+                         int aV2num)
+{
+    op = aOp;
+    numOps = 2;
+    v1 = aV1;
+    v2 = aV2;
+    v1AddMode = aV1AddMode;
+    v2AddMode = aV2AddMode;
+    v1Type = aV1Type;
+    v2Type = aV2Type;
+    v2num = aV2num;
+}
 
 Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
                          Type aV1Type)

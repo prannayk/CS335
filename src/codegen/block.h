@@ -56,6 +56,8 @@ class Instruction
 
     Instruction(OpCode aOp, void* aV1, void* aV2, AddressingMode aV1AddMode,
                 AddressingMode aV2AddMode, Type aV1Type, Type aV2Type);
+    Instruction(OpCode aOp, void* aV1, void* aV2, AddressingMode aV1AddMode,
+                AddressingMode aV2AddMode, Type aV1Type, Type aV2Type, int aV2Num); // for function declaration only
 
     Instruction(OpCode aOp,
                 void* aV1,

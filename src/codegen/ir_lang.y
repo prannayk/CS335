@@ -34,6 +34,9 @@ extern "C" int yylex();
 %token <str> FUNCTION_END 23
 %token <str> LABELSTMT 25
 %token <str> UN_OP 26
+%token <str> CALL_FN_RET 27
+%token <str> CALL_FN 28
+
 
 %%
 

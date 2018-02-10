@@ -24,7 +24,7 @@ SymbolTable symtab;
 
 /* start define keywords */
 DEFINE ".define"
-CALL ".call"
+CALL "call"
 LABEL ".label"
 I8 ".i8"
 I16 ".i16"
@@ -59,9 +59,10 @@ LNOT "lnot"
 UNOP ({NOT}|{NEG}|{LNOT})
 RELOP ({EQ}|{LT}|{GT}|{GEQ}|{LEQ})
 OP ({ARITHMETIC}|{SR}|{SL}|{RELOP})
-VAR_DECL ({VAR}" "*":"" "*{TYPE})
+VAR_DECL ({TYPE})
 VAR_LIST ({VAR_DECL}(" "*","" "{VAR_DECL})*)
 F_END "!"
+RET "ret"
 %x COMMENT
 %%
 
@@ -76,6 +77,9 @@ F_END "!"
 {GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
 {GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
+{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN_RET; }
+{RET}" "*{VAR} { yylval.str = strdup(yytext); return RETURN; }
 {F_END} { yylval.str = strdup(yytext); return FUNCTION_END; }
 \n { yylval.str = strdup(""); }
 . {yylval.str = strdup(yytext); 
@@ -296,7 +300,8 @@ void parse_goto(int flag){
 int num_args(char* arg_list){
             int i = 0;
             char* a;
-            a = strtok(arg_list," ,");
+            char* list = strdup(arg_list);
+            a = strtok(list," ,");
             while(a!=NULL){
                 i++;
                 a = strtok(NULL, " ,");
@@ -311,7 +316,8 @@ void push_args(char * arg_list){
        Instruction *new_inst;
        new_inst = new Instruction(PDECL_OP, strdup(a), CONSTANT_VAL, STRING);
        i_list.push_back(*new_inst);
-    } while((a = strtok(NULL, " ,.")) != NULL);
+       a = strtok(NULL, " ,.");
+    } while((a) != NULL);
 }
 
 void parse_function(){ // function to parse the start of function
@@ -320,6 +326,7 @@ void parse_function(){ // function to parse the start of function
             int i = 0;
             char* name;
             char* arg_list;
+            char* arg_lst;
             char* rtype;
             while(a!=NULL){
                 switch(i){
@@ -334,7 +341,7 @@ void parse_function(){ // function to parse the start of function
                         break;
                 }
                 i++;
-                a = strtok(NULL, " ;");
+                a = strtok(NULL, ";");
             }
     int* num ; 
     num = new int;
@@ -349,6 +356,55 @@ void function_end(){
     Instruction* new_instr;
     new_instr = new Instruction(FUNC_ET);
     i_list.push_back(*new_instr);
+}
+
+void parse_return(){
+    char* a;
+    a = strtok(yylval.str," %");
+    int i = 0;
+    char* rval;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : break; 
+                    case 1 :
+                        rval = strdup(a); break; 
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " %");
+            }
+    Instruction* new_inst;
+    new_inst = new Instruction(RET, getEntry(rval, INT), getMode(rval) ,INT);
+    i_list.push_back(*new_inst);
+}
+
+void parse_call(int imme){
+    char* a;
+    a = strtok(yylval.str," %:.");
+    int i = 0;
+    char* fname;
+    char* rvar, *rtype;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : break; 
+                    case 1 :
+                        if(imme) fname = strdup(a); else rvar = strdup(a); break; 
+                    case 2 : 
+                        if(!imme) rtype = strdup(a);
+                    case 3 : 
+                        if(!imme) fname = strdup(a);
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " %:.");
+            }
+    Instruction* new_inst;
+    Type type = type_parse(rtype);
+    if(imme) new_inst = new Instruction(CALL, fname, CONSTANT_VAL , STRING);
+    else new_inst = new Instruction(CALL, fname, getEntry(rvar, type), CONSTANT_VAL , getMode(rvar), STRING, type, getNum(rvar)); 
+    i_list.push_back(*new_inst);    
 }
 
 int main (int argc, char** argv)
@@ -371,6 +427,9 @@ int main (int argc, char** argv)
                 case UN_ASSIGNMENT : operation(2); break;
                 case FUNCTION_END : function_end();  break;
                 case LABELSTMT : parse_label(); break;
+                case RETURN : parse_return(); break;
+                case CALL_FN : parse_call(0); break;
+                case CALL_FN_RET : parse_call(1);
             }
         counter[k].insert(strdup(yylval.str)); 
     }
