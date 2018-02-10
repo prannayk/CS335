@@ -1,5 +1,4 @@
 #include "block.h"
-#include "symboltable.cpp"
 #include <stdio.h>
 // Instructions
 
@@ -172,4 +171,14 @@ ComplexBlock::firstBasicBlock()
         return blocks[firstBlock];
     }
     return NULL;
+}
+
+void
+ComplexBlock::utilPrintSummary() {
+  cout << endl << "Summary" << endl;
+  map<int, SimpleBlock*>::iterator it;
+  for (it = blocks.begin(); it != blocks.end(); it++) {
+    cout << "Key, Value: " << it->first << it->second <<endl;
+    cout << "Length: " << it->second->length() << endl;
+  }
 }
