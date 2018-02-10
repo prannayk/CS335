@@ -53,6 +53,7 @@ IR::fillStructure()
     ComplexBlock* globalCB = new ComplexBlock(
       "$global", complexCount++); // Define special global block
     SimpleBlock* globalSB = new SimpleBlock(simpleCount++, globalCB);
+    simpleBlockList.push_back(globalSB);
 
     vector<Instruction>::iterator it;
 
@@ -85,6 +86,7 @@ IR::fillStructure()
         // cout << "The label is " << string((char*)it->getV1()) << endl;
         it++;
         sb = new SimpleBlock(simpleCount++, cb);
+        simpleBlockList.push_back(sb);
 
         for (; it != i_list.end(); it++) {
             if (it->getOp() == FUNC_ST) {
@@ -96,7 +98,7 @@ IR::fillStructure()
                 cb->addBlock(sb);
                 addComplexBlock(cb);
                 // cout << "Added complex with " << cb->length() << " blocks, there are now " << utilGetNumComplexBlock() << endl;
-                // cb -> utilPrintSummary();
+                cb -> utilPrintSummary();
                 it++;
                 break;
             }
@@ -115,6 +117,9 @@ IR::fillStructure()
                 basicBlockMap[string((char*)it->getV1())] = simpleCount - 1;
                 // cout << "Hit a jump statement with label " << string((char*)it->getV1()) << endl;
                 sb = tempBlock;
+                simpleBlockList.push_back(sb);
+                continue;
+   
             }
 
             // ii) Following a jump
@@ -125,6 +130,7 @@ IR::fillStructure()
                 sb->setNextBlock(tempBlock);
                 cb->addBlock(sb);
                 sb = tempBlock;
+                simpleBlockList.push_back(sb);
             }
 
             // Done with the handling case
@@ -143,6 +149,87 @@ IR::fillStructure()
             break;
         }
     }
+    
+    // Change the gotoeq targets to be indices
+    vector<SimpleBlock*>::iterator iter;
+    vector<Instruction*>::iterator instIter;
+    long* c;
+    for (iter = simpleBlockList.begin(); iter != simpleBlockList.end(); iter++) {
+     for (instIter = ((*iter)->instructions).begin(); instIter != ((*iter)->instructions).end(); instIter++) {
+        if (((*instIter)->getOp() == GOTOEQ) || ((*instIter)->getOp() == GOTO)) {
+          c = new long;
+          *c = basicBlockMap[string((char*)(*instIter)->getV1())];
+          (*instIter)->setV1((void*)c);
+        }
+      }
+    }
+
+    // Do nextuse stuff
+    
+    vector<SimpleBlock*>::iterator riter;
+    vector<Instruction*>::reverse_iterator ri;
+
+    for (riter = simpleBlockList.begin(); riter != simpleBlockList.end(); riter++) {
+      rootSymbolTable->resetNextUseInfo((*riter)->length());  
+      for (ri = (*riter)->instructions.rbegin(); ri != (*riter)->instructions.rend(); ri++) {
+        if ((*ri)->getOp()  < 100) {
+          // This is the case with 3 things
+          //Attach info
+          (*ri)->setV1Live(((SymbolTableEntry*)(*ri)->getV1())->getLive());
+          (*ri)->setV2Live(((SymbolTableEntry*)(*ri)->getV2())->getLive());
+          (*ri)->setV3Live(((SymbolTableEntry*)(*ri)->getV3())->getLive());
+
+          (*ri)->setV1NextUse(((SymbolTableEntry*)(*ri)->getV1())->getNextUse());
+          (*ri)->setV2NextUse(((SymbolTableEntry*)(*ri)->getV2())->getNextUse());
+          (*ri)->setV3NextUse(((SymbolTableEntry*)(*ri)->getV3())->getNextUse());
+
+          // Set info for first
+          ((SymbolTableEntry*)(*ri)->getV1())->setLive(false);
+          ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(-1);
+
+          // Set info for rest
+          ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);
+          ((SymbolTableEntry*)(*ri)->getV3())->setLive(true);
+          ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+          ((SymbolTableEntry*)(*ri)->getV3())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+
+        } else if ((*ri)->getOp() == 100) {
+          // for gotoeq
+          (*ri)->setV2Live(((SymbolTableEntry*)(*ri)->getV2())->getLive());
+          (*ri)->setV3Live(((SymbolTableEntry*)(*ri)->getV3())->getLive());
+
+          (*ri)->setV2NextUse(((SymbolTableEntry*)(*ri)->getV2())->getNextUse());
+          (*ri)->setV3NextUse(((SymbolTableEntry*)(*ri)->getV3())->getNextUse());
+
+          // Set info for rest
+          ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);
+          ((SymbolTableEntry*)(*ri)->getV3())->setLive(true);
+          ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+          ((SymbolTableEntry*)(*ri)->getV3())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+
+        } else if (((*ri)->getOp() >= 200) && ((*ri)->getOp() < 240)) {
+          //for instr with only 2 operators
+          //Attach info
+          (*ri)->setV1Live(((SymbolTableEntry*)(*ri)->getV1())->getLive());
+          (*ri)->setV2Live(((SymbolTableEntry*)(*ri)->getV2())->getLive());
+
+          (*ri)->setV1NextUse(((SymbolTableEntry*)(*ri)->getV1())->getNextUse());
+          (*ri)->setV2NextUse(((SymbolTableEntry*)(*ri)->getV2())->getNextUse());
+
+          // Set info for first
+          ((SymbolTableEntry*)(*ri)->getV1())->setLive(false);
+          ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(-1);
+
+          // Set info for rest
+          ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);
+          ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+
+        }
+
+      }
+    }
+    
+
 }
 
 int main() {

@@ -35,6 +35,13 @@ class Instruction
 
     int numOps;
 
+    bool v1Live;
+    bool v2Live;
+    bool v3Live;
+    int v1NextUse;
+    int v2NextUse;
+    int v3NextUse;
+
   public:
     // Constructors
     Instruction(OpCode aOp, void* aV1, void* aV2, void* aV3,
@@ -85,6 +92,13 @@ class Instruction
 
     int getNumOps() { return numOps; }
 
+    bool getV1Live() {return v1Live; }
+    bool getV2Live() {return v2Live; }
+    bool getV3Live() {return v3Live; }
+    int getV1NextUse() {return v1NextUse; }
+    int getV2NextUse() {return v2NextUse; }
+    int getV3NextUse() {return v3NextUse; }
+
     // Setters
     void setOp(OpCode a) { op = a; }
 
@@ -100,6 +114,13 @@ class Instruction
     void setV2Type(Type a) { v2Type = a; }
     void setV3Type(Type a) { v3Type = a; }
 
+    void setV1Live(bool a) { v1Live = a; }
+    void setV2Live(bool a) { v2Live = a; }
+    void setV3Live(bool a) { v3Live = a; }
+    void setV1NextUse(int a) {v1NextUse = a; }
+    void setV2NextUse(int a) {v2NextUse = a; }
+    void setV3NextUse(int a) {v3NextUse = a; }
+
     // Print Instruction 
     void printInstruction();
 };
@@ -107,12 +128,12 @@ class Instruction
 class SimpleBlock
 {
   private:
-    vector<Instruction*> instructions;
     int label;
     ComplexBlock* reverse;
     SimpleBlock* nextBlock;
 
   public:
+    vector<Instruction*> instructions;
     // Constructor
     SimpleBlock(int aLabel, ComplexBlock* aReverse);
 

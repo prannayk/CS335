@@ -34,3 +34,12 @@ SymbolTable::getEntry(string a)
 }
 
 bool SymbolTable::checkEntry(string a){ if(getEntry(a) == NULL) return true; return false; }
+
+void
+SymbolTable::resetNextUseInfo(int a) {
+  map<string, SymbolTableEntry*>::iterator iter;
+  for (iter = table.begin(); iter != table.end(); iter++) {
+    (*(iter->second)).setLive(false);
+    (*(iter->second)).setNextUse(a);
+  }
+}
