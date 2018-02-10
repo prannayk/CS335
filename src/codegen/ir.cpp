@@ -79,7 +79,7 @@ IR::fillStructure()
                 break;
             }
 
-            if (it->getOp() == FUNC_END) {
+            if (it->getOp() == FUNC_ET) {
                 continue;
             }
 
@@ -90,7 +90,7 @@ IR::fillStructure()
 
             // i) Target of jump - finish the current block and create a new one
             // and add index to table
-            if (it->getOp() == LABEL) {
+            if (it->getOp() == LABEL_ST) {
                 SimpleBlock* tempBlock = new SimpleBlock(simpleCount++, cb);
                 sb->setNextBlock(tempBlock);
                 cb->addBlock(sb);

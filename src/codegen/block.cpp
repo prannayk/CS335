@@ -3,11 +3,6 @@
 #include <stdio.h>
 // Instructions
 
-<<<<<<< HEAD
-Instruction::Instruction(OpCode aOp, void* aV1, void* aV2, void* aV3,
-                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
-                         AddressingMode aV3AddMode, Type aV1Type, Type aV2Type,
-=======
 void addToSymbolTable();
 
 Instruction::Instruction(OpCode aOp,
@@ -49,7 +44,6 @@ Instruction::Instruction(OpCode aOp,
                          AddressingMode aV3AddMode,
                          Type aV1Type,
                          Type aV2Type,
->>>>>>> Instruction operation handling added
                          Type aV3Type)
 {
     op = aOp;

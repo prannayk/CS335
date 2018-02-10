@@ -47,14 +47,8 @@ enum OpCode
     // Unary control flow operations
     GOTO = 250,
     CALL,
-<<<<<<< HEAD
-    FUNC_OP,
-    PDECL_OP,
-
-=======
     FUNC_ST, FUNC_ET, // function start and end operation
     PDECL_OP,
->>>>>>> f892bd98582f82111b4d327822072e360751efdf
     // Nullary operations
     RET = 300,
     LABEL_ST,
@@ -73,10 +67,7 @@ enum Type
     INT = 1,
     BRANCH = 2,
     STRING,
-<<<<<<< HEAD
-=======
     NONE_TYPE,
->>>>>>> f892bd98582f82111b4d327822072e360751efdf
 };
 
 enum Register

@@ -39,9 +39,15 @@ PTR ".ptr"
 TYPE I8|I16|{I32}|I64|CHAR|PTR
 DIGIT [0-9]
 CONSTANT "$"{DIGIT}+
-ARITHMETIC [+-/*]
+ASHR "ashr"
+AND "&"
+OR "|"
+XOR "^"
+MOD "mod"
 SL "<<"
 SR ">>"
+BITHMETIC [+-/*]
+ARITHMETIC ({BITHMETIC}|{MOD}|{ASHR}|{AND}|{OR}|{XOR})
 GEQ ">="
 LEQ "<="
 GT ">"
@@ -78,16 +84,9 @@ F_END "!"
 %%
 
 int getNum(char* entry){
-            char* a;
-            a = strtok(yylval.str,"%abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ");
-            int i = 0;
-            char* name;
-            while(a!=NULL){
-                name = strdup(a);
-                i++;
-                a = strtok(NULL, " ;");
-            }
-            return atoi(name);
+    char *cpy = entry;
+    while(*cpy != '\0') if(((*cpy <= 'z' && *cpy >= 'a') || (*cpy <= 'Z' && *cpy>='A')))    cpy++; else break;
+    return atoi(cpy);
 }
 
 AddressingMode getMode(char* entry){
@@ -105,12 +104,16 @@ void * getConst(char* entry, Type type_val){
 
 void* getEntry(char* entry, Type type_val){
     if(entry[0] == '$') return getConst(entry, type_val);
+    int i=0; char st;
+    for(i=0;entry[i]!='\0';i++) if(!((entry[i] <= 'z' && entry[i] >= 'a') || (entry[i] <= 'Z' && entry[i]>='A')))   { st = entry[i]; entry[i] = '\0'; break;}
     if(symtab.checkEntry(entry)){
         SymbolTableEntry * newEntry ; 
         newEntry = new SymbolTableEntry(entry, type_val);
         symtab.addEntry(newEntry);
+        entry[i] = st;
         return newEntry;
     }
+    entry[i] = st;
     return symtab.getEntry(entry);
 }
 
@@ -131,6 +134,10 @@ OpCode operation(char* operation){
                 case '/' : op = DIV; break;
                 case '>' : if(operation[1] == '>')  op = SR; else if(operation[1] == '=') op = GEQ; else op = GT; break;
                 case '<' : if(operation[1] == '<')  op = SL; else if(operation[1] == '=') op = LEQ; else op = LT; break;
+                case 'm' : op = MOD;  break;
+                case '&' : op = AND; break;
+                case '|' : op = OR; break;
+                case '^' : op = XOR; break;
                 case '=' : if(operation[1] == '=')  op = EQ; break;
             }
             return op;
@@ -238,7 +245,6 @@ void parse_label(){
             }
             Instruction * new_inst ; 
             new_inst = new Instruction(LABEL_ST, name, CONSTANT_VAL, STRING);
-            printf("label\n");
             i_list.push_back(*new_inst);
 }
 
@@ -342,6 +348,7 @@ void parse_function(){ // function to parse the start of function
 void function_end(){
     Instruction* new_instr;
     new_instr = new Instruction(FUNC_ET);
+    i_list.push_back(*new_instr);
 }
 
 int main (int argc, char** argv)
