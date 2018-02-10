@@ -6,6 +6,7 @@
 #include <map>
 #include <string.h>
 #include <vector>
+#include <iostream>
 
 using namespace std;
 
@@ -18,9 +19,9 @@ class Instruction
   private:
     OpCode op;
 
-    void* v1;
-    void* v2;
-    void* v3;
+    const void* v1;
+    const void* v2;
+    const void* v3;
 
     AddressingMode v1AddMode;
     AddressingMode v2AddMode;
@@ -72,9 +73,9 @@ class Instruction
     // Getters
     OpCode getOp() { return op; }
 
-    void* getV1() { return v1; }
-    void* getV2() { return v2; }
-    void* getV3() { return v3; }
+    const void* getV1() { return v1; }
+    const void* getV2() { return v2; }
+    const void* getV3() { return v3; }
 
     AddressingMode getV1AddMode() { return v1AddMode; }
     AddressingMode getV2AddMode() { return v2AddMode; }
@@ -144,6 +145,8 @@ class ComplexBlock
     void addBlock(SimpleBlock* a);
     int length() const;
     SimpleBlock* firstBasicBlock();
+
+    void utilPrintSummary();
 
     // Constructor
     ComplexBlock(string aLabel, int aNumLabel);

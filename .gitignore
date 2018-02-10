@@ -1,6 +1,7 @@
 *.run
 *.yy.c
 *.swp
+*.swo
 *.tab.h
 *.tab.c
 *.yy

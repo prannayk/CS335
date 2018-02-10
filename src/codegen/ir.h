@@ -5,6 +5,9 @@
 #include <map>
 #include <string.h>
 #include <vector>
+#include <iostream>
+
+using namespace std;
 
 class IR
 {
@@ -19,6 +22,7 @@ class IR
     void addGlobalComplex(ComplexBlock* a);
     void addComplexBlock(ComplexBlock* a);
     ComplexBlock* getComplexBlock(string a);
+    int utilGetNumComplexBlock();
 
     void fillStructure();
 
