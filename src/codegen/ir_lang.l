@@ -9,8 +9,10 @@
 #include <set>
 #include <vector>
 #include<string.h>
-#include"block.cpp"
-#include"ir.cpp"
+
+
+#include"block.h"
+#include"ir.h"
 extern "C" int yylex();
 #define YY_USER_ACTION ++ctr[yy_act]; 
 
@@ -407,7 +409,7 @@ void parse_call(int imme){
     i_list.push_back(*new_inst);    
 }
 
-/*int main (int argc, char** argv)
+int main (int argc, char** argv)
 {
     ++argv, --argc;
     if (argc > 0)
@@ -436,4 +438,5 @@ void parse_call(int imme){
     for(int iter = 0; iter < i_list.size() ; iter++)
         i_list[iter].printInstruction();
     IR ir(i_list);
-}*/
+    ir.fillStructure();
+}

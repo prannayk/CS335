@@ -35,8 +35,8 @@ codegen:
 	make setup
 	bison --defines=${GEN_FOLDER}ir_lang.tab.h ${GEN_FOLDER}ir_lang.y -o ${GEN_FOLDER}ir_lang.tab.c
 	flex -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
-	#${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${FLAGS} -o ${BIN_GEN}ir_lang.run
-	${CLANG} ${FLAGC} ${GEN_FOLDER}*.cpp -o ${BIN_GEN}test.out
+	${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}*.cpp ${FLAGS} -o ${BIN_GEN}ir_lang.run
+	#${CLANG} ${FLAGS} ${GEN_FOLDER}*.cpp -o ${BIN_GEN}test.out
 
 test_codegen:
 	make codegen

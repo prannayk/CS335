@@ -805,32 +805,32 @@ X86Generator::FlushRegisters()
 }
 
 
-int
-main()
-{
-    SymbolTableEntry* a = new SymbolTableEntry("a", INT);
-    SymbolTableEntry* b = new SymbolTableEntry("b", INT);
-    SymbolTableEntry* c = new SymbolTableEntry("c", INT);
-    SymbolTableEntry* d = new SymbolTableEntry("d", INT);
-    SymbolTableEntry* e = new SymbolTableEntry("e", INT);
-    SymbolTableEntry* f = new SymbolTableEntry("f", INT);
-    long l1 = 10L;
-    X86Generator gen("testfile");
-    Instruction i1(ADD, a, a, c, REGISTER, REGISTER, REGISTER, INT, INT, INT);
-    Instruction i2(
-      ADD, c, &l1, &l1, REGISTER, CONSTANT_VAL, CONSTANT_VAL, INT, INT, INT);
-    Instruction i3(
-      MOD, a, a, &l1, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT);
-    Instruction i4(LNOT, a, a, REGISTER, REGISTER, INT, INT);
-    Instruction i5(
-      CALL, (char*)"something", a, (AddressingMode)0, REGISTER, INT, INT);
-    Instruction i6(RET, &l1, CONSTANT_VAL, INT);
+/* int */
+/* main() */
+/* { */
+/*     SymbolTableEntry* a = new SymbolTableEntry("a", INT); */
+/*     SymbolTableEntry* b = new SymbolTableEntry("b", INT); */
+/*     SymbolTableEntry* c = new SymbolTableEntry("c", INT); */
+/*     SymbolTableEntry* d = new SymbolTableEntry("d", INT); */
+/*     SymbolTableEntry* e = new SymbolTableEntry("e", INT); */
+/*     SymbolTableEntry* f = new SymbolTableEntry("f", INT); */
+/*     long l1 = 10L; */
+/*     X86Generator gen("testfile"); */
+/*     Instruction i1(ADD, a, a, c, REGISTER, REGISTER, REGISTER, INT, INT, INT); */
+/*     Instruction i2( */
+/*       ADD, c, &l1, &l1, REGISTER, CONSTANT_VAL, CONSTANT_VAL, INT, INT, INT); */
+/*     Instruction i3( */
+/*       MOD, a, a, &l1, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT); */
+    /* Instruction i4(LNOT, a, a, REGISTER, REGISTER, INT, INT); */
+    /* Instruction i5( */
+    /*   CALL, (char*)"something", a, (AddressingMode)0, REGISTER, INT, INT); */
+    /* Instruction i6(RET, &l1, CONSTANT_VAL, INT); */
 
-    gen.GenerateInstruction(i4);
-    gen.WriteBackAll();
-    gen.getReg(0);
-    return 0;
-}
+    /* gen.GenerateInstruction(i4); */
+    /* gen.WriteBackAll(); */
+    /* gen.getReg(0); */
+    /* return 0; */
+/* } */
 
 SymbolTableEntry* X86Generator::getReg(SymbolTableEntry* entry){
     SymbolTableEntry * a;
@@ -838,7 +838,7 @@ SymbolTableEntry* X86Generator::getReg(SymbolTableEntry* entry){
     if(entry == currentInstruction.getV1()) r = currentInstruction.getV1Register();     
     if(entry == currentInstruction.getV2()) r = currentInstruction.getV2Register();     
     if(entry == currentInstruction.getV3()) r = currentInstruction.getV3Register();    
-    if (r < (Register)0){ printf("Error : can not find register\n");     exit(EXIT_FAILURE); }
+    /* if (r < (Register)0){ printf("Error : can not find register\n");     exit(EXIT_FAILURE); } */
     a = REGDESC.getRegisterSTE(r);  
     REGDESC.setRegisterSTE(r, entry);
     return a;
