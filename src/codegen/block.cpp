@@ -13,9 +13,9 @@ Instruction::Instruction(OpCode aOp,
                          AddressingMode aV3AddMode,
                          Type aV1Type,
                          Type aV2Type,
-                         Type aV3Type, 
-                         int aV1num, 
-                         int aV2num, 
+                         Type aV3Type,
+                         int aV1num,
+                         int aV2num,
                          int aV3num)
 {
     op = aOp;
@@ -77,7 +77,7 @@ Instruction::Instruction(OpCode aOp,
                          AddressingMode aV1AddMode,
                          AddressingMode aV2AddMode,
                          Type aV1Type,
-                         Type aV2Type, 
+                         Type aV2Type,
                          int aV1num, int aV2num)
 {
     op = aOp;
