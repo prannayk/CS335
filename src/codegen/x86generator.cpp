@@ -28,7 +28,7 @@ bool
 X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1, long op2)
 {
     if (op1->getReg() == NONE) {
-        return false;
+        REPORTERR("Operand has NONE register.")
     }
 
     if (op == LNOT) {
@@ -54,7 +54,7 @@ X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1, long op2)
             break;
         }
         default: {
-            return false;
+            REPORTERR("Cannot find supported operation of form reg, const");
         }
     }
     LARG(op1);
@@ -67,7 +67,7 @@ X86Generator::WriteInstruction(OpCode op,
                                SymbolTableEntry* op2)
 {
     if (op1->getReg() == NONE) {
-        return false;
+        REPORTERR("Operand has NONE register.")
     }
 
     if (op == LNOT) {
@@ -93,7 +93,7 @@ X86Generator::WriteInstruction(OpCode op,
                 break;
             }
             default: {
-                return false;
+                REPORTERR("Cannot find supported operation of form reg, reg");
             }
         }
         LARG(op1);
@@ -118,7 +118,7 @@ X86Generator::WriteInstruction(OpCode op,
         return true;
     }
 
-    return false;
+    REPORTERR("Cannot find supported operation of the form reg, reg");
 }
 
 bool
@@ -129,7 +129,16 @@ X86Generator::WriteInstruction(OpCode op,
 {
 
     if (op1->getReg() == NONE) {
-        return false;
+        REPORTERR("Operand has NONE register");
+    }
+
+    if (op == GOTOEQ) {
+        INST(cmpq);
+        CARG(op2);
+        LARG(op1);
+        INST(je);
+        OUTPUTNAME << LABELPREFIX << op3 << endl;
+        return true;
     }
 
     // Binary math/bit operations
@@ -141,12 +150,11 @@ X86Generator::WriteInstruction(OpCode op,
         if (op == DIV || op == MOD) {
             // This is not possible, since rem/idiv %reg needs at least
             // one register except %rax, which is op1.
-            return false;
+            REPORTERR("Division and mod is not possible with reg, num, num");
         }
 
-        if (!writeBinaryArithmeticOperation(op)) {
-            return false;
-        }
+        writeBinaryArithmeticOperation(op);
+
         CARG(op3);
         LARG(op1);
         return true;
@@ -160,7 +168,7 @@ X86Generator::WriteInstruction(OpCode op,
         // TODO: Add array accesses here.
         return true;
     }
-    return false;
+    REPORTERR("Cannot find supported operation of the form reg, num, num");
 }
 
 bool
@@ -170,7 +178,16 @@ X86Generator::WriteInstruction(OpCode op,
                                long op3)
 {
     if (op1->getReg() == NONE || op2->getReg() == NONE) {
-        return false;
+        REPORTERR("Operand has NONE register.");
+    }
+
+    if (op == GOTOEQ) {
+        INST(cmpq);
+        ARG(op2);
+        LARG(op1);
+        INST(je);
+        OUTPUTNAME << LABELPREFIX << op3 << endl;
+        return true;
     }
 
     // Binary math/bit operations
@@ -185,7 +202,7 @@ X86Generator::WriteInstruction(OpCode op,
             // Now, we assume certain things here which need to be true
             // RDX is available, and RAX is op1, and RDX is not op2
             if (op1->getReg() != RAX || op2->getReg() == RDX) {
-                return false;
+                REPORTERR("Division registers are wrong");
             }
             INST(xorq);
             OUTPUTNAME << "%rdx, %rdx" << endl;
@@ -201,7 +218,7 @@ X86Generator::WriteInstruction(OpCode op,
             // Now, we assume certain things here which need to be true
             // RDX is available, and RDX is op1, and RAX is not op1
             if (op1->getReg() != RDX || op2->getReg() == RAX) {
-                return false;
+                REPORTERR("Mod registers are wrong.");
             }
             INST(xorq);
             OUTPUTNAME << "%rdx, %rdx" << endl;
@@ -214,9 +231,7 @@ X86Generator::WriteInstruction(OpCode op,
             return true;
         }
 
-        if (!writeBinaryArithmeticOperation(op)) {
-            return false;
-        }
+        writeBinaryArithmeticOperation(op);
 
         // Now, write the source and dest.
         CARG(op3);
@@ -234,13 +249,9 @@ X86Generator::WriteInstruction(OpCode op,
         ARG(op1);
         LARG(op2);
 
-        if (!writeBinaryRelationalOperation(op)) {
-            return false;
-        }
+        writeBinaryRelationalOperation(op);
 
-        if (!generateRelopLabels(op1)) {
-            return false;
-        }
+        generateRelopLabels(op1);
 
         return true;
     }
@@ -250,7 +261,7 @@ X86Generator::WriteInstruction(OpCode op,
         // TODO: Add array accesses here.
         return true;
     }
-    return false;
+    REPORTERR("Cannot find supported operation of the form reg, reg, num");
 }
 
 bool
@@ -261,7 +272,7 @@ X86Generator::WriteInstruction(OpCode op,
 {
     if (op1->getReg() == NONE || op2->getReg() == NONE ||
         op3->getReg() == NONE) {
-        return false;
+        REPORTERR("Operands have NONE register");
     }
 
     // Binary math/bit operations
@@ -276,7 +287,7 @@ X86Generator::WriteInstruction(OpCode op,
             // RDX is available, and RAX is op1, and RDX is not op2/op3
             if (op1->getReg() != RAX || op2->getReg() == RDX ||
                 op3->getReg() == RDX) {
-                return false;
+                REPORTERR("Division registers error");
             }
             INST(xorq);
             OUTPUTNAME << "%rdx, %rdx" << endl;
@@ -290,7 +301,7 @@ X86Generator::WriteInstruction(OpCode op,
             // RAX is available, and RDX is op1, and RAX is not op2/op3
             if (op1->getReg() != RDX || op2->getReg() == RAX ||
                 op3->getReg() == RAX) {
-                return false;
+                REPORTERR("Mod registers error");
             }
             INST(xorq);
             OUTPUTNAME << "%rdx, %rdx" << endl;
@@ -301,9 +312,7 @@ X86Generator::WriteInstruction(OpCode op,
             return true;
         }
 
-        if (!writeBinaryArithmeticOperation(op)) {
-            return false;
-        }
+        writeBinaryArithmeticOperation(op);
 
         ARG(op3);
         LARG(op1);
@@ -316,13 +325,9 @@ X86Generator::WriteInstruction(OpCode op,
         ARG(op3);
         LARG(op2);
 
-        if (!writeBinaryRelationalOperation(op)) {
-            return false;
-        }
+        writeBinaryRelationalOperation(op);
 
-        if (!generateRelopLabels(op1)) {
-            return false;
-        }
+        generateRelopLabels(op1);
 
         return true;
     }
@@ -333,7 +338,7 @@ X86Generator::WriteInstruction(OpCode op,
         return true;
     }
 
-    return false;
+    REPORTERR("Supported operation of the form reg, reg, reg does not exist");
 }
 
 bool
@@ -377,7 +382,7 @@ X86Generator::writeBinaryArithmeticOperation(OpCode op)
             break;
         }
         default: {
-            return false;
+            REPORTERR("Cannot find binary arithmetic operation");
         }
     }
     return true;
@@ -406,7 +411,7 @@ X86Generator::writeBinaryRelationalOperation(OpCode op)
             INST(jne);
             break;
         default:
-            return false;
+            REPORTERR("Cannot find binary relop");
     }
     return true;
 }
@@ -481,8 +486,40 @@ X86Generator::GenerateInstruction(Instruction& aInst)
             OUTPUTNAME << op1->getName() << "(%rip), %rax" << endl;
         }
 
+        INST(movq);
+        OUTPUTNAME << "%rbp, %rsp" << endl;
+        INST(popq);
+        OUTPUTNAME << "%rbp" << endl;
         LINST(retq);
         return true;
+    }
+
+    if (aInst.getOp() == GOTO) {
+        WriteBackAll();
+        FlushRegisters();
+
+        long label = *(long*)aInst.getV1();
+        INST(jmp);
+        OUTPUTNAME << LABELPREFIX << label << endl;
+        return true;
+    }
+
+    if (aInst.getOp() == GOTOEQ) {
+        WriteBackAll();
+        FlushRegisters();
+
+        long label = *(long*)aInst.getV1();
+
+        if (aInst.getV3AddMode() == REGISTER) {
+            SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
+            SymbolTableEntry* op3 = (SymbolTableEntry*)aInst.getV3();
+            MaybeGetRegister(op2, true);
+            MaybeGetRegister(op3, true);
+            return WriteInstruction(GOTOEQ, op2, op3, label);
+        }
+        SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
+        MaybeGetRegister(op2, true);
+        return WriteInstruction(GOTOEQ, op2, *(long*)aInst.getV3(), label);
     }
 
     // 0.2 End of block instructions: GOTOEQ and GOTO
@@ -506,7 +543,6 @@ X86Generator::GenerateInstruction(Instruction& aInst)
             op1->setReg(result);
             REGDESC.setRegisterSTE(result, op1);
             SynchronizeDescriptors(result, NULL, op1);
-            op1->setDirty(1);
 
             // Populate RBX, RCX but don't actually change regdesc or addrdesc
             // Reason: DIV a, a, a is problematic otherwise.
@@ -528,6 +564,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
                 LoadFromMemory(op1);
             }
 
+            op1->setDirty(1);
             return WriteInstruction(
               aInst.getOp(),
               op1,
@@ -598,7 +635,6 @@ X86Generator::GenerateInstruction(Instruction& aInst)
             op1->setReg(result);
             REGDESC.setRegisterSTE(result, op1);
             SynchronizeDescriptors(result, NULL, op1);
-            op1->setDirty(1);
 
             // Reason: DIV a, a, NUM is problematic otherwise.
             if (op2->getName() != op1->getName()) {
@@ -647,6 +683,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
 
         MaybeGetRegister(op2, true);
         MaybeGetRegister(op1, false);
+        op1->setDirty(1);
         return WriteInstruction(aInst.getOp(), op1, op2, op3);
     }
 
@@ -654,7 +691,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
     if (numOps == 3 && v1a == REGISTER && v2a == CONSTANT_VAL &&
         v3a == REGISTER) {
         // Not allowed.
-        return false;
+        REPORTERR("Unallowed operation of type reg, num, reg");
     }
 
     // 1.4 We have something of the form %t1, NUM, NUM
@@ -674,6 +711,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
     if (numOps == 2 && v1a == REGISTER && v2a == REGISTER) {
         SymbolTableEntry* op1 = (SymbolTableEntry*)aInst.getV1();
         SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
+        // TOOD: Evaluate the need for this set dirty.
         op1->setDirty(1);
 
         if (op1->getName() == op2->getName()) {
@@ -688,6 +726,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
 
         MaybeGetRegister(op2, true);
         MaybeGetRegister(op1, false);
+        op1->setDirty(1);
         return WriteInstruction(aInst.getOp(), op1, op2);
     }
 
@@ -700,7 +739,7 @@ X86Generator::GenerateInstruction(Instruction& aInst)
         op1->setDirty(1);
         return WriteInstruction(aInst.getOp(), op1, op2);
     }
-    return false;
+    REPORTERR("Instruction is unsupported");
 }
 
 void
@@ -804,42 +843,155 @@ X86Generator::FlushRegisters()
     }
 }
 
-
-/* int */
-/* main() */
-/* { */
-/*     SymbolTableEntry* a = new SymbolTableEntry("a", INT); */
-/*     SymbolTableEntry* b = new SymbolTableEntry("b", INT); */
-/*     SymbolTableEntry* c = new SymbolTableEntry("c", INT); */
-/*     SymbolTableEntry* d = new SymbolTableEntry("d", INT); */
-/*     SymbolTableEntry* e = new SymbolTableEntry("e", INT); */
-/*     SymbolTableEntry* f = new SymbolTableEntry("f", INT); */
-/*     long l1 = 10L; */
-/*     X86Generator gen("testfile"); */
-/*     Instruction i1(ADD, a, a, c, REGISTER, REGISTER, REGISTER, INT, INT, INT); */
-/*     Instruction i2( */
-/*       ADD, c, &l1, &l1, REGISTER, CONSTANT_VAL, CONSTANT_VAL, INT, INT, INT); */
-/*     Instruction i3( */
-/*       MOD, a, a, &l1, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT); */
-    /* Instruction i4(LNOT, a, a, REGISTER, REGISTER, INT, INT); */
-    /* Instruction i5( */
-    /*   CALL, (char*)"something", a, (AddressingMode)0, REGISTER, INT, INT); */
-    /* Instruction i6(RET, &l1, CONSTANT_VAL, INT); */
-
-    /* gen.GenerateInstruction(i4); */
-    /* gen.WriteBackAll(); */
-    /* gen.getReg(0); */
-    /* return 0; */
-/* } */
-
-SymbolTableEntry* X86Generator::getReg(SymbolTableEntry* entry){
-    SymbolTableEntry * a;
+SymbolTableEntry*
+X86Generator::getReg(SymbolTableEntry* entry)
+{
+    SymbolTableEntry* a;
     Register r;
-    if(entry == currentInstruction.getV1()) r = currentInstruction.getV1Register();     
-    if(entry == currentInstruction.getV2()) r = currentInstruction.getV2Register();     
-    if(entry == currentInstruction.getV3()) r = currentInstruction.getV3Register();    
-    /* if (r < (Register)0){ printf("Error : can not find register\n");     exit(EXIT_FAILURE); } */
-    a = REGDESC.getRegisterSTE(r);  
+    if (entry == currentInstruction.getV1())
+        r = currentInstruction.getV1Register();
+    if (entry == currentInstruction.getV2())
+        r = currentInstruction.getV2Register();
+    if (entry == currentInstruction.getV3())
+        r = currentInstruction.getV3Register();
+    /* if (r < (Register)0){ printf("Error : can not find register\n");
+     * exit(EXIT_FAILURE); } */
+    a = REGDESC.getRegisterSTE(r);
     REGDESC.setRegisterSTE(r, entry);
     return a;
 }
+
+bool
+X86Generator::GenerateSimpleBlock(SimpleBlock& aSimpleBlock)
+{
+    LABL(aSimpleBlock.getLabel());
+    SimpleBlock* next = aSimpleBlock.getNextBlock();
+    vector<Instruction*>::iterator iter;
+
+    Instruction* current;
+    for (iter = aSimpleBlock.instructions.begin();
+         iter != aSimpleBlock.instructions.end();
+         iter++) {
+        current = *iter;
+        GenerateInstruction(*current);
+        if (current->getOp() == GOTO || current->getOp() == GOTOEQ) {
+            // Do stuff
+            break;
+        }
+    }
+
+    if (next != NULL) {
+        long nextLabel = next->getLabel();
+        WriteBackAll();
+        FlushRegisters();
+        current = new Instruction(GOTO, &nextLabel, CONSTANT_VAL, INT);
+        GenerateInstruction(*current);
+    }
+
+    return true;
+}
+
+bool
+X86Generator::GenerateComplexBlock(ComplexBlock& aComplexBlock)
+{
+    long firstBlockLabel = aComplexBlock.getFirstBlock();
+    GLOBL(aComplexBlock.getLabel());
+    FUNC(aComplexBlock.getLabel());
+
+    // Function PROLOG
+    INST(pushq);
+    OUTPUTNAME << "%rbp" << endl;
+    INST(movq);
+    OUTPUTNAME << "%rsp, %rbp" << endl;
+
+    Instruction start(GOTO, &firstBlockLabel, CONSTANT_VAL, INT);
+    GenerateInstruction(start);
+
+    map<int, SimpleBlock*>::iterator iter;
+
+    SimpleBlock* current;
+    for (iter = aComplexBlock.blocks.begin();
+         iter != aComplexBlock.blocks.end();
+         iter++) {
+        current = iter->second;
+        GenerateSimpleBlock(*current);
+    }
+    return true;
+}
+
+// int
+// main()
+// {
+//     SymbolTableEntry* a = new SymbolTableEntry("a", INT);
+//     SymbolTableEntry* b = new SymbolTableEntry("b", INT);
+//     SymbolTableEntry* c = new SymbolTableEntry("c", INT);
+//     long one = 1L;
+//     long three = 3L;
+//     long seven = 7L;
+//     long five = 5L;
+//     long label1 = 1L;
+//     long label2 = 2L;
+//     long label3 = 3L;
+//     long label4 = 4L;
+//     long label5 = 5L;
+//     X86Generator gen("testfile");
+
+//     ComplexBlock chaitanyaBhagwat((char*)"main", 1);
+//     SimpleBlock mySb1(1, NULL);
+//     SimpleBlock mySb2(2, NULL);
+//     SimpleBlock mySb3(3, NULL);
+//     SimpleBlock mySb4(4, NULL);
+//     SimpleBlock mySb5(5, NULL);
+
+//     vector<Instruction*> inst1;
+//     vector<Instruction*> inst2;
+//     vector<Instruction*> inst3;
+//     vector<Instruction*> inst4;
+//     vector<Instruction*> inst5;
+
+//     inst1.push_back(
+//       new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
+//     inst1.push_back(new Instruction(
+//       GT, b, a, &three, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT));
+//     inst1.push_back(new Instruction(GOTOEQ,
+//                                     &label2,
+//                                     b,
+//                                     &one,
+//                                     CONSTANT_VAL,
+//                                     REGISTER,
+//                                     CONSTANT_VAL,
+//                                     INT,
+//                                     INT,
+//                                     INT));
+//     inst5.push_back(new Instruction(GOTO, &label3, CONSTANT_VAL, INT));
+
+//     inst2.push_back(new Instruction(ASG, c, a, REGISTER, REGISTER, INT,
+//     INT)); inst2.push_back(new Instruction(GOTO, &label4, CONSTANT_VAL,
+//     INT));
+
+//     inst3.push_back(
+//       new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
+
+//     inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
+
+//     mySb1.instructions = inst1;
+//     mySb2.instructions = inst2;
+//     mySb3.instructions = inst3;
+//     mySb4.instructions = inst4;
+//     mySb5.instructions = inst5;
+
+//     mySb1.setNextBlock(&mySb5);
+//     mySb2.setNextBlock(&mySb3);
+//     mySb3.setNextBlock(&mySb4);
+//     mySb5.setNextBlock(&mySb2);
+
+//     chaitanyaBhagwat.addBlock(&mySb1);
+//     chaitanyaBhagwat.addBlock(&mySb5);
+//     chaitanyaBhagwat.addBlock(&mySb2);
+//     chaitanyaBhagwat.addBlock(&mySb3);
+//     chaitanyaBhagwat.addBlock(&mySb4);
+
+//     gen.GenerateComplexBlock(chaitanyaBhagwat);
+
+//     return 0;
+// }

@@ -19,8 +19,12 @@
 #define LARG(op) OUTPUTNAME << REGDESC.getX86Name(op->getReg()) << endl
 #define CARG(n) OUTPUTNAME << "$" << n << ","
 #define LCARG(n) OUTPUTNAME << "$" << n << endl
+#define LABL(lbl) OUTPUTNAME << LABELPREFIX << lbl << ":" << endl;
+#define GLOBL(name) OUTPUTNAME << ".globl " << name << endl
+#define FUNC(name) OUTPUTNAME << name << ": " << endl
 #define REPORTERR(err)                                                  \
-  cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << "): " << err << endl;                          \
+  cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << ", " << __LINE__ << "): " << err << endl;                          \
+  assert(0);                                                            \
   return false;
 
 using namespace std;
@@ -77,6 +81,8 @@ class X86Generator
 
     // Generate boilerplate and write instructions
     bool GenerateInstruction(Instruction& aInst);
+    bool GenerateSimpleBlock(SimpleBlock& aSimpleBlock);
+    bool GenerateComplexBlock(ComplexBlock& aComplexBlock);
 
     void MaybeWriteBack(Register aRegister);
     void LoadFromMemory(SymbolTableEntry* aSte);

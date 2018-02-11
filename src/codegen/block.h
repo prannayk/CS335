@@ -143,7 +143,7 @@ class SimpleBlock
   private:
     int label;
     ComplexBlock* reverse;
-    SimpleBlock* nextBlock;
+    SimpleBlock* nextBlock = NULL;
 
   public:
     vector<Instruction*> instructions;
@@ -168,12 +168,12 @@ class SimpleBlock
 class ComplexBlock
 {
   private:
-    map<int, SimpleBlock*> blocks;
     int firstBlock;
     string label;
     int numLabel;
 
   public:
+    map<int, SimpleBlock*> blocks;
     void addBlock(SimpleBlock* a);
     int length() const;
     SimpleBlock* firstBasicBlock();
