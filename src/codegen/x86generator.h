@@ -22,10 +22,11 @@
 #define LABL(lbl) OUTPUTNAME << LABELPREFIX << lbl << ":" << endl;
 #define GLOBL(name) OUTPUTNAME << ".globl " << name << endl
 #define FUNC(name) OUTPUTNAME << name << ": " << endl
-#define REPORTERR(err)                                                  \
-  cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << ", " << __LINE__ << "): " << err << endl;                          \
-  assert(0);                                                            \
-  return false;
+#define REPORTERR(err)                                                         \
+    cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << ", " << __LINE__    \
+         << "): " << err << endl;                                              \
+    assert(0);                                                                 \
+    return false;
 
 using namespace std;
 
@@ -35,15 +36,15 @@ class X86Generator
     ofstream OUTPUTNAME;
     RegisterDescriptor REGDESC;
     int jumpLabel;
-    string error;
+    Instruction currentInstruction;
     // To deal with cases like SUB a, b, a
     SymbolTableEntry phantomOp2;
     SymbolTableEntry phantomOp3;
-    Instruction currentInstruction;
 
     // Helper
     bool writeBinaryArithmeticOperation(OpCode op);
     bool writeBinaryRelationalOperation(OpCode op);
+    bool writeUnaryArithmeticBitOperation(OpCode op);
     bool generateRelopLabels(SymbolTableEntry* op1);
 
   public:

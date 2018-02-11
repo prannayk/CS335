@@ -41,23 +41,10 @@ X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1, long op2)
     INST(movq);
     CARG(op2);
     LARG(op1);
-    switch (op) {
-        case ASG: {
-            return true;
-        }
-        case NOT: {
-            INST(notq);
-            break;
-        }
-        case NEG: {
-            INST(neg);
-            break;
-        }
-        default: {
-            REPORTERR("Cannot find supported operation of form reg, const");
-        }
+    writeUnaryArithmeticBitOperation(op);
+    if (op != ASG) {
+        LARG(op1);
     }
-    LARG(op1);
     return true;
 }
 
@@ -80,23 +67,10 @@ X86Generator::WriteInstruction(OpCode op,
         INST(movq);
         ARG(op2);
         LARG(op1);
-        switch (op) {
-            case ASG: {
-                return true;
-            }
-            case NOT: {
-                INST(notq);
-                break;
-            }
-            case NEG: {
-                INST(neg);
-                break;
-            }
-            default: {
-                REPORTERR("Cannot find supported operation of form reg, reg");
-            }
+        writeUnaryArithmeticBitOperation(op);
+        if (op != ASG) {
+            LARG(op1);
         }
-        LARG(op1);
         return true;
     }
 
@@ -215,20 +189,7 @@ X86Generator::WriteInstruction(OpCode op,
         }
 
         if (op == MOD) {
-            // Now, we assume certain things here which need to be true
-            // RDX is available, and RDX is op1, and RAX is not op1
-            if (op1->getReg() != RDX || op2->getReg() == RAX) {
-                REPORTERR("Mod registers are wrong.");
-            }
-            INST(xorq);
-            OUTPUTNAME << "%rdx, %rdx" << endl;
-            INST(movq);
-            CARG(op3);
-            LARG(op2);
-            // URGENT TODO: MOD is faulty.
-            INST(idiv); // Remainder.
-            LARG(op2);
-            return true;
+            REPORTERR("Mod should be handled by division");
         }
 
         writeBinaryArithmeticOperation(op);
@@ -277,11 +238,6 @@ X86Generator::WriteInstruction(OpCode op,
 
     // Binary math/bit operations
     if (op < 50) {
-        // move the operand to the destination.
-        INST(movq);
-        ARG(op2);
-        LARG(op1);
-
         if (op == DIV) {
             // Now, we assume certain things here which need to be true
             // RDX is available, and RAX is op1, and RDX is not op2/op3
@@ -295,21 +251,13 @@ X86Generator::WriteInstruction(OpCode op,
             LARG(op3);
             return true;
         }
+        // move the operand to the destination.
+        INST(movq);
+        ARG(op2);
+        LARG(op1);
 
         if (op == MOD) {
-            // Now, we assume certain things here which need to be true
-            // RAX is available, and RDX is op1, and RAX is not op2/op3
-            if (op1->getReg() != RDX || op2->getReg() == RAX ||
-                op3->getReg() == RAX) {
-                REPORTERR("Mod registers error");
-            }
-            INST(xorq);
-            OUTPUTNAME << "%rdx, %rdx" << endl;
-            INST(movq);
-            // URGENT NOTE: MOD is faulty.
-            INST(idiv); // Remainder
-            LARG(op3);
-            return true;
+            REPORTERR("Mod instructions should be handled by division");
         }
 
         writeBinaryArithmeticOperation(op);
@@ -417,6 +365,27 @@ X86Generator::writeBinaryRelationalOperation(OpCode op)
 }
 
 bool
+X86Generator::writeUnaryArithmeticBitOperation(OpCode op)
+{
+    switch (op) {
+        case ASG: {
+            return true;
+        }
+        case NOT: {
+            INST(notq);
+            break;
+        }
+        case NEG: {
+            INST(neg);
+            break;
+        }
+        default: {
+            REPORTERR("Cannot find supported operation of form reg, const");
+        }
+    }
+}
+
+bool
 X86Generator::generateRelopLabels(SymbolTableEntry* op1)
 {
     int label1 = ++jumpLabel;
@@ -450,80 +419,74 @@ bool
 X86Generator::GenerateInstruction(Instruction& aInst)
 {
     int numOps = aInst.getNumOps();
+    OpCode op = aInst.getOp();
     AddressingMode v1a = aInst.getV1AddMode();
     AddressingMode v2a = aInst.getV2AddMode();
     AddressingMode v3a = aInst.getV3AddMode();
 
-    // 0.1 Function calling/returning
-    if (aInst.getOp() == CALL) {
-        WriteBackAll();
-        FlushRegisters();
-        // With call, the first op is a string
-        char* functionName = (char*)aInst.getV1();
-        INST(call);
-        OUTPUTNAME << functionName << endl;
+    // 0 Control flow instructions
+    {
+        if (op == CALL || op == RET || op == GOTOEQ || op == GOTO) {
+            WriteBackAll();
+            FlushRegisters();
+        }
+        // 0.1 Function calling/returning
+        if (op == CALL) {
+            // With call, the first op is a string
+            char* functionName = (char*)aInst.getV1();
+            INST(call);
+            OUTPUTNAME << functionName << endl;
 
-        // The second op has to be an identifier, which stores the return.
-        // The contents of the identifier are written back and flushed.
-        SymbolTableEntry* op1 = (SymbolTableEntry*)aInst.getV2();
-        INST(movq);
-        OUTPUTNAME << "%rax, " << op1->getName() << "(%rip)" << endl;
-        return true;
-    }
-
-    if (aInst.getOp() == RET) {
-        WriteBackAll();
-        FlushRegisters();
-
-        // With return, we might want to return an identifier or a 0
-        if (v1a == CONSTANT_VAL) {
+            // The second op has to be an identifier, which stores the return.
+            // The contents of the identifier are written back and flushed.
+            SymbolTableEntry* op1 = (SymbolTableEntry*)aInst.getV2();
             INST(movq);
-            CARG(0L);
-            OUTPUTNAME << "%rax" << endl;
-        } else {
-            SymbolTableEntry* op1 = (SymbolTableEntry*)aInst.getV1();
-            INST(movq);
-            OUTPUTNAME << op1->getName() << "(%rip), %rax" << endl;
+            OUTPUTNAME << "%rax, " << op1->getName() << "(%rip)" << endl;
+            return true;
         }
 
-        INST(movq);
-        OUTPUTNAME << "%rbp, %rsp" << endl;
-        INST(popq);
-        OUTPUTNAME << "%rbp" << endl;
-        LINST(retq);
-        return true;
-    }
+        if (op == RET) {
+            // With return, we might want to return an identifier or a 0
+            if (v1a == CONSTANT_VAL) {
+                INST(movq);
+                CARG(0L);
+                OUTPUTNAME << "%rax" << endl;
+            } else {
+                SymbolTableEntry* op1 = (SymbolTableEntry*)aInst.getV1();
+                INST(movq);
+                OUTPUTNAME << op1->getName() << "(%rip), %rax" << endl;
+            }
 
-    if (aInst.getOp() == GOTO) {
-        WriteBackAll();
-        FlushRegisters();
+            INST(movq);
+            OUTPUTNAME << "%rbp, %rsp" << endl;
+            INST(popq);
+            OUTPUTNAME << "%rbp" << endl;
+            LINST(retq);
+            return true;
+        }
 
-        long label = *(long*)aInst.getV1();
-        INST(jmp);
-        OUTPUTNAME << LABELPREFIX << label << endl;
-        return true;
-    }
+        if (op == GOTO) {
+            long label = *(long*)aInst.getV1();
+            INST(jmp);
+            OUTPUTNAME << LABELPREFIX << label << endl;
+            return true;
+        }
 
-    if (aInst.getOp() == GOTOEQ) {
-        WriteBackAll();
-        FlushRegisters();
+        if (op == GOTOEQ) {
+            long label = *(long*)aInst.getV1();
 
-        long label = *(long*)aInst.getV1();
-
-        if (aInst.getV3AddMode() == REGISTER) {
+            if (aInst.getV3AddMode() == REGISTER) {
+                SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
+                SymbolTableEntry* op3 = (SymbolTableEntry*)aInst.getV3();
+                MaybeGetRegister(op2, true);
+                MaybeGetRegister(op3, true);
+                return WriteInstruction(GOTOEQ, op2, op3, label);
+            }
             SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
-            SymbolTableEntry* op3 = (SymbolTableEntry*)aInst.getV3();
             MaybeGetRegister(op2, true);
-            MaybeGetRegister(op3, true);
-            return WriteInstruction(GOTOEQ, op2, op3, label);
+            return WriteInstruction(GOTOEQ, op2, *(long*)aInst.getV3(), label);
         }
-        SymbolTableEntry* op2 = (SymbolTableEntry*)aInst.getV2();
-        MaybeGetRegister(op2, true);
-        return WriteInstruction(GOTOEQ, op2, *(long*)aInst.getV3(), label);
     }
-
-    // 0.2 End of block instructions: GOTOEQ and GOTO
-    // Not handled here, handled inside basic block loop.
 
     // 1 Binary instructions
     // 1.1 All three operands are registers
@@ -533,43 +496,101 @@ X86Generator::GenerateInstruction(Instruction& aInst)
         SymbolTableEntry* op3 = (SymbolTableEntry*)aInst.getV3();
 
         if (aInst.getOp() == DIV || aInst.getOp() == MOD) {
-            // There is a point in every man's life where he has to say "fuck
-            // efficiency", and come up with some inefficient, but correct shit.
-            // This is that time.
+            // Division is super hard, so we only accept divisions in just one
+            // form: A = A / B
+            // All other divisions are converted to such a form.
+
+            // Case: A = B / B
+            if (op2->getName() == op3->getName()) {
+                // The result will either be a 0 or a 1.
+                long result = (aInst.getOp() == DIV) ? 1L : 0L;
+                Instruction i(
+                  ASG, op1, &result, REGISTER, CONSTANT_VAL, INT, INT);
+                return GenerateInstruction(i);
+            }
+
+            // Modulus is actually carried out by idiv
+            if (aInst.getOp() == MOD) {
+                Instruction i(DIV,
+                              op1,
+                              op2,
+                              op3,
+                              REGISTER,
+                              REGISTER,
+                              REGISTER,
+                              INT,
+                              INT,
+                              INT);
+                GenerateInstruction(i);
+                // Now, our result will be stored in RDX.
+                INST(movq);
+                OUTPUTNAME << "%rdx, " << op1->getName() << "(%rip)" << endl;
+                // Update the tables to reflect this.
+                op1->setReg(RDX);
+                REGDESC.setRegisterSTE(RDX, op1);
+                REGDESC.setRegisterSTE(RAX, NULL);
+                return true;
+            }
+
+            // Case: A = B / A (Trickiest case)
+            if (op1->getName() == op3->getName()) {
+                Instruction i(
+                  ASG, &phantomOp2, op1, REGISTER, REGISTER, INT, INT);
+                GenerateInstruction(i);
+                Instruction j(ASG, op1, op2, REGISTER, REGISTER, INT, INT);
+                GenerateInstruction(i);
+                Instruction k(DIV,
+                              op1,
+                              op2,
+                              &phantomOp2,
+                              REGISTER,
+                              REGISTER,
+                              REGISTER,
+                              INT,
+                              INT,
+                              INT);
+                return GenerateInstruction(k);
+            }
+
+            // Case: A = B / C
+            if (op1->getName() != op2->getName()) {
+                Instruction i(ASG, op1, op2, REGISTER, REGISTER, INT, INT);
+                GenerateInstruction(i);
+                Instruction j(DIV,
+                              op1,
+                              op1,
+                              op3,
+                              REGISTER,
+                              REGISTER,
+                              REGISTER,
+                              INT,
+                              INT,
+                              INT);
+                return GenerateInstruction(j);
+            }
+
+            // Case: A = A / B
+            assert(op1->getName() == op2->getName());
+            assert(op2->getName() != op3->getName());
+
             WriteBackAll();
             FlushRegisters();
             // Now, RDX, RAX, RCX are guaranteed empty.
-            Register result = (aInst.getOp() == DIV) ? RAX : RDX;
+            Register result = RAX;
             op1->setReg(result);
             REGDESC.setRegisterSTE(result, op1);
             SynchronizeDescriptors(result, NULL, op1);
+            LoadFromMemory(op1);
 
-            // Populate RBX, RCX but don't actually change regdesc or addrdesc
-            // Reason: DIV a, a, a is problematic otherwise.
-            if (op2->getName() != op1->getName()) {
-                op2->setReg(RCX);
-                REGDESC.setRegisterSTE(RCX, op2);
-                SynchronizeDescriptors(RCX, NULL, op2);
-                LoadFromMemory(op2);
-            } else {
-                LoadFromMemory(op1);
-            }
-
-            if (op3->getName() != op1->getName()) {
-                op3->setReg(RBX);
-                REGDESC.setRegisterSTE(RBX, op3);
-                SynchronizeDescriptors(RBX, NULL, op3);
-                LoadFromMemory(op3);
-            } else {
-                LoadFromMemory(op1);
-            }
+            op3->setReg(RBX);
+            REGDESC.setRegisterSTE(RBX, op3);
+            SynchronizeDescriptors(RBX, NULL, op3);
+            LoadFromMemory(op3);
 
             op1->setDirty(1);
-            return WriteInstruction(
-              aInst.getOp(),
-              op1,
-              (op1->getName() == op2->getName()) ? op1 : op2,
-              (op1->getName() == op3->getName()) ? op1 : op3);
+            return WriteInstruction(DIV, op1, op1, op3);
+            // (op1->getName() == op2->getName()) ? op1 : op2,
+            // (op1->getName() == op3->getName()) ? op1 : op3);
         }
 
         if (op1->getName() == op3->getName()) {
@@ -625,41 +646,62 @@ X86Generator::GenerateInstruction(Instruction& aInst)
         long op3 = *(long*)aInst.getV3();
 
         if (aInst.getOp() == DIV || aInst.getOp() == MOD) {
-            // There is a point in every man's life where he has to say "fuck
-            // efficiency", and come up with some inefficient, but correct shit.
-            // This is that time.
+            // Division is super hard, so we convert all division to take the
+            // form A = A / NUM.
+
+            // Case A = B / NUM
+            if (op1->getName() != op2->getName()) {
+                Instruction i(ASG, op1, op2, REGISTER, REGISTER, INT, INT);
+                GenerateInstruction(i);
+                Instruction j(DIV,
+                              op1,
+                              op1,
+                              &op3,
+                              REGISTER,
+                              REGISTER,
+                              CONSTANT_VAL,
+                              INT,
+                              INT,
+                              INT);
+                return GenerateInstruction(j);
+            }
+
+            // Modulus is actually carried out by idiv
+            if (aInst.getOp() == MOD) {
+                Instruction i(DIV,
+                              op1,
+                              op2,
+                              &op3,
+                              REGISTER,
+                              REGISTER,
+                              CONSTANT_VAL,
+                              INT,
+                              INT,
+                              INT);
+                GenerateInstruction(i);
+                // Now, our result will be stored in RDX.
+                INST(movq);
+                OUTPUTNAME << "%rdx, " << op1->getName() << "(%rip)" << endl;
+                // Update the tables to reflect this.
+                op1->setReg(RDX);
+                REGDESC.setRegisterSTE(RDX, op1);
+                REGDESC.setRegisterSTE(RAX, NULL);
+                return true;
+            }
+
+            // Case A = A / NUM
             WriteBackAll();
             FlushRegisters();
+            assert(op1->getName() == op2->getName());
             // Now, RDX, RAX, RCX are guaranteed empty.
-            Register result = (aInst.getOp() == DIV) ? RAX : RDX;
+            Register result = RAX;
             op1->setReg(result);
             REGDESC.setRegisterSTE(result, op1);
             SynchronizeDescriptors(result, NULL, op1);
-
-            // Reason: DIV a, a, NUM is problematic otherwise.
-            if (op2->getName() != op1->getName()) {
-                op2->setReg(RCX);
-                REGDESC.setRegisterSTE(RCX, op2);
-                SynchronizeDescriptors(RCX, NULL, op2);
-                LoadFromMemory(op2);
-                return WriteInstruction(aInst.getOp(), op1, op2, op3);
-            }
-
             LoadFromMemory(op1);
-            INST(movq);
-            ARG(op1);
-            OUTPUTNAME << phantomOp2.getName() << "(%rip)" << endl;
-            Instruction i(aInst.getOp(),
-                          op1,
-                          &phantomOp2,
-                          &op3,
-                          REGISTER,
-                          REGISTER,
-                          CONSTANT_VAL,
-                          INT,
-                          INT,
-                          INT);
-            return GenerateInstruction(i);
+
+            op1->setDirty(1);
+            return WriteInstruction(DIV, op1, op1, op3);
         }
 
         if (op1->getName() == op2->getName()) {
@@ -991,7 +1033,10 @@ X86Generator::GenerateComplexBlock(ComplexBlock& aComplexBlock)
 //     chaitanyaBhagwat.addBlock(&mySb3);
 //     chaitanyaBhagwat.addBlock(&mySb4);
 
-//     gen.GenerateComplexBlock(chaitanyaBhagwat);
+//     Instruction in(
+//       MOD, a, b, &five, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT);
+//     gen.GenerateInstruction(in);
+//     gen.WriteBackAll();
 
 //     return 0;
 // }
