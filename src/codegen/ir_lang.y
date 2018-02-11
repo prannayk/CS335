@@ -23,7 +23,6 @@ extern "C" int yylex();
 %token <str> RETURN 14
 %token <str> RELOP 15
 %token <str> PRINT 16
-%token <str> PTR 17
 %token <str> ASSIGNMENT 18
 %token <str> OPERATION 19
 %token <str> OPIM 20
@@ -36,6 +35,8 @@ extern "C" int yylex();
 %token <str> UN_OP 26
 %token <str> CALL_FN_RET 27
 %token <str> CALL_FN 28
+%token <str> FPTR 29
+%token <str> GADDR 30
 
 
 %%

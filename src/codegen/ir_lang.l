@@ -38,7 +38,7 @@ LETTER [a-zA-Z]
 VNAME {LETTER}*[0-9]*
 VAR \%{VNAME}
 PTR ".ptr"
-TYPE I8|I16|{I32}|I64|CHAR|PTR
+TYPE ({I8}|{I16}|{I32}|{I64}|{CHAR}|{PTR})
 DIGIT [0-9]
 CONSTANT "$"{DIGIT}+
 ASHR "ashr"
@@ -65,6 +65,8 @@ VAR_DECL ({TYPE})
 VAR_LIST ({VAR_DECL}(" "*","" "{VAR_DECL})*)
 F_END "!"
 RET "ret"
+FPTR "followptr"
+GADDR "gettaddr"
 %x COMMENT
 %%
 
@@ -81,6 +83,8 @@ RET "ret"
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
 {CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN_RET; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{FPTR}" "*{VAR} { yylval.str = strdup(yytext); return FPTR; }
+{VAR}" "*":"" "*{PTR}" "*"="" "*{GADDR}" "*{VAR}" "*":"" "*{TYPE}  { yylval.str = strdup(yytext); return GADDR; }
 {RET}" "*{VAR} { yylval.str = strdup(yytext); return RETURN; }
 {F_END} { yylval.str = strdup(yytext); return FUNCTION_END; }
 \n { yylval.str = strdup(""); }
@@ -128,6 +132,7 @@ Type type_parse(char* type_var){
     Type type_code;
     switch(type_var[0]){
         case 'i' : type_code = INT; break;
+        case 'p' : type_code = PTR; break;
     }
 }
 
@@ -409,6 +414,56 @@ void parse_call(int imme){
     i_list.push_back(*new_inst);    
 }
 
+void parse_get_addr(){
+    char* a;
+    a = strtok(yylval.str," %:.");
+    int i = 0;
+    char* target, *type_str, *source, *vtype_str;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : target = strdup(a); break; 
+                    case 1 : 
+                        type_str = strdup(a); break;
+                    case 2 : 
+                        source = strdup(a); break;
+                    case 3: vtype_str = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " %:.");
+            }
+    Type type_var = type_parse(type_str);
+    Type var_type = type_parse(vtype_str);
+    Instruction new_inst(GETADDR, getEntry(target, type_var), getEntry(source, var_type), getMode(target), getMode(source), type_var, var_type, getNum(target), getNum(source));
+    i_list.push_back(new_inst);
+}
+void parse_fptr(){
+    char* a;
+    a = strtok(yylval.str," %:.");
+    int i = 0;
+    char* target, *type_str, *source, *vtype_str;
+            while(a!=NULL){
+                switch(i){
+                    case 0 : target = strdup(a); break; 
+                    case 1 : 
+                        type_str = strdup(a); break;
+                    case 2 : 
+                        source = strdup(a); break;
+                    case 3 : 
+                        vtype_str = strdup(a); break;
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " %:.");
+            }
+    Type type_var = type_parse(type_str);
+    Type var_type = PTR;
+    Instruction new_inst(FOLLOWPTR, getEntry(target, type_var), getEntry(source, var_type), getMode(target), getMode(source), type_var, var_type, getNum(target), getNum(source));
+    i_list.push_back(new_inst);
+}
+
 int main (int argc, char** argv)
 {
     ++argv, --argc;
@@ -431,7 +486,10 @@ int main (int argc, char** argv)
                 case LABELSTMT : parse_label(); break;
                 case RETURN : parse_return(); break;
                 case CALL_FN : parse_call(0); break;
-                case CALL_FN_RET : parse_call(1);
+                case CALL_FN_RET : parse_call(1); break;
+                case GADDR : parse_get_addr(); break;
+                case FPTR : parse_fptr(); break;
+
             }
         counter[k].insert(strdup(yylval.str)); 
     }

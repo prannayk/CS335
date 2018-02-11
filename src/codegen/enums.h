@@ -70,6 +70,7 @@ enum Type
     INT = 1,
     BRANCH = 2,
     STRING,
+    PTR,
     NONE_TYPE,
 };
 
