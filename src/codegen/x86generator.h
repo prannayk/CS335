@@ -19,6 +19,9 @@
 #define LARG(op) OUTPUTNAME << REGDESC.getX86Name(op->getReg()) << endl
 #define CARG(n) OUTPUTNAME << "$" << n << ","
 #define LCARG(n) OUTPUTNAME << "$" << n << endl
+#define REPORTERR(err)                                                  \
+  cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << "): " << err << endl;                          \
+  return false;
 
 using namespace std;
 
@@ -28,6 +31,7 @@ class X86Generator
     ofstream OUTPUTNAME;
     RegisterDescriptor REGDESC;
     int jumpLabel;
+    string error;
 
     // To deal with cases like SUB a, b, a
     SymbolTableEntry phantomOp2;
