@@ -32,7 +32,10 @@ class Instruction
     Type v3Type;
 
     int v1num, v2num, v3num;
-
+    
+    
+    Register v1reg, v2reg, v3reg;
+    
     int numOps;
 
     bool v1Live;
@@ -101,6 +104,10 @@ class Instruction
     int getV2NextUse() {return v2NextUse; }
     int getV3NextUse() {return v3NextUse; }
 
+    Register getV1Register() { return v1reg; }
+    Register getV2Register() { return v2reg; }
+    Register getV3Register() { return v3reg; }
+
     // Setters
     void setOp(OpCode a) { op = a; }
 
@@ -122,6 +129,10 @@ class Instruction
     void setV1NextUse(int a) {v1NextUse = a; }
     void setV2NextUse(int a) {v2NextUse = a; }
     void setV3NextUse(int a) {v3NextUse = a; }
+
+    void setV1Register(Register a) { v1reg = a; }
+    void setV2Register(Register a) { v2reg = a; }
+    void setV3Register(Register a) { v3reg = a; }
 
     // Print Instruction 
     void printInstruction();

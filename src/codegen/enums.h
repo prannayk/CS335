@@ -52,6 +52,9 @@ enum OpCode
     // Nullary operations
     RET = 300,
     LABEL_ST,
+    
+    // null instruction as default
+    NULL_IST = 1000,
 
 };
 

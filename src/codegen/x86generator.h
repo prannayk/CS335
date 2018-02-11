@@ -32,10 +32,10 @@ class X86Generator
     RegisterDescriptor REGDESC;
     int jumpLabel;
     string error;
-
     // To deal with cases like SUB a, b, a
     SymbolTableEntry phantomOp2;
     SymbolTableEntry phantomOp3;
+    Instruction currentInstruction;
 
     // Helper
     bool writeBinaryArithmeticOperation(OpCode op);
@@ -64,6 +64,7 @@ class X86Generator
                           SymbolTableEntry* op2);
 
     // Binary instructions
+    SymbolTableEntry* getReg(SymbolTableEntry* entry);
     bool WriteInstruction(OpCode op, SymbolTableEntry* op1, long op2, long op3);
     bool WriteInstruction(OpCode op,
                           SymbolTableEntry* op1,

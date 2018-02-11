@@ -1,7 +1,7 @@
 #include "block.h"
 #include "enums.h"
 #include "symboltable.h"
-
+#include "registerdescriptor.h"
 #include <map>
 #include <string.h>
 #include <vector>
@@ -18,7 +18,7 @@ class IR
     string globalComplexName;
     map<string, int> basicBlockMap;
     vector<SimpleBlock*> simpleBlockList;
-
+    RegisterDescriptor RegDescTable;
   public:
     void addGlobalComplex(ComplexBlock* a);
     void addComplexBlock(ComplexBlock* a);
@@ -26,6 +26,7 @@ class IR
     int utilGetNumComplexBlock();
 
     void fillStructure();
+    Register getRegister(int flag, SymbolTableEntry* current); // get Reg function
 
     // Constructor
     IR(vector<Instruction>);

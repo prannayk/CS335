@@ -1,4 +1,6 @@
 #include "x86generator.h"
+#include <iostream>
+using namespace std;
 
 X86Generator::X86Generator(const char* aFilename)
   : OUTPUTNAME(aFilename, ios::out | ios::trunc)
@@ -6,6 +8,7 @@ X86Generator::X86Generator(const char* aFilename)
   , jumpLabel(0)
   , phantomOp2("dnm2", INT)
   , phantomOp3("dnm3", INT)
+  , currentInstruction(NULL_IST)
 {
 }
 
@@ -801,7 +804,7 @@ X86Generator::FlushRegisters()
     }
 }
 
-/*
+
 int
 main()
 {
@@ -825,6 +828,18 @@ main()
 
     gen.GenerateInstruction(i4);
     gen.WriteBackAll();
+    gen.getReg(0);
     return 0;
 }
-*/
+
+SymbolTableEntry* X86Generator::getReg(SymbolTableEntry* entry){
+    SymbolTableEntry * a;
+    Register r;
+    if(entry == currentInstruction.getV1()) r = currentInstruction.getV1Register();     
+    if(entry == currentInstruction.getV2()) r = currentInstruction.getV2Register();     
+    if(entry == currentInstruction.getV3()) r = currentInstruction.getV3Register();    
+    if (r < (Register)0){ printf("Error : can not find register\n");     exit(EXIT_FAILURE); }
+    a = REGDESC.getRegisterSTE(r);  
+    REGDESC.setRegisterSTE(r, entry);
+    return a;
+}

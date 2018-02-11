@@ -20,7 +20,7 @@ class SymbolTableEntry
 
     bool live;
     int nextUse;
-
+    int active; // for use in register descriptor table
   public:
     // Constructor
     SymbolTableEntry(string aName, Type aType);
@@ -37,7 +37,7 @@ class SymbolTableEntry
 
     bool getLive() const { return live; }
     int getNextUse() const { return nextUse; }
-
+    int getUse() const { return active; }
     // Setters
     void setName(string a) { name = a; }
 
@@ -50,6 +50,8 @@ class SymbolTableEntry
 
     void setLive(bool a) { live = a; }
     void setNextUse(int a) {nextUse = a; }
+
+    void setUse(int a) { active = a; } 
 };
 
 class SymbolTable

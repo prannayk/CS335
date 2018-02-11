@@ -16,6 +16,6 @@ class RegisterDescriptor
     void setRegisterSTE(Register aReg, SymbolTableEntry* aSte);
     SymbolTableEntry* getRegisterSTE(Register aReg);
     string getX86Name(Register aReg);
-
+    map<Register, SymbolTableEntry*>* getRegTable(){ return &regDescTable; }
     RegisterDescriptor();
 };

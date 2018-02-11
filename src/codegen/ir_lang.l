@@ -407,7 +407,7 @@ void parse_call(int imme){
     i_list.push_back(*new_inst);    
 }
 
-int main (int argc, char** argv)
+/*int main (int argc, char** argv)
 {
     ++argv, --argc;
     if (argc > 0)
@@ -436,4 +436,4 @@ int main (int argc, char** argv)
     for(int iter = 0; iter < i_list.size() ; iter++)
         i_list[iter].printInstruction();
     IR ir(i_list);
-}
+}*/

@@ -35,10 +35,25 @@ IR::utilGetNumComplexBlock() {
     return complexBlocks.size();
 }
 
+Register IR::getRegister(int flag, SymbolTableEntry* current){
+    SymbolTableEntry* entry;
+    int max = -1; Register r = (Register)(-1);
+   for(int i=RAX; i <= R15; i++){
+       entry = RegDescTable.getRegisterSTE((Register)i);
+       if(entry == NULL)    return (Register)i;
+       if (entry->getNextUse() > max && !entry->getUse())   {
+        r = (Register)i;
+        if(flag)    entry->setUse(0);
+       }
+   }
+   if(!flag)    current->setUse(1);
+   RegDescTable.setRegisterSTE(r, current);
+   return r;
+}
+
 void
 IR::fillStructure()
 {
-
     vector<int> leaders;
     vector<int> complexBegin;
     vector<int> complexEnd;
@@ -186,12 +201,14 @@ IR::fillStructure()
           // Set info for first
           ((SymbolTableEntry*)(*ri)->getV1())->setLive(false);
           ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(-1);
-
+          (*ri)->setV1Register(getRegister(0, (SymbolTableEntry*)(*ri)->getV1()));
           // Set info for rest
           ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);
           ((SymbolTableEntry*)(*ri)->getV3())->setLive(true);
           ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
           ((SymbolTableEntry*)(*ri)->getV3())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+          (*ri)->setV2Register(getRegister(0, (SymbolTableEntry*)(*ri)->getV2()));
+          (*ri)->setV3Register(getRegister(1, (SymbolTableEntry*)(*ri)->getV3()));
 
         } else if ((*ri)->getOp() == 100) {
           // for gotoeq
@@ -206,6 +223,8 @@ IR::fillStructure()
           ((SymbolTableEntry*)(*ri)->getV3())->setLive(true);
           ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
           ((SymbolTableEntry*)(*ri)->getV3())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
+          (*ri)->setV2Register(getRegister(0, (SymbolTableEntry*)(*ri)->getV2()));
+          (*ri)->setV3Register(getRegister(1, (SymbolTableEntry*)(*ri)->getV3()));
 
         } else if (((*ri)->getOp() >= 200) && ((*ri)->getOp() < 240)) {
           //for instr with only 2 operators
@@ -224,6 +243,8 @@ IR::fillStructure()
           ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);
           ((SymbolTableEntry*)(*ri)->getV2())->setNextUse(distance(begin((*riter)->instructions), ri.base()) - 1);
 
+          (*ri)->setV1Register(getRegister(0, (SymbolTableEntry*)(*ri)->getV1()));
+          (*ri)->setV2Register(getRegister(1, (SymbolTableEntry*)(*ri)->getV2()));
         }
 
       }
@@ -231,7 +252,7 @@ IR::fillStructure()
     
 
 }
-
+/*
 int main() {
   SymbolTableEntry* ste = new SymbolTableEntry("a", INT);
   vector<Instruction> my_list;
@@ -265,3 +286,4 @@ int main() {
   return 0;
 
 }
+*/

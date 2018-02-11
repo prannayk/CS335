@@ -1,5 +1,7 @@
 CC=g++
+CLANG=clang++
 FLAGS=-lfl -std=c++17
+FLAGC=-std=c++14 -stdlib=libstdc++ -ggdb3
 BIN=bin/
 TEST=tests/
 # Lexer make [testing]
@@ -33,11 +35,12 @@ codegen:
 	make setup
 	bison --defines=${GEN_FOLDER}ir_lang.tab.h ${GEN_FOLDER}ir_lang.y -o ${GEN_FOLDER}ir_lang.tab.c
 	flex -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
-	${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${FLAGS} -o ${BIN_GEN}ir_lang.run
+	#${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${FLAGS} -o ${BIN_GEN}ir_lang.run
+	${CLANG} ${FLAGC} ${GEN_FOLDER}*.cpp -o ${BIN_GEN}test.out
 
 test_codegen:
 	make codegen
-	${BIN_GEN}ir_lang.run ${TEST}start.txt
+	${BIN_GEN}test.out
 
 clean:
 	rm -r bin
