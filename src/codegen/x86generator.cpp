@@ -25,6 +25,32 @@ X86Generator::WriteComment(string comment)
 }
 
 bool
+X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1)
+{
+    if (op != PRINT_LONG) {
+        REPORTERR("Cannot find supported operation of the form (reg)");
+    }
+
+    // First, transfer the contents, if any, of rsi and rdi to a safe place.
+    // We don't want to run the risk of allocating either rsi to store rdi
+    // or vice versa, so be on the safe side.
+    if (REGDESC.getRegisterSTE(RSI) != NULL ||
+        REGDESC.getRegisterSTE(RDI) != NULL) {
+        WriteBackAll();
+        FlushRegisters();
+    }
+
+    INST(movq);
+    OUTPUTNAME << op1->getName() << "(%rip), "
+               << "%rsi" << endl;
+    INST(leaq);
+    OUTPUTNAME << PRINTLONGSTR << "(%rip), %rdi" << endl;
+    INST(call);
+    OUTPUTNAME << "printf@PLT" << endl;
+    return true;
+}
+
+bool
 X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1, long op2)
 {
     if (op1->getReg() == NONE) {
@@ -380,9 +406,9 @@ X86Generator::writeUnaryArithmeticBitOperation(OpCode op)
             break;
         }
         default: {
-            REPORTERR("Cannot find supported operation of form reg, const");
         }
     }
+    REPORTERR("Cannot find supported operation of form reg, const");
 }
 
 bool
@@ -424,8 +450,13 @@ X86Generator::GenerateInstruction(Instruction& aInst)
     AddressingMode v2a = aInst.getV2AddMode();
     AddressingMode v3a = aInst.getV3AddMode();
 
-    // 0 Control flow instructions
+    // 0 Control flow/special instructions
     {
+        if (op == PRINT_LONG) {
+            return WriteInstruction(PRINT_LONG,
+                                    (SymbolTableEntry*)aInst.getV1());
+        }
+
         if (op == CALL || op == RET || op == GOTOEQ || op == GOTO) {
             WriteBackAll();
             FlushRegisters();
@@ -961,82 +992,79 @@ X86Generator::GenerateComplexBlock(ComplexBlock& aComplexBlock)
     return true;
 }
 
-// int
-// main()
-// {
-//     SymbolTableEntry* a = new SymbolTableEntry("a", INT);
-//     SymbolTableEntry* b = new SymbolTableEntry("b", INT);
-//     SymbolTableEntry* c = new SymbolTableEntry("c", INT);
-//     long one = 1L;
-//     long three = 3L;
-//     long seven = 7L;
-//     long five = 5L;
-//     long label1 = 1L;
-//     long label2 = 2L;
-//     long label3 = 3L;
-//     long label4 = 4L;
-//     long label5 = 5L;
-//     X86Generator gen("testfile");
+int
+main()
+{
+    SymbolTableEntry* a = new SymbolTableEntry("a", INT);
+    SymbolTableEntry* b = new SymbolTableEntry("b", INT);
+    SymbolTableEntry* c = new SymbolTableEntry("c", INT);
+    long one = 1L;
+    long three = 3L;
+    long seven = 7L;
+    long five = 5L;
+    long label1 = 1L;
+    long label2 = 2L;
+    long label3 = 3L;
+    long label4 = 4L;
+    long label5 = 5L;
+    X86Generator gen("testfile");
 
-//     ComplexBlock chaitanyaBhagwat((char*)"main", 1);
-//     SimpleBlock mySb1(1, NULL);
-//     SimpleBlock mySb2(2, NULL);
-//     SimpleBlock mySb3(3, NULL);
-//     SimpleBlock mySb4(4, NULL);
-//     SimpleBlock mySb5(5, NULL);
+    ComplexBlock chaitanyaBhagwat((char*)"main", 1);
+    SimpleBlock mySb1(1, NULL);
+    SimpleBlock mySb2(2, NULL);
+    SimpleBlock mySb3(3, NULL);
+    SimpleBlock mySb4(4, NULL);
+    SimpleBlock mySb5(5, NULL);
 
-//     vector<Instruction*> inst1;
-//     vector<Instruction*> inst2;
-//     vector<Instruction*> inst3;
-//     vector<Instruction*> inst4;
-//     vector<Instruction*> inst5;
+    vector<Instruction*> inst1;
+    vector<Instruction*> inst2;
+    vector<Instruction*> inst3;
+    vector<Instruction*> inst4;
+    vector<Instruction*> inst5;
 
-//     inst1.push_back(
-//       new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
-//     inst1.push_back(new Instruction(
-//       GT, b, a, &three, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT));
-//     inst1.push_back(new Instruction(GOTOEQ,
-//                                     &label2,
-//                                     b,
-//                                     &one,
-//                                     CONSTANT_VAL,
-//                                     REGISTER,
-//                                     CONSTANT_VAL,
-//                                     INT,
-//                                     INT,
-//                                     INT));
-//     inst5.push_back(new Instruction(GOTO, &label3, CONSTANT_VAL, INT));
+    inst1.push_back(
+      new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
+    inst1.push_back(new Instruction(
+      GT, b, a, &three, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT));
+    inst1.push_back(new Instruction(GOTOEQ,
+                                    &label2,
+                                    b,
+                                    &one,
+                                    CONSTANT_VAL,
+                                    REGISTER,
+                                    CONSTANT_VAL,
+                                    INT,
+                                    INT,
+                                    INT));
+    inst5.push_back(new Instruction(GOTO, &label3, CONSTANT_VAL, INT));
 
-//     inst2.push_back(new Instruction(ASG, c, a, REGISTER, REGISTER, INT,
-//     INT)); inst2.push_back(new Instruction(GOTO, &label4, CONSTANT_VAL,
-//     INT));
+    inst2.push_back(new Instruction(ASG, c, a, REGISTER, REGISTER, INT, INT));
+    inst2.push_back(new Instruction(GOTO, &label4, CONSTANT_VAL, INT));
 
-//     inst3.push_back(
-//       new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
+    inst3.push_back(
+      new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
 
-//     inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
+    inst4.push_back(new Instruction(PRINT_LONG, a, CONSTANT_VAL, INT));
+    inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
 
-//     mySb1.instructions = inst1;
-//     mySb2.instructions = inst2;
-//     mySb3.instructions = inst3;
-//     mySb4.instructions = inst4;
-//     mySb5.instructions = inst5;
+    mySb1.instructions = inst1;
+    mySb2.instructions = inst2;
+    mySb3.instructions = inst3;
+    mySb4.instructions = inst4;
+    mySb5.instructions = inst5;
 
-//     mySb1.setNextBlock(&mySb5);
-//     mySb2.setNextBlock(&mySb3);
-//     mySb3.setNextBlock(&mySb4);
-//     mySb5.setNextBlock(&mySb2);
+    mySb1.setNextBlock(&mySb5);
+    mySb2.setNextBlock(&mySb3);
+    mySb3.setNextBlock(&mySb4);
+    mySb5.setNextBlock(&mySb2);
 
-//     chaitanyaBhagwat.addBlock(&mySb1);
-//     chaitanyaBhagwat.addBlock(&mySb5);
-//     chaitanyaBhagwat.addBlock(&mySb2);
-//     chaitanyaBhagwat.addBlock(&mySb3);
-//     chaitanyaBhagwat.addBlock(&mySb4);
+    chaitanyaBhagwat.addBlock(&mySb1);
+    chaitanyaBhagwat.addBlock(&mySb5);
+    chaitanyaBhagwat.addBlock(&mySb2);
+    chaitanyaBhagwat.addBlock(&mySb3);
+    chaitanyaBhagwat.addBlock(&mySb4);
 
-//     Instruction in(
-//       MOD, a, b, &five, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT);
-//     gen.GenerateInstruction(in);
-//     gen.WriteBackAll();
+    gen.GenerateComplexBlock(chaitanyaBhagwat);
 
-//     return 0;
-// }
+    return 0;
+}

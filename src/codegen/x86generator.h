@@ -1,9 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <cassert>
 
 #include "block.h"
 #include "enums.h"
@@ -13,6 +13,7 @@
 #define OUTPUTNAME output
 #define REGDESC regDesc
 #define COMPARELABEL "cmpLabel"
+#define PRINTLONGSTR "pstr"
 #define INST(I) OUTPUTNAME << #I << "\t"
 #define LINST(I) INST(I) << endl
 #define ARG(op) OUTPUTNAME << REGDESC.getX86Name(op->getReg()) << ", "
@@ -58,6 +59,9 @@ class X86Generator
 
     // Special for CALL
     bool WriteInstruction(OpCode op, long op1);
+
+    // Special for PRINT_LONG
+    bool WriteInstruction(OpCode op, SymbolTableEntry* op1);
 
     // Special for CALL
     bool WriteInstruction(OpCode op, string op1);
