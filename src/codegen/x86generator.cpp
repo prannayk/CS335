@@ -1148,7 +1148,7 @@ X86Generator::Generate(IR& aIR)
 
 int
 main(int argc, char** argv)
-{
+{   
     IR ir = load(argc, argv);
     ir.fillStructure();
     return 0;

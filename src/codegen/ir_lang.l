@@ -110,7 +110,7 @@ AddressingMode getMode(char* entry){
 
 void* getConst(char* entry, Type type_val){
     if (type_val == INT){
-        long * ptr = new long;
+        int * ptr = new int;
         *ptr = atoi(entry);
         return ptr;
     }
@@ -128,8 +128,9 @@ void* getEntry(char* entry, Type type_val){
         entry[i] = st;
         return newEntry;
     }
+    SymbolTableEntry* a = symtab.getEntry(entry);
     entry[i] = st;
-    return symtab.getEntry(entry);
+    return a;
 }
 
 
@@ -292,7 +293,7 @@ void parse_goto(int flag){
                 a = strtok(NULL, " :?%");
             }
     Instruction* new_inst;
-    if(!flag){   
+    if(flag){   
         OpCode op = operation(op_string);
         OpCode gotoop;
         switch (op) {
@@ -304,7 +305,7 @@ void parse_goto(int flag){
             case NEQ: gotoop = GOTONEQ; break; 
         }
         Type type_val = INT;
-        new_inst = new Instruction(op, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, getNum(arg1), getNum(arg2), -1);
+        new_inst = new Instruction(gotoop, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, getNum(arg1), getNum(arg2), -1);
     } else {
         new_inst = new Instruction(GOTO, arg1, CONSTANT_VAL, BRANCH);     
     }
@@ -519,6 +520,6 @@ IR load (int argc, char** argv)
     }
     for(int iter = 0; iter < i_list.size() ; iter++)
         i_list[iter].printInstruction();
-    IR ir(i_list);
+    IR ir(i_list, &symtab);
     return ir;
 }

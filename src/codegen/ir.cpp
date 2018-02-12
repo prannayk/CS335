@@ -2,9 +2,15 @@
 
 // IR
 
-IR::IR(vector<Instruction> instr_list)
+IR::IR(vector<Instruction> instr_list, SymbolTable * symtab)
 {
     i_list = instr_list;
+    rootSymbolTable = symtab; 
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("a", INT)); */
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("b", INT)); */
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("c", INT)); */
+    cout << rootSymbolTable->table.size() << endl; 
+    cout << ((SymbolTableEntry*)rootSymbolTable->getEntry("a"))->getLive() << endl;
 }
 
 

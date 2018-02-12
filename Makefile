@@ -3,6 +3,7 @@ CLANG=clang++
 FLAGS=-lfl -std=c++17
 FLAGC=-std=c++14 -stdlib=libstdc++ -ggdb3
 BIN=bin/
+FLAGCLANG=-stdlib=libstdc++  -lfl  -std=c++14 -ggdb3
 TEST=tests/
 # Lexer make [testing]
 
@@ -36,7 +37,7 @@ codegen:
 	bison --defines=${GEN_FOLDER}ir_lang.tab.h ${GEN_FOLDER}ir_lang.y -o ${GEN_FOLDER}ir_lang.tab.c
 	flex --header-file=${GEN_FOLDER}ir_lang.yy.h -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
 	# ${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}*.cpp ${FLAGS} -o ${BIN_GEN}ir_lang.run
-	${CLANG}  ${GEN_FOLDER}*.cpp ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c -stdlib=libstdc++  -lfl  -std=c++17 -ggdb3
+	${CLANG}  ${GEN_FOLDER}*.cpp ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${FLAGCLANG} 
 	# ${CLANG} ${FLAGS} ${GEN_FOLDER}*.cpp ${GEN_FOLDER}*.c -o ${BIN_GEN}test.out
 
 test_codegen:
