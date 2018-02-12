@@ -1,7 +1,10 @@
+%x1 : .i32 = $0
 .define ; main ; .i32 , .i32 ; .i32 @
-%c12 : .i32 = $0
-goto %c12 == $0 ? helloworld
-printint %c12
-.label helloworld
-ret %a12
+%y1 : .i32 = call funcz
+printint %y1
+ret %y1
+!
+.define ; funcz ; .i32 ; .i32 @
+%x3 : .i32 = %x2 + {
+ret $0
 !

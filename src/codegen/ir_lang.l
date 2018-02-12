@@ -88,7 +88,7 @@ PINT "printint"
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN_RET; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{FPTR}" "*{VAR} { yylval.str = strdup(yytext); return FPTR; }
 {VAR}" "*":"" "*{PTR}" "*"="" "*{GADDR}" "*{VAR}" "*":"" "*{TYPE}  { yylval.str = strdup(yytext); return GADDR; }
-{RET}" "*{VAR} { yylval.str = strdup(yytext); return RETURN; }
+{RET}" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); return RETURN; }
 {F_END} { yylval.str = strdup(yytext); return FUNCTION_END; }
 {PINT}" "*{VAR} { yylval.str = strdup(yytext); return PINT;  }
 \n { yylval.str = strdup(""); }
