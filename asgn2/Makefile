@@ -1,5 +1,5 @@
 CC=clang++
-FLAGCLANG=-stdlib=libstdc++ -lfl -std=c++17
+FLAGCLANG=-stdlib=libstdc++ -lfl -std=c++17 -g
 TEST=test
 SRC=src
 BIN=bin

@@ -44,12 +44,17 @@ IR::getRegister(int flag, SymbolTableEntry* current)
     Register r = (Register)(-1);
     for (int i = RAX; i <= R14; i++) {
         entry = RegDescTable.getRegisterSTE((Register)i);
-        if (entry == NULL)
-            return (Register)i;
+        if (entry && flag)
+            entry->setUse(0);
+
+        if (entry == NULL) {
+            r = (Register)i;
+            break;
+        }
+
         if (entry->getNextUse() > max && !entry->getUse()) {
             r = (Register)i;
-            if (flag)
-                entry->setUse(0);
+            max = entry->getNextUse();
         }
     }
     if (!flag)
@@ -221,7 +226,7 @@ IR::fillStructure()
 
                 // Set info for first
                 ((SymbolTableEntry*)(*ri)->getV1())->setLive(false);
-                ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(-1);
+                ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(MAXVECTORSIZE);
                 (*ri)->setV1Register(
                   getRegister(0, (SymbolTableEntry*)(*ri)->getV1()));
                 // Set info for rest
@@ -279,7 +284,7 @@ IR::fillStructure()
 
                 // Set info for first
                 ((SymbolTableEntry*)(*ri)->getV1())->setLive(false);
-                ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(-1);
+                ((SymbolTableEntry*)(*ri)->getV1())->setNextUse(MAXVECTORSIZE);
 
                 // Set info for rest
                 ((SymbolTableEntry*)(*ri)->getV2())->setLive(true);

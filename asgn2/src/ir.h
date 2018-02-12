@@ -7,6 +7,8 @@
 #include <string.h>
 #include <vector>
 
+#define MAXVECTORSIZE 1000
+
 using namespace std;
 
 class IR
