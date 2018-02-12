@@ -1,0 +1,27 @@
+.define ; main ; .i32, .i32 ; .i32 @
+%da1 : .i32 = $67
+%cca1 : .i32 = $67
+%avv1 : .i32 = $67
+%add1 : .i32 = $67
+%agg1 : .i32 = $67
+%gga1 : .i32 = $67
+%avvvv1 : .i32 = $67
+%eeea1 : .i32 = $67
+%asd1 : .i32 = $67
+%adsfsdf1 : .i32 = $67
+%sdfa1 : .i32 = $67
+%dsfa1 : .i32 = $67
+%adsf1 : .i32 = $67
+%dx1 : .i32 = $67
+%adfdsf1 : .i32 = $67
+%dsdfsx1 : .i32 = $67
+%sdfsda1 : .i32 = $67
+%sdfa1 : .i32 = $67
+%adsfds1 : .i32 = $67
+%asdsd1 : .i32 = $67
+%sdfdsfa1 : .i32 = $67
+%asdf1 : .i32 = $67
+%adsf1 : .i32 = $67
+%a21 : .i32 = $67
+%afsd1 : .i32 = $67
+!

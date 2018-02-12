@@ -1,0 +1,13 @@
+%a1 : .i32 = $10
+%b1 : .i32 = $1
+
+.define ; main ; .i32 , .i32 ; .i32 @
+.label loop
+goto %a1 == $1 ? fin
+%b2 : .i32 = %b1 * %a1
+%a2 : .i32 = %a1 - $1
+goto loop
+.label fin
+printint %b2
+ret %b2
+!
