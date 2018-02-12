@@ -79,10 +79,10 @@ PINT "printint"
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
-{VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR} { yylval.str = strdup(yytext); return UN_ASSIGNMENT; }
-{VAR}" "*":"" "*{TYPE}" "*"="{UNOP}" "*{VAR} { yylval.str = strdup(yytext); return UN_OP; }
-{GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
-{GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "roll " << endl; return UN_ASSIGNMENT; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{UNOP}" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "here" << endl; return UN_OP; }
+{GOTO}" "*({VAR}|{CONSTANT})" "*{RELOP}" "*({VAR}|{CONSTANT})" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
+{GOTO}" "*{VNAME} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
 {CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN_RET; }
@@ -163,6 +163,7 @@ OpCode operation(char* operation){
 }
 
 OpCode unary_op(char* op_string){
+    cout << "asdasd" << op_string << endl;
     switch(op_string[0]){
         case '-' : return NEG;
         case '~' : return NOT;
@@ -173,7 +174,7 @@ OpCode unary_op(char* op_string){
 
 void unary_op(int flag){
             char* a;
-            a = strtok(yylval.str," :%");
+            a = strtok(yylval.str," :%,=.");
             int i = 0;
             char* target;
             char* op_string;
@@ -187,7 +188,7 @@ void unary_op(int flag){
                     case 1 :
                         type_var = strdup(a); break; 
                     case 2 :
-                        if(flag)    op_string = strdup(a); else arg1 = strdup(a); break;
+                        if(!flag)    op_string = strdup(a); else arg1 = strdup(a); break;
                     case 3 :
                         arg1 = strdup(a); break;
                     default : 
@@ -199,7 +200,7 @@ void unary_op(int flag){
             Type type_code = type_parse(type_var);
             Instruction* new_inst;
             OpCode op;
-            if(flag) op = unary_op(op_string); else op = ASG;
+            if(!flag) op = unary_op(op_string); else op = ASG;
             new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
             i_list.push_back(*new_inst); return;
     
@@ -281,7 +282,7 @@ void parse_goto(int flag){
                     case 1 :
                         arg1 = strdup(a); break; 
                     case 2 :
-                        op_string = strdup(a); break;
+                        if(flag)    op_string = strdup(a); else branch = strdup(a); break;
                     case 3 :
                         arg2 = strdup(a); break;
                     case 4 :
@@ -305,7 +306,7 @@ void parse_goto(int flag){
             case NEQ: gotoop = GOTONEQ; break; 
         }
         Type type_val = INT;
-        new_inst = new Instruction(gotoop, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, getNum(arg1), getNum(arg2), -1);
+        new_inst = new Instruction(gotoop, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, -1, getNum(arg1), getNum(arg2));
     } else {
         new_inst = new Instruction(GOTO, arg1, CONSTANT_VAL, BRANCH);     
     }
@@ -506,7 +507,8 @@ IR load (int argc, char** argv)
                 case GOTOSTMT : parse_goto(1); break;
                 case GOTO : parse_goto(0); break;
                 case FUNCTION_START : parse_function(); break;
-                case UN_ASSIGNMENT : operation(2); break;
+                case UN_ASSIGNMENT : unary_op(1); break;
+                case UN_OP : unary_op(0); break;
                 case FUNCTION_END : function_end();  break;
                 case LABELSTMT : parse_label(); break;
                 case RETURN : parse_return(); break;
@@ -516,7 +518,6 @@ IR load (int argc, char** argv)
                 case FPTR : parse_fptr(); break;
                 case PINT : parse_pint(); break;
             }
-        counter[k].insert(strdup(yylval.str)); 
     }
     for(int iter = 0; iter < i_list.size() ; iter++)
         i_list[iter].printInstruction();
