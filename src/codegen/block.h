@@ -79,6 +79,7 @@ class Instruction
                 Type aV2Type, 
                 int aV1num, int aV2num);
     Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type aV1Type);
+    Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type aV1Type, int numV1);
     Instruction(OpCode aOp);
     // Getters
     OpCode getOp() { return op; }

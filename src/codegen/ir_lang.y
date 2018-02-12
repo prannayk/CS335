@@ -37,6 +37,7 @@ extern "C" int yylex();
 %token <str> CALL_FN 28
 %token <str> FPTR 29
 %token <str> GADDR 30
+%token <str> PINT 31
 
 
 %%

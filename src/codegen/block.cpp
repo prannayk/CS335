@@ -121,6 +121,17 @@ Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
     v1Type = aV1Type;
 }
 
+Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
+                         Type aV1Type, int numV1)
+{
+    op = aOp;
+    numOps = 1;
+    v1 = aV1;
+    v1AddMode = aV1AddMode;
+    v1Type = aV1Type;
+    v1num = numV1;
+}
+
 Instruction::Instruction(OpCode aOp)
 {
     numOps = 0;

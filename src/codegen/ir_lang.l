@@ -67,6 +67,7 @@ F_END "!"
 RET "ret"
 FPTR "followptr"
 GADDR "gettaddr"
+PINT "printint"
 %x COMMENT
 %%
 
@@ -87,6 +88,7 @@ GADDR "gettaddr"
 {VAR}" "*":"" "*{PTR}" "*"="" "*{GADDR}" "*{VAR}" "*":"" "*{TYPE}  { yylval.str = strdup(yytext); return GADDR; }
 {RET}" "*{VAR} { yylval.str = strdup(yytext); return RETURN; }
 {F_END} { yylval.str = strdup(yytext); return FUNCTION_END; }
+{PINT}" "*{VAR} { yylval.str = strdup(yytext); return PINT;  }
 \n { yylval.str = strdup(""); }
 . {yylval.str = strdup(yytext); 
     return UNMATCH; }
@@ -463,6 +465,23 @@ void parse_fptr(){
     Instruction new_inst(FOLLOWPTR, getEntry(target, type_var), getEntry(source, var_type), getMode(target), getMode(source), type_var, var_type, getNum(target), getNum(source));
     i_list.push_back(new_inst);
 }
+void parse_pint(){
+    char* a;
+    a = strtok(yylval.str," %:.");
+    int i = 0;
+    char* target;
+            while(a!=NULL){
+                switch(i){
+                    case 1: target = strdup(a); break; 
+                    default : 
+                        break;
+                }
+                i++;
+                a = strtok(NULL, " %:.");
+            }
+    Instruction new_inst(PRINTINT, getEntry(target, INT), getMode(target), INT, getNum(target));
+    i_list.push_back(new_inst);
+}
 
 int main (int argc, char** argv)
 {
@@ -489,7 +508,7 @@ int main (int argc, char** argv)
                 case CALL_FN_RET : parse_call(1); break;
                 case GADDR : parse_get_addr(); break;
                 case FPTR : parse_fptr(); break;
-
+                case PINT : parse_pint(); break;
             }
         counter[k].insert(strdup(yylval.str)); 
     }

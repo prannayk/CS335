@@ -43,7 +43,7 @@ enum OpCode
     NEG,
     ASG,
     LNOT,
-
+    
     // Unary control flow operations
     GOTO = 250,
     CALL,
@@ -52,7 +52,8 @@ enum OpCode
     // Nullary operations
     RET = 300,
     LABEL_ST,
-    
+    // print 
+    PRINTINT = 400,
     // null instruction as default
     NULL_IST = 1000,
 
