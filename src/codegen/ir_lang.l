@@ -118,7 +118,7 @@ void* getConst(char* entry, Type type_val){
 }
 
 void* getEntry(char* entry, Type type_val){
-    if(entry[0] == '$') return getConst(entry, type_val);
+    if(entry[0] == '$') return getConst(entry+1, type_val);
     int i=0; char st;
     for(i=0;entry[i]!='\0';i++) if(!((entry[i] <= 'z' && entry[i] >= 'a') || (entry[i] <= 'Z' && entry[i]>='A')))   { st = entry[i]; entry[i] = '\0'; break;}
     if(symtab.checkEntry(entry)){
