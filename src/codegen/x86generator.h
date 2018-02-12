@@ -1,9 +1,9 @@
 #pragma once
 
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <cassert>
 
 #include "block.h"
 #include "enums.h"
@@ -13,15 +13,21 @@
 #define OUTPUTNAME output
 #define REGDESC regDesc
 #define COMPARELABEL "cmpLabel"
+#define PRINTLONGSTR "pstr"
 #define INST(I) OUTPUTNAME << #I << "\t"
 #define LINST(I) INST(I) << endl
 #define ARG(op) OUTPUTNAME << REGDESC.getX86Name(op->getReg()) << ", "
 #define LARG(op) OUTPUTNAME << REGDESC.getX86Name(op->getReg()) << endl
 #define CARG(n) OUTPUTNAME << "$" << n << ","
 #define LCARG(n) OUTPUTNAME << "$" << n << endl
-#define REPORTERR(err)                                                  \
-  cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << "): " << err << endl;                          \
-  return false;
+#define LABL(lbl) OUTPUTNAME << LABELPREFIX << lbl << ":" << endl;
+#define GLOBL(name) OUTPUTNAME << ".globl " << name << endl
+#define FUNC(name) OUTPUTNAME << name << ": " << endl
+#define REPORTERR(err)                                                         \
+    cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << ", " << __LINE__    \
+         << "): " << err << endl;                                              \
+    assert(0);                                                                 \
+    return false;
 
 using namespace std;
 
@@ -31,15 +37,15 @@ class X86Generator
     ofstream OUTPUTNAME;
     RegisterDescriptor REGDESC;
     int jumpLabel;
-    string error;
+    Instruction currentInstruction;
     // To deal with cases like SUB a, b, a
     SymbolTableEntry phantomOp2;
     SymbolTableEntry phantomOp3;
-    Instruction currentInstruction;
 
     // Helper
     bool writeBinaryArithmeticOperation(OpCode op);
     bool writeBinaryRelationalOperation(OpCode op);
+    bool writeUnaryArithmeticBitOperation(OpCode op);
     bool generateRelopLabels(SymbolTableEntry* op1);
 
   public:
@@ -53,6 +59,9 @@ class X86Generator
 
     // Special for CALL
     bool WriteInstruction(OpCode op, long op1);
+
+    // Special for PRINT_LONG
+    bool WriteInstruction(OpCode op, SymbolTableEntry* op1);
 
     // Special for CALL
     bool WriteInstruction(OpCode op, string op1);
@@ -77,6 +86,8 @@ class X86Generator
 
     // Generate boilerplate and write instructions
     bool GenerateInstruction(Instruction& aInst);
+    bool GenerateSimpleBlock(SimpleBlock& aSimpleBlock);
+    bool GenerateComplexBlock(ComplexBlock& aComplexBlock);
 
     void MaybeWriteBack(Register aRegister);
     void LoadFromMemory(SymbolTableEntry* aSte);

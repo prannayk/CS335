@@ -43,11 +43,13 @@ enum OpCode
     NEG,
     ASG,
     LNOT,
-    
-    // Unary control flow operations
+    // Unary control flow/special operations
     GOTO = 250,
     CALL,
-    FUNC_ST, FUNC_ET, // function start and end operation
+    PRINT_LONG,
+    // function start and end operation
+    FUNC_ST,
+    FUNC_ET,
     PDECL_OP,
     // Nullary operations
     RET = 300,
