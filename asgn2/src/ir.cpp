@@ -6,12 +6,6 @@ IR::IR(vector<Instruction> instr_list, SymbolTable* symtab)
 {
     i_list = instr_list;
     rootSymbolTable = symtab;
-    /* rootSymbolTable->addEntry(new SymbolTableEntry("a", INT)); */
-    /* rootSymbolTable->addEntry(new SymbolTableEntry("b", INT)); */
-    /* rootSymbolTable->addEntry(new SymbolTableEntry("c", INT)); */
-    cout << rootSymbolTable->table.size() << endl;
-    cout << ((SymbolTableEntry*)rootSymbolTable->getEntry("a"))->getLive()
-         << endl;
 }
 
 void
@@ -48,7 +42,7 @@ IR::getRegister(int flag, SymbolTableEntry* current)
     SymbolTableEntry* entry;
     int max = -1;
     Register r = (Register)(-1);
-    for (int i = RAX; i <= R15; i++) {
+    for (int i = RAX; i <= R14; i++) {
         entry = RegDescTable.getRegisterSTE((Register)i);
         if (entry == NULL)
             return (Register)i;
