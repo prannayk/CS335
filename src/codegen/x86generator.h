@@ -95,6 +95,7 @@ class X86Generator
     bool GenerateComplexBlock(ComplexBlock& aComplexBlock);
     bool GenerateDataSection(SymbolTable& aSymbolTable,
                              SimpleBlock& aSimpleBlock);
+    bool Generate(IR& aIR);
 
     void MaybeWriteBack(Register aRegister);
     void LoadFromMemory(SymbolTableEntry* aSte);

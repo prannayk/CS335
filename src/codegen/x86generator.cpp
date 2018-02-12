@@ -1036,6 +1036,26 @@ X86Generator::GenerateDataSection(SymbolTable& aSymbolTable,
     return true;
 }
 
+bool
+X86Generator::Generate(IR& aIR)
+{
+    // First, create the data section.
+    SimpleBlock* firstBlock = aIR.getSimpleBlockList()[0];
+    SymbolTable* st = aIR.getRootSymbolTable();
+    GenerateDataSection(*st, *firstBlock);
+
+    // Now, create the text section (every complex block).
+    map<string, ComplexBlock*>::iterator iter;
+    for (iter = aIR.complexBlocks.begin(); iter != aIR.complexBlocks.end();
+         ++iter) {
+        if (iter->first == "$global") {
+            continue;
+        }
+        GenerateComplexBlock(*(iter->second));
+    }
+    return true;
+}
+
 int
 main()
 {
