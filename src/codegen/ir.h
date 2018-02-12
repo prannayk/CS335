@@ -31,7 +31,7 @@ class IR
                          SymbolTableEntry* current); // get Reg function
 
     // Constructor
-    IR(vector<Instruction>);
+    IR(vector<Instruction>, SymbolTable*);
 
     // Getters
     SymbolTable* getRootSymbolTable() { return rootSymbolTable; }
