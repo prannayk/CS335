@@ -1,0 +1,7 @@
+.define ; main ; .i32 , .i32 ; .i32 @
+%c12 : .i32 = $0
+goto %c12 == $0 ? helloworld
+printint %c12
+.label helloworld
+ret %a12
+!
