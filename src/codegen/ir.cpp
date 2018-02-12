@@ -42,7 +42,7 @@ IR::getRegister(int flag, SymbolTableEntry* current)
     SymbolTableEntry* entry;
     int max = -1;
     Register r = (Register)(-1);
-    for (int i = RAX; i <= R15; i++) {
+    for (int i = RAX; i <= R14; i++) {
         entry = RegDescTable.getRegisterSTE((Register)i);
         if (entry == NULL)
             return (Register)i;

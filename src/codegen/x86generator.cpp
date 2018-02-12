@@ -857,7 +857,7 @@ X86Generator::MaybeGetRegister(SymbolTableEntry* aRegisterFor,
                                bool aLoadImmediately)
 {
     if (aRegisterFor->getReg() == NONE) {
-        SymbolTableEntry* oldSymbolForRegister = dummyGetRegister(aRegisterFor);
+        SymbolTableEntry* oldSymbolForRegister = getReg(aRegisterFor);
         assert(aRegisterFor->getReg() != NONE);
 
         // Write back if needed.
@@ -899,7 +899,7 @@ void
 X86Generator::WriteBackAll()
 {
     // Note: this depends on the enums being sequential.
-    for (int r = RAX; r <= R15; r++) {
+    for (int r = RAX; r <= R14; r++) {
         MaybeWriteBack((Register)r);
     }
 }
@@ -907,7 +907,7 @@ X86Generator::WriteBackAll()
 void
 X86Generator::FlushRegisters()
 {
-    for (int r = RAX; r <= R15; r++) {
+    for (int r = RAX; r <= R14; r++) {
         SymbolTableEntry* ste = REGDESC.getRegisterSTE((Register)r);
         if (ste != NULL) {
             // We need to clear this up, writeback has been called before.
@@ -923,12 +923,15 @@ X86Generator::getReg(SymbolTableEntry* entry)
 {
     SymbolTableEntry* a;
     Register r;
-    if (entry == currentInstruction.getV1())
+    if (entry == currentInstruction.getV1()) {
         r = currentInstruction.getV1Register();
-    if (entry == currentInstruction.getV2())
+    } else if (entry == currentInstruction.getV2()) {
         r = currentInstruction.getV2Register();
-    if (entry == currentInstruction.getV3())
+    } else if (entry == currentInstruction.getV3()) {
         r = currentInstruction.getV3Register();
+    } else {
+        r = R15;
+    }
     /* if (r < (Register)0){ printf("Error : can not find register\n");
      * exit(EXIT_FAILURE); } */
     a = REGDESC.getRegisterSTE(r);
@@ -949,6 +952,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock& aSimpleBlock)
          iter != aSimpleBlock.instructions.end();
          iter++) {
         current = *iter;
+        currentInstruction = *current;
         GenerateInstruction(*current);
         if (current->getOp() == GOTO || current->getOp() == GOTOEQ) {
             // Do stuff
@@ -960,6 +964,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock& aSimpleBlock)
         long nextLabel = next->getLabel();
         WriteBackAll();
         FlushRegisters();
+        currentInstruction = *current;
         current = new Instruction(GOTO, &nextLabel, CONSTANT_VAL, INT);
         GenerateInstruction(*current);
     }
