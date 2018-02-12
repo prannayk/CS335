@@ -81,8 +81,8 @@ PINT "printint"
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "roll " << endl; return UN_ASSIGNMENT; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{UNOP}" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "here" << endl; return UN_OP; }
-{GOTO}" "*{VAR}" "*{RELOP}" "*{VAR}" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
-{GOTO}" "*{VAR} { yylval.str = strdup(yytext); return GOTO; }
+{GOTO}" "*({VAR}|{CONSTANT})" "*{RELOP}" "*({VAR}|{CONSTANT})" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); cout << "here from" <<endl; return GOTOSTMT; }
+{GOTO}" "*{VNAME} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
 {CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CALL}" "*{VNAME} { yylval.str = strdup(yytext); return CALL_FN_RET; }
@@ -282,7 +282,7 @@ void parse_goto(int flag){
                     case 1 :
                         arg1 = strdup(a); break; 
                     case 2 :
-                        op_string = strdup(a); break;
+                        if(flag)    op_string = strdup(a); else branch = strdup(a); break;
                     case 3 :
                         arg2 = strdup(a); break;
                     case 4 :
@@ -306,7 +306,10 @@ void parse_goto(int flag){
             case NEQ: gotoop = GOTONEQ; break; 
         }
         Type type_val = INT;
-        new_inst = new Instruction(gotoop, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, getNum(arg1), getNum(arg2), -1);
+        cout  << "adsfsadf" << (arg2 == NULL) << endl;
+        cout << getEntry(arg2, type_val) << endl;
+        new_inst = new Instruction(gotoop, branch , getEntry(arg1, type_val), getEntry(arg2, type_val), CONSTANT_VAL, getMode(arg1), getMode(arg2), BRANCH, INT , INT, -1, getNum(arg1), getNum(arg2));
+        cout << "here" << endl;
     } else {
         new_inst = new Instruction(GOTO, arg1, CONSTANT_VAL, BRANCH);     
     }
