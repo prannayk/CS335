@@ -1,0 +1,157 @@
+Instructions, Opcodes and Usage for POGOIR
+
+==== Format
+
+'$name' Instruction ($opcode)
+	$usage (I have skipped types for brevity)
+	$usage
+	$any_notes
+
+==== Control Flow Instructions
+
+'ret' Instruction (ret)
+  ret $0
+  ret %t1
+
+'goto' Unconditional Instruction (goto)
+  goto 4
+
+'goto' Conditional Instructions (gotoeq)
+  goto %t1 == %t2 ? 6
+
+'call' Instruction (call)
+  %r1 = call func_name
+
+'param' Instruction (param)
+=== NOT IMPLEMENTED
+  param %t1
+
+==== Binary Operations
+
+'add' Instruction (add)
+  %t1 = %a + %b
+  %t1 = %a + $5
+  %t1 = $5 + $6
+
+'sub' Instruction (sub)
+  (see 'add')
+
+'lt' Instruction (lt)
+  %t3 = %a1 < %t2
+
+'leq' Instruction (leq)
+  (see lt)
+
+'gt', 'geq', 'eq', 'neq' Instructions (gt, geq, eq, neq)
+  (see lt)
+
+'mul' Instruction (mul)
+  %t1 = $5 * %x
+  Note: we do not care about overflow, we just let it be
+  	This is signed multiplication
+
+'div' Instruction (div)
+  %t2 = %a / %b
+  %t3 = %a / %c
+  Note: this necessarily requires the use of %rax, %rdx registers to
+  	hold the dividend, and possibly an extra register for the
+        divisor - so when allocating registers, we need to keep this
+        in mind.
+
+'mod' Instruction (mod)
+  %t1 = $5 mod $4
+  %t2 = %a mod %b
+  %t3 = %a mod %c
+  Note: this necessarily requires the use of %rax, %rdx registers to
+  	hold the dividend, and possibly an extra register for the
+        divisor - so when allocating registers, we need to keep this
+        in mind.
+
+
+'sl' Instruction (sl)
+  %t1 = $4 << $2
+  %t3 = %t1 << $2
+
+
+'sr' Instruction (sr)
+  (see sl, with >> instead of <<)
+
+'ashr' Instruction (ashr)
+  (see sl, with ashr instead of <<)
+  (Note: this is generated when casting from int to long)
+
+'and' Instruction (and)
+  (see sl, with & instead of <<)
+
+'or' Instruction (or)
+  (see sl, with | instead of <<)
+
+'xor' Instruction (xor)
+  (see sl, with ^ instead of <<)
+
+
+==== Vector Operations
+==== NOT IMPLEMENTED YET
+
+'extractelement' Instruction (eelem)
+	%t1 = %x eelem $5
+  %t2 = %x eelem %y
+
+'insertelement' Instruction (ielem)
+  %t1 ielem $1 = %t2
+  %t1 ielem %x = $6
+  Note: the array pointer is immutable in terms of assignment, but array elements are not
+  This thing is a possible "gotcha" in terms of how different this is.
+
+
+==== Memory Access and Addressing Operations
+==== IMPLEMENTED, BUT NOT SUPPORTED
+
+'getaddr' Instruction (getaddr)
+	%t1 = getaddr %a1
+
+'followptr' Instruction (followptr)
+	%t1 = followptr %a1
+
+==== Unary Operators
+
+'negate' Instruction (neg)
+  %t1 = - $5
+  %t2 = - %t1
+
+'not' Instruction (not)
+  %t1 = ~ %a1
+  %t2 = ~ $1
+
+'lnot' Instruction (lnot)
+  %t1 = lnot %a
+
+'assign' Instruction (asg)
+  %t1 = %t2
+  %t1 = $6
+
+==== Special Instructions
+
+'print' Instruction (printint)
+  printint %t1
+
+
+==== Types
+
+We support limited types on the left side (in fact, they are mandatory).
+Example:
+  %t1 : .i32 = %a
+
+Above, they were ommited for brevity.
+
+==== Function Definitions, Labels
+==== Parameters do not have been implemented yet.
+.define ; func_name ; arg1 : .i32 , arg2 : .f64 , arg3 : .i32 ; .i32 @
+    %t1 : .i32 = %a
+    %t1 : .i32 = %a
+    %t1 : .i32 = %a
+    %t1 : .i32 = %a
+  ret %t1
+!
+
+.label : loop
