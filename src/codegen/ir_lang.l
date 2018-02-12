@@ -110,8 +110,8 @@ AddressingMode getMode(char* entry){
 
 void* getConst(char* entry, Type type_val){
     if (type_val == INT){
-        int * ptr = new int;
-        *ptr = atoi(entry);
+        long* ptr = new long;
+        *ptr = atol(entry);
         return ptr;
     }
     return NULL;
@@ -200,6 +200,7 @@ void unary_op(int flag){
             Instruction* new_inst;
             OpCode op;
             if(!flag) op = unary_op(op_string); else op = ASG;
+            void* gE = getEntry(arg1, type_code);
             new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
             i_list.push_back(*new_inst); return;
     

@@ -437,7 +437,7 @@ SymbolTableEntry*
 X86Generator::dummyGetRegister(SymbolTableEntry* old)
 {
     static int regn = -1;
-    regn = (regn + 1) % 3;
+    regn = (regn + 1) % 13;
 
     old->setReg((Register)(regn + 1));
     return REGDESC.getRegisterSTE((Register)(regn + 1));
@@ -857,7 +857,7 @@ X86Generator::MaybeGetRegister(SymbolTableEntry* aRegisterFor,
                                bool aLoadImmediately)
 {
     if (aRegisterFor->getReg() == NONE) {
-        SymbolTableEntry* oldSymbolForRegister = getReg(aRegisterFor);
+        SymbolTableEntry* oldSymbolForRegister = dummyGetRegister(aRegisterFor);
         assert(aRegisterFor->getReg() != NONE);
 
         // Write back if needed.
