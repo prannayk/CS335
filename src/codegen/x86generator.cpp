@@ -1056,91 +1056,100 @@ X86Generator::Generate(IR& aIR)
     return true;
 }
 
+// int
+// main()
+// {
+//     SymbolTableEntry* a = new SymbolTableEntry("a", INT);
+//     SymbolTableEntry* b = new SymbolTableEntry("b", INT);
+//     SymbolTableEntry* c = new SymbolTableEntry("c", INT);
+//     SymbolTable st;
+//     st.addEntry(a);
+//     st.addEntry(b);
+//     st.addEntry(c);
+//     long one = 1L;
+//     long three = 3L;
+//     long seven = 7L;
+//     long five = 5L;
+//     long label1 = 1L;
+//     long label2 = 2L;
+//     long label3 = 3L;
+//     long label4 = 4L;
+//     long label5 = 5L;
+//     X86Generator gen("testfile");
+
+//     ComplexBlock chaitanyaBhagwat((char*)"main", 1);
+//     SimpleBlock mySb1(1, NULL);
+//     SimpleBlock mySb2(2, NULL);
+//     SimpleBlock mySb3(3, NULL);
+//     SimpleBlock mySb4(4, NULL);
+//     SimpleBlock mySb5(5, NULL);
+//     SimpleBlock mySb6(6, NULL);
+
+//     vector<Instruction*> inst1;
+//     vector<Instruction*> inst2;
+//     vector<Instruction*> inst3;
+//     vector<Instruction*> inst4;
+//     vector<Instruction*> inst5;
+//     vector<Instruction*> inst6;
+
+//     inst1.push_back(
+//       new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
+//     inst1.push_back(new Instruction(
+//       GT, b, a, &three, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT));
+//     inst1.push_back(new Instruction(GOTOEQ,
+//                                     &label2,
+//                                     b,
+//                                     &one,
+//                                     CONSTANT_VAL,
+//                                     REGISTER,
+//                                     CONSTANT_VAL,
+//                                     INT,
+//                                     INT,
+//                                     INT));
+//     inst5.push_back(new Instruction(GOTO, &label3, CONSTANT_VAL, INT));
+
+//     inst2.push_back(new Instruction(ASG, c, a, REGISTER, REGISTER, INT,
+//     INT)); inst2.push_back(new Instruction(GOTO, &label4, CONSTANT_VAL,
+//     INT));
+
+//     inst3.push_back(
+//       new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
+
+//     inst4.push_back(new Instruction(PRINT_LONG, a, CONSTANT_VAL, INT));
+//     inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
+
+//     inst6.push_back(
+//       new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
+//     inst6.push_back(
+//       new Instruction(ASG, b, &seven, REGISTER, CONSTANT_VAL, INT, INT));
+//     mySb1.instructions = inst1;
+//     mySb2.instructions = inst2;
+//     mySb3.instructions = inst3;
+//     mySb4.instructions = inst4;
+//     mySb5.instructions = inst5;
+//     mySb6.instructions = inst6;
+
+//     mySb1.setNextBlock(&mySb5);
+//     mySb2.setNextBlock(&mySb3);
+//     mySb3.setNextBlock(&mySb4);
+//     mySb5.setNextBlock(&mySb2);
+
+//     chaitanyaBhagwat.addBlock(&mySb1);
+//     chaitanyaBhagwat.addBlock(&mySb5);
+//     chaitanyaBhagwat.addBlock(&mySb2);
+//     chaitanyaBhagwat.addBlock(&mySb3);
+//     chaitanyaBhagwat.addBlock(&mySb4);
+
+//     gen.GenerateDataSection(st, mySb6);
+//     gen.GenerateComplexBlock(chaitanyaBhagwat);
+
+//     return 0;
+// }
+
 int
-main()
+main(int argc, char** argv)
 {
-    SymbolTableEntry* a = new SymbolTableEntry("a", INT);
-    SymbolTableEntry* b = new SymbolTableEntry("b", INT);
-    SymbolTableEntry* c = new SymbolTableEntry("c", INT);
-    SymbolTable st;
-    st.addEntry(a);
-    st.addEntry(b);
-    st.addEntry(c);
-    long one = 1L;
-    long three = 3L;
-    long seven = 7L;
-    long five = 5L;
-    long label1 = 1L;
-    long label2 = 2L;
-    long label3 = 3L;
-    long label4 = 4L;
-    long label5 = 5L;
-    X86Generator gen("testfile");
-
-    ComplexBlock chaitanyaBhagwat((char*)"main", 1);
-    SimpleBlock mySb1(1, NULL);
-    SimpleBlock mySb2(2, NULL);
-    SimpleBlock mySb3(3, NULL);
-    SimpleBlock mySb4(4, NULL);
-    SimpleBlock mySb5(5, NULL);
-    SimpleBlock mySb6(6, NULL);
-
-    vector<Instruction*> inst1;
-    vector<Instruction*> inst2;
-    vector<Instruction*> inst3;
-    vector<Instruction*> inst4;
-    vector<Instruction*> inst5;
-    vector<Instruction*> inst6;
-
-    inst1.push_back(
-      new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
-    inst1.push_back(new Instruction(
-      GT, b, a, &three, REGISTER, REGISTER, CONSTANT_VAL, INT, INT, INT));
-    inst1.push_back(new Instruction(GOTOEQ,
-                                    &label2,
-                                    b,
-                                    &one,
-                                    CONSTANT_VAL,
-                                    REGISTER,
-                                    CONSTANT_VAL,
-                                    INT,
-                                    INT,
-                                    INT));
-    inst5.push_back(new Instruction(GOTO, &label3, CONSTANT_VAL, INT));
-
-    inst2.push_back(new Instruction(ASG, c, a, REGISTER, REGISTER, INT, INT));
-    inst2.push_back(new Instruction(GOTO, &label4, CONSTANT_VAL, INT));
-
-    inst3.push_back(
-      new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
-
-    inst4.push_back(new Instruction(PRINT_LONG, a, CONSTANT_VAL, INT));
-    inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
-
-    inst6.push_back(
-      new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
-    inst6.push_back(
-      new Instruction(ASG, b, &seven, REGISTER, CONSTANT_VAL, INT, INT));
-    mySb1.instructions = inst1;
-    mySb2.instructions = inst2;
-    mySb3.instructions = inst3;
-    mySb4.instructions = inst4;
-    mySb5.instructions = inst5;
-    mySb6.instructions = inst6;
-
-    mySb1.setNextBlock(&mySb5);
-    mySb2.setNextBlock(&mySb3);
-    mySb3.setNextBlock(&mySb4);
-    mySb5.setNextBlock(&mySb2);
-
-    chaitanyaBhagwat.addBlock(&mySb1);
-    chaitanyaBhagwat.addBlock(&mySb5);
-    chaitanyaBhagwat.addBlock(&mySb2);
-    chaitanyaBhagwat.addBlock(&mySb3);
-    chaitanyaBhagwat.addBlock(&mySb4);
-
-    gen.GenerateDataSection(st, mySb6);
-    gen.GenerateComplexBlock(chaitanyaBhagwat);
-
+    IR ir = load(argc, argv);
+    ir.fillStructure();
     return 0;
 }
