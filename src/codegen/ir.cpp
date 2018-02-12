@@ -2,10 +2,16 @@
 
 // IR
 
-IR::IR(vector<Instruction> instr_list, SymbolTable* aSymTable)
+IR::IR(vector<Instruction> instr_list, SymbolTable* symtab)
 {
     i_list = instr_list;
-    rootSymbolTable = aSymTable;
+    rootSymbolTable = symtab;
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("a", INT)); */
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("b", INT)); */
+    /* rootSymbolTable->addEntry(new SymbolTableEntry("c", INT)); */
+    cout << rootSymbolTable->table.size() << endl;
+    cout << ((SymbolTableEntry*)rootSymbolTable->getEntry("a"))->getLive()
+         << endl;
 }
 
 void
@@ -118,8 +124,9 @@ IR::fillStructure()
             if (it->getOp() == FUNC_ET) {
                 cb->addBlock(sb);
                 addComplexBlock(cb);
-                // cout << "Added complex with " << cb->length() << " blocks,
-                // there are now " << utilGetNumComplexBlock() << endl;
+                // cout << "Added complex with " << cb->length() << "
+                // blocks, there are now " << utilGetNumComplexBlock() <<
+                // endl;
                 cb->utilPrintSummary();
                 it++;
                 break;
@@ -130,8 +137,8 @@ IR::fillStructure()
             // Need to take care of i) target of jump ii) following a jump
             // Also if function ends
 
-            // i) Target of jump - finish the current block and create a new one
-            // and add index to table
+            // i) Target of jump - finish the current block and create a new
+            // one and add index to table
             if (it->getOp() == LABEL_ST) {
                 tempBlock = new SimpleBlock(simpleCount++, cb);
                 sb->setNextBlock(tempBlock);
@@ -310,23 +317,23 @@ int main() {
 
 
   my_list.push_back(Instruction(ASG, ste, NULL, NULL, NONE_MODE, NONE_MODE,
-NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG, ste, NULL, NULL,
-NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
+NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG, ste, NULL,
+NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
   my_list.push_back(Instruction(FUNC_ST, (void*)a1, NULL, NULL, NONE_MODE,
-NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG, ste,
-NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
+NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG,
+ste, NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
   my_list.push_back(Instruction(ASG, ste, NULL, NULL, NONE_MODE, NONE_MODE,
-NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(FUNC_ET, (void*)a2,
-NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
+NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(FUNC_ET,
+(void*)a2, NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
   my_list.push_back(Instruction(FUNC_ST, (void*)a3, NULL, NULL, NONE_MODE,
-NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG, ste,
-NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
+NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG,
+ste, NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
   my_list.push_back(Instruction(LABEL_ST, (void*)a4, NULL, NULL, NONE_MODE,
 NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(GOTO,
 (void*)a6, NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
    my_list.push_back(Instruction(GOTOEQ, (void*)a7, NULL, NULL, NONE_MODE,
-NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG, ste,
-NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
+NONE_MODE, NONE_MODE, INT, INT, INT)); my_list.push_back(Instruction(ASG,
+ste, NULL, NULL, NONE_MODE, NONE_MODE, NONE_MODE, INT, INT, INT));
   my_list.push_back(Instruction(FUNC_ET, (void*)a5, NULL, NULL, NONE_MODE,
 NONE_MODE, NONE_MODE, INT, INT, INT)); IR ir(my_list); ir.fillStructure();
   // cout << ir.utilGetNumComplexBlock() << endl;
