@@ -27,7 +27,7 @@ X86Generator::WriteComment(string comment)
 bool
 X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1)
 {
-    if (op != PRINT_LONG) {
+    if (op != PRINTINT) {
         REPORTERR("Cannot find supported operation of the form (reg)");
     }
 
@@ -39,6 +39,8 @@ X86Generator::WriteInstruction(OpCode op, SymbolTableEntry* op1)
         WriteBackAll();
         FlushRegisters();
     }
+
+    MaybeWriteBack(op1->getReg());
 
     INST(movq);
     OUTPUTNAME << op1->getName() << "(%rip), "
@@ -452,9 +454,8 @@ X86Generator::GenerateInstruction(Instruction& aInst)
 
     // 0 Control flow/special instructions
     {
-        if (op == PRINT_LONG) {
-            return WriteInstruction(PRINT_LONG,
-                                    (SymbolTableEntry*)aInst.getV1());
+        if (op == PRINTINT) {
+            return WriteInstruction(PRINTINT, (SymbolTableEntry*)aInst.getV1());
         }
 
         if (op == CALL || op == RET || op == GOTOEQ || op == GOTO) {
@@ -812,7 +813,8 @@ X86Generator::GenerateInstruction(Instruction& aInst)
         op1->setDirty(1);
         return WriteInstruction(aInst.getOp(), op1, op2);
     }
-    REPORTERR("Instruction is unsupported");
+    return true;
+    REPORTERR("Instruction is unsupported" << aInst.getOp());
 }
 
 void
@@ -1115,7 +1117,7 @@ X86Generator::Generate(IR& aIR)
 //     inst3.push_back(
 //       new Instruction(ASG, c, &seven, REGISTER, CONSTANT_VAL, INT, INT));
 
-//     inst4.push_back(new Instruction(PRINT_LONG, a, CONSTANT_VAL, INT));
+//     inst4.push_back(new Instruction(PRINTINT, a, CONSTANT_VAL, INT));
 //     inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
 
 //     inst6.push_back(
@@ -1150,6 +1152,8 @@ int
 main(int argc, char** argv)
 {
     IR ir = load(argc, argv);
-    // ir.fillStructure();
+    ir.fillStructure();
+    X86Generator gen("testfile.s");
+    gen.Generate(ir);
     return 0;
 }

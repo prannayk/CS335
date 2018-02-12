@@ -46,7 +46,6 @@ enum OpCode
     // Unary control flow/special operations
     GOTO = 250,
     CALL,
-    PRINT_LONG,
     // function start and end operation
     FUNC_ST,
     FUNC_ET,
@@ -54,7 +53,7 @@ enum OpCode
     // Nullary operations
     RET = 300,
     LABEL_ST,
-    // print 
+    // print
     PRINTINT = 400,
     // null instruction as default
     NULL_IST = 1000,
