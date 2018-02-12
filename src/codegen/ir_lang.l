@@ -1,5 +1,7 @@
 /* Scanner / lexer for IR */
 %{
+#pragma once
+
 #include <math.h>
 #include "ir_lang.tab.h"
 #include <stdlib.h>
@@ -106,12 +108,13 @@ AddressingMode getMode(char* entry){
     return REGISTER;
 }
 
-void * getConst(char* entry, Type type_val){
+void* getConst(char* entry, Type type_val){
     if (type_val == INT){
         long * ptr = new long;
         *ptr = atoi(entry);
         return ptr;
     }
+    return NULL;
 }
 
 void* getEntry(char* entry, Type type_val){
@@ -136,6 +139,7 @@ Type type_parse(char* type_var){
         case 'i' : type_code = INT; break;
         case 'p' : type_code = PTR; break;
     }
+    return type_code;
 }
 
 OpCode operation(char* operation){
@@ -163,6 +167,7 @@ OpCode unary_op(char* op_string){
         case '~' : return NOT;
         case 'l' : return LNOT;
     }
+    return NULL_IST;
 }
 
 void unary_op(int flag){
@@ -483,7 +488,7 @@ void parse_pint(){
     i_list.push_back(new_inst);
 }
 
-int main (int argc, char** argv)
+IR load (int argc, char** argv)
 {
     ++argv, --argc;
     if (argc > 0)
@@ -515,5 +520,5 @@ int main (int argc, char** argv)
     for(int iter = 0; iter < i_list.size() ; iter++)
         i_list[iter].printInstruction();
     IR ir(i_list);
-    ir.fillStructure();
+    return ir;
 }

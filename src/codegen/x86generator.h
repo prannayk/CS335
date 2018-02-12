@@ -7,7 +7,12 @@
 
 #include "block.h"
 #include "enums.h"
+#include "ir.h"
+#include "ir_lang.yy.h"
 #include "registerdescriptor.h"
+
+extern IR
+load(int, char**);
 
 #define LABELPREFIX "label"
 #define OUTPUTNAME output
@@ -88,6 +93,8 @@ class X86Generator
     bool GenerateInstruction(Instruction& aInst);
     bool GenerateSimpleBlock(SimpleBlock& aSimpleBlock);
     bool GenerateComplexBlock(ComplexBlock& aComplexBlock);
+    bool GenerateDataSection(SymbolTable& aSymbolTable,
+                             SimpleBlock& aSimpleBlock);
 
     void MaybeWriteBack(Register aRegister);
     void LoadFromMemory(SymbolTableEntry* aSte);

@@ -57,12 +57,11 @@ class SymbolTableEntry
 class SymbolTable
 {
   private:
-    map<string, SymbolTableEntry*> table;
-
     SymbolTable* parentScope;
     SymbolTable* globalScope;
 
   public:
+    map<string, SymbolTableEntry*> table;
     void addEntry(SymbolTableEntry* a);
     SymbolTableEntry* getEntry(string a);
     bool checkEntry(string a);

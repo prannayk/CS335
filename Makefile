@@ -34,9 +34,10 @@ golang:
 codegen:
 	make setup
 	bison --defines=${GEN_FOLDER}ir_lang.tab.h ${GEN_FOLDER}ir_lang.y -o ${GEN_FOLDER}ir_lang.tab.c
-	flex -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
-	${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}*.cpp ${FLAGS} -o ${BIN_GEN}ir_lang.run
-	#${CLANG} ${FLAGS} ${GEN_FOLDER}*.cpp -o ${BIN_GEN}test.out
+	flex --header-file=${GEN_FOLDER}ir_lang.yy.h -o ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}ir_lang.l
+	# ${CC} ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c ${GEN_FOLDER}*.cpp ${FLAGS} -o ${BIN_GEN}ir_lang.run
+	${CLANG}  ${GEN_FOLDER}*.cpp ${GEN_FOLDER}ir_lang.tab.c ${GEN_FOLDER}ir_lang.yy.c -stdlib=libstdc++  -lfl  -std=c++17 -ggdb3
+	# ${CLANG} ${FLAGS} ${GEN_FOLDER}*.cpp ${GEN_FOLDER}*.c -o ${BIN_GEN}test.out
 
 test_codegen:
 	make codegen

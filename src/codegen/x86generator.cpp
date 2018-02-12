@@ -930,7 +930,8 @@ X86Generator::getReg(SymbolTableEntry* entry)
     /* if (r < (Register)0){ printf("Error : can not find register\n");
      * exit(EXIT_FAILURE); } */
     a = REGDESC.getRegisterSTE(r);
-    REGDESC.setRegisterSTE(r, entry);
+    entry->setReg(r);
+    // REGDESC.setRegisterSTE(r, entry);
     return a;
 }
 
@@ -992,12 +993,59 @@ X86Generator::GenerateComplexBlock(ComplexBlock& aComplexBlock)
     return true;
 }
 
+bool
+X86Generator::GenerateDataSection(SymbolTable& aSymbolTable,
+                                  SimpleBlock& aSimpleBlock)
+{
+    OUTPUTNAME << ".data" << endl;
+    vector<Instruction*>::iterator iter1;
+
+    Instruction* current;
+    SymbolTableEntry* ste;
+    for (iter1 = aSimpleBlock.instructions.begin();
+         iter1 != aSimpleBlock.instructions.end();
+         iter1++) {
+        current = *iter1;
+        if (current->getOp() != ASG ||
+            current->getV2AddMode() != CONSTANT_VAL) {
+            REPORTERR("Tried to do non constant assignment operation in global "
+                      "section");
+        }
+
+        ste = (SymbolTableEntry*)current->getV1();
+        OUTPUTNAME << ste->getName() << ":";
+        OUTPUTNAME << "\t.quad " << *(long*)(current->getV2()) << endl;
+        ste->setValid(true);
+    }
+
+    map<string, SymbolTableEntry*>::iterator iter2;
+    map<string, SymbolTableEntry*> table = aSymbolTable.table;
+    for (iter2 = table.begin(); iter2 != table.end(); iter2++) {
+        if (!(iter2->second->getValid())) {
+            OUTPUTNAME << (iter2->first) << ":";
+            OUTPUTNAME << "\t.quad 0" << endl;
+            iter2->second->setValid(true);
+        }
+    }
+    OUTPUTNAME << ("dnm2:");
+    OUTPUTNAME << "\t.quad 0" << endl;
+    OUTPUTNAME << ("dnm3:");
+    OUTPUTNAME << "\t.quad 0" << endl;
+    OUTPUTNAME << (PRINTLONGSTR) << ":";
+    OUTPUTNAME << "\t.asciz \"%ld\\n\"" << endl;
+    return true;
+}
+
 int
 main()
 {
     SymbolTableEntry* a = new SymbolTableEntry("a", INT);
     SymbolTableEntry* b = new SymbolTableEntry("b", INT);
     SymbolTableEntry* c = new SymbolTableEntry("c", INT);
+    SymbolTable st;
+    st.addEntry(a);
+    st.addEntry(b);
+    st.addEntry(c);
     long one = 1L;
     long three = 3L;
     long seven = 7L;
@@ -1015,12 +1063,14 @@ main()
     SimpleBlock mySb3(3, NULL);
     SimpleBlock mySb4(4, NULL);
     SimpleBlock mySb5(5, NULL);
+    SimpleBlock mySb6(6, NULL);
 
     vector<Instruction*> inst1;
     vector<Instruction*> inst2;
     vector<Instruction*> inst3;
     vector<Instruction*> inst4;
     vector<Instruction*> inst5;
+    vector<Instruction*> inst6;
 
     inst1.push_back(
       new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
@@ -1047,11 +1097,16 @@ main()
     inst4.push_back(new Instruction(PRINT_LONG, a, CONSTANT_VAL, INT));
     inst4.push_back(new Instruction(RET, &seven, CONSTANT_VAL, INT));
 
+    inst6.push_back(
+      new Instruction(ASG, a, &five, REGISTER, CONSTANT_VAL, INT, INT));
+    inst6.push_back(
+      new Instruction(ASG, b, &seven, REGISTER, CONSTANT_VAL, INT, INT));
     mySb1.instructions = inst1;
     mySb2.instructions = inst2;
     mySb3.instructions = inst3;
     mySb4.instructions = inst4;
     mySb5.instructions = inst5;
+    mySb6.instructions = inst6;
 
     mySb1.setNextBlock(&mySb5);
     mySb2.setNextBlock(&mySb3);
@@ -1064,6 +1119,7 @@ main()
     chaitanyaBhagwat.addBlock(&mySb3);
     chaitanyaBhagwat.addBlock(&mySb4);
 
+    gen.GenerateDataSection(st, mySb6);
     gen.GenerateComplexBlock(chaitanyaBhagwat);
 
     return 0;
