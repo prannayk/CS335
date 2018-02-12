@@ -79,8 +79,8 @@ PINT "printint"
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
-{VAR}" "*":"" "*{TYPE}" "*"="" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "roll " << endl; return UN_ASSIGNMENT; }
-{VAR}" "*":"" "*{TYPE}" "*"="" "*{UNOP}" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); cout << "here" << endl; return UN_OP; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); return UN_ASSIGNMENT; }
+{VAR}" "*":"" "*{TYPE}" "*"="" "*{UNOP}" "*({VAR}|{CONSTANT}) { yylval.str = strdup(yytext); return UN_OP; }
 {GOTO}" "*({VAR}|{CONSTANT})" "*{RELOP}" "*({VAR}|{CONSTANT})" "*"\?"" "*{VNAME} { yylval.str = strdup(yytext); return GOTOSTMT; }
 {GOTO}" "*{VNAME} { yylval.str = strdup(yytext); return GOTO; }
 {DEFINE}" "*";"" "*{VNAME}" "*";"" "*{VAR_LIST}" "*";"" "*{TYPE}" "*"@" { yylval.str = strdup(yytext); return FUNCTION_START; }
@@ -163,7 +163,6 @@ OpCode operation(char* operation){
 }
 
 OpCode unary_op(char* op_string){
-    cout << "asdasd" << op_string << endl;
     switch(op_string[0]){
         case '-' : return NEG;
         case '~' : return NOT;
@@ -397,29 +396,30 @@ void parse_return(){
 
 void parse_call(int imme){
     char* a;
-    a = strtok(yylval.str," %:.");
+    a = strtok(yylval.str," %:.=");
     int i = 0;
     char* fname;
     char* rvar, *rtype;
             while(a!=NULL){
                 switch(i){
-                    case 0 : break; 
+                    case 0 : if(imme) rvar = strdup(a); break; 
                     case 1 :
-                        if(imme) fname = strdup(a); else rvar = strdup(a); break; 
-                    case 2 : 
-                        if(!imme) rtype = strdup(a);
+                        if(imme) rtype = strdup(a); else fname = strdup(a); break; 
+                    case 2 : break;
                     case 3 : 
-                        if(!imme) fname = strdup(a);
+                        if(imme) fname = strdup(a); break;
                     default : 
                         break;
                 }
                 i++;
-                a = strtok(NULL, " %:.");
+                a = strtok(NULL, " %:.=");
             }
     Instruction* new_inst;
-    Type type = type_parse(rtype);
-    if(imme) new_inst = new Instruction(CALL, fname, CONSTANT_VAL , STRING);
-    else new_inst = new Instruction(CALL, fname, getEntry(rvar, type), CONSTANT_VAL , getMode(rvar), STRING, type, getNum(rvar)); 
+    if(!imme) new_inst = new Instruction(CALL, fname, CONSTANT_VAL , STRING);
+    else {
+        Type type = type_parse(rtype);
+        new_inst = new Instruction(CALL, fname, getEntry(rvar, type), CONSTANT_VAL , getMode(rvar), STRING, type, getNum(rvar)); 
+    }
     i_list.push_back(*new_inst);    
 }
 
