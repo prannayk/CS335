@@ -3,7 +3,7 @@
 using namespace std;
 
 X86Generator::X86Generator(const char* aFilename)
-  : OUTPUTNAME(aFilename, ios::out | ios::trunc)
+  : OUTPUTNAME1(aFilename, ios::out | ios::trunc)
   , REGDESC()
   , jumpLabel(0)
   , phantomOp2("dnm2", INT)
@@ -14,7 +14,7 @@ X86Generator::X86Generator(const char* aFilename)
 
 X86Generator::~X86Generator()
 {
-    OUTPUTNAME.close();
+    OUTPUTNAME1.close();
 }
 
 bool
@@ -857,7 +857,7 @@ X86Generator::MaybeGetRegister(SymbolTableEntry* aRegisterFor,
                                bool aLoadImmediately)
 {
     if (aRegisterFor->getReg() == NONE) {
-        SymbolTableEntry* oldSymbolForRegister = dummyGetRegister(aRegisterFor);
+        SymbolTableEntry* oldSymbolForRegister = getReg(aRegisterFor);
         assert(aRegisterFor->getReg() != NONE);
 
         // Write back if needed.

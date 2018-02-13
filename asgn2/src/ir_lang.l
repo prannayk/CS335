@@ -74,7 +74,6 @@ PINT "printint"
 %%
 
 {LABEL}" "*{VNAME} { yylval.str = strdup(yytext); return LABELSTMT; }
-{VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*\n { yylval.str = strdup(yytext); return ASSIGNMENT; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPERATION; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{VAR}" "*{OP}" "*{CONSTANT} { yylval.str = strdup(yytext); return OPIM; }
 {VAR}" "*":"" "*{TYPE}" "*"="" "*{CONSTANT}" "*{OP}" "*{VAR} { yylval.str = strdup(yytext); return OPIM; }
@@ -110,7 +109,7 @@ AddressingMode getMode(char* entry){
 
 void* getConst(char* entry, Type type_val){
     if (type_val == INT){
-        long* ptr = new long;
+        long * ptr = new long;
         *ptr = atol(entry);
         return ptr;
     }
@@ -200,7 +199,6 @@ void unary_op(int flag){
             Instruction* new_inst;
             OpCode op;
             if(!flag) op = unary_op(op_string); else op = ASG;
-            void* gE = getEntry(arg1, type_code);
             new_inst = new Instruction(op, getEntry(target, type_code), getEntry(arg1, type_code), getMode(target), getMode(arg1), type_code, type_code, getNum(target), getNum(arg1));
             i_list.push_back(*new_inst); return;
     
@@ -520,8 +518,8 @@ IR load (int argc, char** argv)
                 case PINT : parse_pint(); break;
             }
     }
-    for(int iter = 0; iter < i_list.size() ; iter++)
-        i_list[iter].printInstruction();
+    /* for(int iter = 0; iter < i_list.size() ; iter++) */
+    /*     i_list[iter].printInstruction(); */
     IR ir(i_list, &symtab);
     return ir;
 }

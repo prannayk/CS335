@@ -126,7 +126,6 @@ IR::fillStructure()
                 // cout << "Added complex with " << cb->length() << "
                 // blocks, there are now " << utilGetNumComplexBlock() <<
                 // endl;
-                cb->utilPrintSummary();
                 it++;
                 break;
             }

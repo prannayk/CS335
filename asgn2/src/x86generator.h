@@ -15,7 +15,7 @@ extern IR
 load(int, char**);
 
 #define LABELPREFIX "label"
-#define OUTPUTNAME output
+#define OUTPUTNAME cout
 #define REGDESC regDesc
 #define COMPARELABEL "cmpLabel"
 #define PRINTLONGSTR "pstr"
@@ -39,7 +39,7 @@ using namespace std;
 class X86Generator
 {
   private:
-    ofstream OUTPUTNAME;
+    ofstream OUTPUTNAME1;
     RegisterDescriptor REGDESC;
     int jumpLabel;
     Instruction currentInstruction;

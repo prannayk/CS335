@@ -154,4 +154,4 @@ Above, they were ommited for brevity.
   ret %t1
 !
 
-.label : loop
+.label loop
