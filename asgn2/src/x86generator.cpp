@@ -206,13 +206,12 @@ X86Generator::WriteInstruction(OpCode op,
             if (op1->getReg() != RAX || op2->getReg() == RDX) {
                 REPORTERR("Division registers are wrong");
             }
-            INST(xorq);
-            OUTPUTNAME << "%rdx, %rdx" << endl;
             INST(movq);
             CARG(op3);
-            LARG(op2);
+            OUTPUTNAME << "%rbx" << endl;
+            LINST(cqto);
             INST(idiv);
-            LARG(op2);
+            OUTPUTNAME << "%rbx" << endl;
             return true;
         }
 
@@ -273,8 +272,7 @@ X86Generator::WriteInstruction(OpCode op,
                 op3->getReg() == RDX) {
                 REPORTERR("Division registers error");
             }
-            INST(xorq);
-            OUTPUTNAME << "%rdx, %rdx" << endl;
+            LINST(cqto);
             INST(idiv);
             LARG(op3);
             return true;
