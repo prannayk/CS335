@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-lfl -std=c++14
-BIN=bin/
-TEST=test/
+TEST=test
+BISON_FLAGS=-d -Wconflicts-sr
 
 SRC=src
 BIN=bin
@@ -18,9 +18,12 @@ clean:
 	rm $(SRC)/golang.tab.*
 	rm $(SRC)/golang.yy.c
 
-parser parser-defines: $(SRC)/golang.y
+parser-pure:
+	python3 $(SRC)/ankit_bhardwaj.py > $(SRC)/golang.y
+
+parser parser-defines: parser-pure $(SRC)/golang.y
 	cd $(SRC); \
-	bison -d golang.y
+	bison $(BISON_FLAGS) golang.y -v
 
 lexer: parser-defines $(SRC)/golang.l
 	cd $(SRC); \

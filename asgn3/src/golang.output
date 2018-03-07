@@ -1,0 +1,588 @@
+Terminals unused in grammar
+
+   DEFAULT
+   FUNC
+   INTERFACE
+   SELECT
+   CASE
+   DEFER
+   GO
+   MAP
+   STRUCT
+   CHAN
+   ELSE
+   GOTO
+   SWITCH
+   CONST
+   FALLTHROUGH
+   IF
+   RANGE
+   TYPE
+   CONTINUE
+   FOR
+   IMPORT
+   RETURN
+   VAR
+   NIL
+   COMMENT_ST
+   COMMENT_EN
+   COMMENT_LN
+   FOLDL
+   FOLDR
+   MMAP
+   YIELD
+   APPEND
+   CAP
+   CLOSE
+   COPY
+   DELETE
+   LEN
+   MAKE
+   NEW
+   PRINT
+   PRINTLN
+   GEN
+   GENERIC_CONCAT
+   GENERIC_NAME
+   GENERIC_BNAME
+   GENERIC_LIST
+   NEWLINE
+   UNICODE_CHAR
+   UNICODE_LETTER
+   LETTER
+   DECIMAL_DIGIT
+   OCTAL_DIGIT
+   HEX_DIGIT
+   OCTAL_LIT
+   HEX_LIT
+   INT_LIT
+   DECIMALS
+   EXP
+   OCTAL_BYTE
+   HEX_BYTE
+   BYTE_VAL
+   ESCAPE
+   RAW_STRING
+   INTER_STRING
+   STRING_LIT
+   UINT8
+   UINT16
+   UINT32
+   UINT64
+   INT8
+   INT16
+   INT32
+   INT64
+   FLOAT32
+   FLOAT64
+   BYTE
+   BOOL
+   UINT
+   INT
+   UINTPTR
+   OR
+   AND
+   LE
+   LT
+   GE
+   GT
+   EQ
+   NE
+   LS
+   RS
+   NOT_AND
+   INC
+   DEC
+   DECL
+   MOD
+   BIT_OR
+   BIT_AND
+   CARET
+   NOT_OP
+   BIT_NOT
+   PTR_OP
+   AMPERSAND
+   TRUE
+   FALSE
+   REL_OP
+   ADD_OP
+   MUL_OP
+   UNARY_OP
+   BIN_OP
+   VARIADIC
+   ASSGN_OP
+   BLOCK_OPEN
+   BLOCK_CLOSE
+   DOT
+   COMMA
+   SQUARE_OPEN
+   SQUARE_CLOSE
+   BREAK
+
+
+Grammar
+
+    0 $accept: SourceFile $end
+
+    1 SourceFile: PackageClause STMTEND ImportDecls TopLevelDecls
+
+    2 PackageClause: PACKAGE ID
+
+    3 ImportDecls: ImportDecl ImportDecls
+    4            | ImportDecl
+
+    5 ImportDecl: DECIMAL_LIT STMTEND
+
+    6 TopLevelDecls: TopLevelDecl TopLevelDecls
+    7              | TopLevelDecl
+
+    8 TopLevelDecl: expression STMTEND
+
+    9 expression: term ADD expression
+   10           | term SUB expression
+   11           | term
+
+   12 term: factor STAR term
+   13     | factor DIV term
+   14     | factor
+
+   15 factor: PAREN_OPEN expression PAREN_CLOSE
+   16       | FLOAT_LIT
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+DEFAULT (1)
+FUNC (2)
+INTERFACE (3)
+SELECT (4)
+CASE (5)
+DEFER (6)
+GO (7)
+MAP (8)
+STRUCT (9)
+CHAN (10)
+ELSE (11)
+GOTO (12)
+PACKAGE (13) 2
+SWITCH (14)
+CONST (15)
+FALLTHROUGH (16)
+IF (17)
+RANGE (18)
+TYPE (19)
+CONTINUE (20)
+FOR (21)
+IMPORT (22)
+RETURN (23)
+VAR (24)
+NIL (25)
+COMMENT_ST (26)
+COMMENT_EN (27)
+COMMENT_LN (28)
+FOLDL (29)
+FOLDR (30)
+MMAP (31)
+YIELD (32)
+APPEND (33)
+CAP (34)
+CLOSE (35)
+COPY (36)
+DELETE (37)
+LEN (38)
+MAKE (39)
+NEW (40)
+PRINT (41)
+PRINTLN (42)
+GEN (43)
+GENERIC_CONCAT (44)
+GENERIC_NAME (45)
+GENERIC_BNAME (46)
+GENERIC_LIST (47)
+NEWLINE (48)
+UNICODE_CHAR (49)
+UNICODE_LETTER (50)
+LETTER (51)
+DECIMAL_DIGIT (52)
+OCTAL_DIGIT (53)
+HEX_DIGIT (54)
+ID (55) 2
+DECIMAL_LIT (56) 5
+OCTAL_LIT (57)
+HEX_LIT (58)
+INT_LIT (59)
+DECIMALS (60)
+EXP (61)
+FLOAT_LIT (62) 16
+OCTAL_BYTE (63)
+HEX_BYTE (64)
+BYTE_VAL (65)
+ESCAPE (66)
+RAW_STRING (67)
+INTER_STRING (68)
+STRING_LIT (69)
+UINT8 (70)
+UINT16 (71)
+UINT32 (72)
+UINT64 (73)
+INT8 (74)
+INT16 (75)
+INT32 (76)
+INT64 (77)
+FLOAT32 (78)
+FLOAT64 (79)
+BYTE (80)
+BOOL (81)
+UINT (82)
+INT (83)
+UINTPTR (84)
+OR (85)
+AND (86)
+LE (87)
+LT (88)
+GE (89)
+GT (90)
+EQ (91)
+NE (92)
+LS (93)
+RS (94)
+NOT_AND (95)
+INC (96)
+DEC (97)
+DECL (98)
+ADD (99) 9
+SUB (100) 10
+STAR (101) 12
+DIV (102) 13
+MOD (103)
+BIT_OR (104)
+BIT_AND (105)
+CARET (106)
+NOT_OP (107)
+BIT_NOT (108)
+PTR_OP (109)
+AMPERSAND (110)
+STMTEND (111) 1 5 8
+TRUE (112)
+FALSE (113)
+REL_OP (114)
+ADD_OP (115)
+MUL_OP (116)
+UNARY_OP (117)
+BIN_OP (118)
+VARIADIC (119)
+ASSGN_OP (120)
+PAREN_OPEN (121) 15
+PAREN_CLOSE (122) 15
+BLOCK_OPEN (123)
+BLOCK_CLOSE (124)
+DOT (125)
+COMMA (126)
+SQUARE_OPEN (127)
+SQUARE_CLOSE (128)
+BREAK (129)
+error (256)
+
+
+Nonterminals, with rules where they appear
+
+$accept (132)
+    on left: 0
+SourceFile (133)
+    on left: 1, on right: 0
+PackageClause (134)
+    on left: 2, on right: 1
+ImportDecls (135)
+    on left: 3 4, on right: 1 3
+ImportDecl (136)
+    on left: 5, on right: 3 4
+TopLevelDecls (137)
+    on left: 6 7, on right: 1 6
+TopLevelDecl (138)
+    on left: 8, on right: 6 7
+expression (139)
+    on left: 9 10 11, on right: 8 9 10 15
+term (140)
+    on left: 12 13 14, on right: 9 10 11 12 13
+factor (141)
+    on left: 15 16, on right: 12 13 14
+
+
+State 0
+
+    0 $accept: . SourceFile $end
+
+    PACKAGE  shift, and go to state 1
+
+    SourceFile     go to state 2
+    PackageClause  go to state 3
+
+
+State 1
+
+    2 PackageClause: PACKAGE . ID
+
+    ID  shift, and go to state 4
+
+
+State 2
+
+    0 $accept: SourceFile . $end
+
+    $end  shift, and go to state 5
+
+
+State 3
+
+    1 SourceFile: PackageClause . STMTEND ImportDecls TopLevelDecls
+
+    STMTEND  shift, and go to state 6
+
+
+State 4
+
+    2 PackageClause: PACKAGE ID .
+
+    $default  reduce using rule 2 (PackageClause)
+
+
+State 5
+
+    0 $accept: SourceFile $end .
+
+    $default  accept
+
+
+State 6
+
+    1 SourceFile: PackageClause STMTEND . ImportDecls TopLevelDecls
+
+    DECIMAL_LIT  shift, and go to state 7
+
+    ImportDecls  go to state 8
+    ImportDecl   go to state 9
+
+
+State 7
+
+    5 ImportDecl: DECIMAL_LIT . STMTEND
+
+    STMTEND  shift, and go to state 10
+
+
+State 8
+
+    1 SourceFile: PackageClause STMTEND ImportDecls . TopLevelDecls
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    TopLevelDecls  go to state 13
+    TopLevelDecl   go to state 14
+    expression     go to state 15
+    term           go to state 16
+    factor         go to state 17
+
+
+State 9
+
+    3 ImportDecls: ImportDecl . ImportDecls
+    4            | ImportDecl .
+
+    DECIMAL_LIT  shift, and go to state 7
+
+    $default  reduce using rule 4 (ImportDecls)
+
+    ImportDecls  go to state 18
+    ImportDecl   go to state 9
+
+
+State 10
+
+    5 ImportDecl: DECIMAL_LIT STMTEND .
+
+    $default  reduce using rule 5 (ImportDecl)
+
+
+State 11
+
+   16 factor: FLOAT_LIT .
+
+    $default  reduce using rule 16 (factor)
+
+
+State 12
+
+   15 factor: PAREN_OPEN . expression PAREN_CLOSE
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    expression  go to state 19
+    term        go to state 16
+    factor      go to state 17
+
+
+State 13
+
+    1 SourceFile: PackageClause STMTEND ImportDecls TopLevelDecls .
+
+    $default  reduce using rule 1 (SourceFile)
+
+
+State 14
+
+    6 TopLevelDecls: TopLevelDecl . TopLevelDecls
+    7              | TopLevelDecl .
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    $default  reduce using rule 7 (TopLevelDecls)
+
+    TopLevelDecls  go to state 20
+    TopLevelDecl   go to state 14
+    expression     go to state 15
+    term           go to state 16
+    factor         go to state 17
+
+
+State 15
+
+    8 TopLevelDecl: expression . STMTEND
+
+    STMTEND  shift, and go to state 21
+
+
+State 16
+
+    9 expression: term . ADD expression
+   10           | term . SUB expression
+   11           | term .
+
+    ADD  shift, and go to state 22
+    SUB  shift, and go to state 23
+
+    $default  reduce using rule 11 (expression)
+
+
+State 17
+
+   12 term: factor . STAR term
+   13     | factor . DIV term
+   14     | factor .
+
+    STAR  shift, and go to state 24
+    DIV   shift, and go to state 25
+
+    $default  reduce using rule 14 (term)
+
+
+State 18
+
+    3 ImportDecls: ImportDecl ImportDecls .
+
+    $default  reduce using rule 3 (ImportDecls)
+
+
+State 19
+
+   15 factor: PAREN_OPEN expression . PAREN_CLOSE
+
+    PAREN_CLOSE  shift, and go to state 26
+
+
+State 20
+
+    6 TopLevelDecls: TopLevelDecl TopLevelDecls .
+
+    $default  reduce using rule 6 (TopLevelDecls)
+
+
+State 21
+
+    8 TopLevelDecl: expression STMTEND .
+
+    $default  reduce using rule 8 (TopLevelDecl)
+
+
+State 22
+
+    9 expression: term ADD . expression
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    expression  go to state 27
+    term        go to state 16
+    factor      go to state 17
+
+
+State 23
+
+   10 expression: term SUB . expression
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    expression  go to state 28
+    term        go to state 16
+    factor      go to state 17
+
+
+State 24
+
+   12 term: factor STAR . term
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    term    go to state 29
+    factor  go to state 17
+
+
+State 25
+
+   13 term: factor DIV . term
+
+    FLOAT_LIT   shift, and go to state 11
+    PAREN_OPEN  shift, and go to state 12
+
+    term    go to state 30
+    factor  go to state 17
+
+
+State 26
+
+   15 factor: PAREN_OPEN expression PAREN_CLOSE .
+
+    $default  reduce using rule 15 (factor)
+
+
+State 27
+
+    9 expression: term ADD expression .
+
+    $default  reduce using rule 9 (expression)
+
+
+State 28
+
+   10 expression: term SUB expression .
+
+    $default  reduce using rule 10 (expression)
+
+
+State 29
+
+   12 term: factor STAR term .
+
+    $default  reduce using rule 12 (term)
+
+
+State 30
+
+   13 term: factor DIV term .
+
+    $default  reduce using rule 13 (term)

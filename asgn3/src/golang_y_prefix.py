@@ -1,4 +1,4 @@
-
+print('''
 %{
 #include <stdlib.h>
 #include <stdio.h>
@@ -147,64 +147,4 @@ void yyerror(const char *s);
 %token   <str>          BREAK 129
 
 %%
-
-SourceFile  :
-PackageClause STMTEND ImportDecls TopLevelDecls { cout <<"PackageClause"<< " " <<"stmtend" << " " << $2<< " " <<"ImportDecls"<< " " <<"TopLevelDecls" << endl ;}
-
-;
-PackageClause  :
-PACKAGE ID { cout <<"package" << " " << $1<< " " <<"id" << " " << $2 << endl ;}
-
-;
-ImportDecls  :
-ImportDecl ImportDecls { cout <<"ImportDecl"<< " " <<"ImportDecls" << endl ;}
-		| ImportDecl { cout <<"ImportDecl" << endl ;}
-
-;
-ImportDecl  :
-DECIMAL_LIT STMTEND { cout <<"decimal_lit" << " " << $1<< " " <<"stmtend" << " " << $2 << endl ;}
-
-;
-TopLevelDecls  :
-TopLevelDecl TopLevelDecls { cout <<"TopLevelDecl"<< " " <<"TopLevelDecls" << endl ;}
-		| TopLevelDecl { cout <<"TopLevelDecl" << endl ;}
-
-;
-TopLevelDecl  :
-expression STMTEND { cout <<"expression"<< " " <<"stmtend" << " " << $2 << endl ;}
-
-;
-expression  :
-term ADD expression { cout <<"term"<< " " <<"add" << " " << $2<< " " <<"expression" << endl ;}
-		| term SUB expression { cout <<"term"<< " " <<"sub" << " " << $2<< " " <<"expression" << endl ;}
-		| term { cout <<"term" << endl ;}
-
-;
-term  :
-factor STAR term { cout <<"factor"<< " " <<"star" << " " << $2<< " " <<"term" << endl ;}
-		| factor DIV term { cout <<"factor"<< " " <<"div" << " " << $2<< " " <<"term" << endl ;}
-		| factor { cout <<"factor" << endl ;}
-
-;
-factor  :
-PAREN_OPEN expression PAREN_CLOSE { cout <<"paren_open" << " " << $1<< " " <<"expression"<< " " <<"paren_close" << " " << $3 << endl ;}
-		| FLOAT_LIT { cout <<"float_lit" << " " << $1 << endl ;}
-
-;
-
-%%
-
-int main(int argc, char** argv) {
-	FILE *myfile = fopen(argv[1], "r");
-        yyin = myfile;
-        do {
-            yyparse();
-        } while (!feof(yyin));
-    return 0;
-}
-
-void yyerror(const char *s) {
-    printf("EEK, parse error!  Message: %s\n", s);
-    exit(-1);
-}
-
+''')
