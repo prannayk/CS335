@@ -8,8 +8,13 @@
 #include <iomanip>
 #include <set>
 #include <vector>
-extern "C" int yylex();
-#define YY_USER_ACTION ++ctr[yy_act]; 
+#define YY_DECL extern "C" int yylex()
+
+#include "golang.tab.h"  // to get the token types that we return
+
+/* extern "C" int yyparse(); */
+/* extern "C" void yyerror(const char*); */
+#define YY_USER_ACTION ++ctr[yy_act];
 
 #define NUM_TOKENS 130
 using namespace std;
@@ -400,59 +405,3 @@ SQUARE_CLOSE "]"
 
 . printf("Do not understand symbol (%s)\n", yytext);
 %%
-
-const char* tokens[] = {"PADDING", "DEFAULT", "FUNC", "INTERFACE", "SELECT", "CASE", "DEFER", "GO", "MAP", "STRUCT", "CHAN", "ELSE", "GOTO", "PACKAGE", "SWITCH", "CONST", "FALLTHROUGH", "IF", "RANGE", "TYPE", "CONTINUE", "FOR", "IMPORT", "RETURN", "VAR", "NIL", "COMMENT_ST", "COMMENT_EN", "COMMENT_LN", "FOLDL", "FOLDR", "MMAP", "YIELD", "APPEND", "CAP", "CLOSE", "COPY", "DELETE", "LEN", "MAKE", "NEW", "PRINT", "PRINTLN", "GEN", "GENERIC_CONCAT", "GENERIC_NAME", "GENERIC_BNAME", "GENERIC_LIST", "NEWLINE", "UNICODE_CHAR", "UNICODE_LETTER", "LETTER", "DECIMAL_DIGIT", "OCTAL_DIGIT", "HEX_DIGIT", "ID", "DECIMAL_LIT", "OCTAL_LIT", "HEX_LIT", "INT_LIT", "DECIMALS", "EXP", "FLOAT_LIT", "OCTAL_BYTE", "HEX_BYTE", "BYTE_VAL", "ESCAPE", "RAW_STRING", "INTER_STRING", "STRING_LIT", "UINT8", "UINT16", "UINT32", "UINT64", "INT8", "INT16", "INT32", "INT64", "FLOAT32", "FLOAT64", "BYTE", "BOOL", "UINT", "INT", "UINTPTR", "OR", "AND", "LE", "LT", "GE", "GT", "EQ", "NE", "LS", "RS", "NOT_AND", "INC", "DEC", "DECL", "ADD", "SUB", "STAR", "DIV", "MOD", "BIT_OR", "BIT_AND", "CARET", "NOT_OP", "BIT_NOT", "PTR_OP", "AMPERSAND", "STMTEND", "TRUE", "FALSE", "REL_OP", "ADD_OP", "MUL_OP", "UNARY_OP", "BIN_OP", "VARIADIC", "ASSGN_OP", "PAREN_OPEN", "PAREN_CLOSE", "BLOCK_OPEN", "BLOCK_CLOSE", "DOT", "COMMA", "SQUARE_OPEN", "SQUARE_CLOSE", "BREAK"};
-
-int main (int argc, char** argv)
-{
-    ++argv, --argc;
-    if (argc > 0)
-        yyin = fopen(argv[0], "r");
-    else
-        yyin = stdin;
-    while(1){
-        int k = yylex();
-        if(k == 0) break;
-        // printf("%s\t\t%s\t\t%d\n", tokens[k], yylval.str, k);
-        counter[k].insert(strdup(yylval.str)); 
-    }
-    int po, tempcount;
-    cout << left
-         << setfill(' ')
-         << setw(20)
-         << "Tokens"
-         << left
-         << setfill(' ')
-         << setw(20)
-         << "Occurances"
-         << left
-         << setfill(' ')
-         << setw(20)
-         << "Lexemes"
-         << endl;
-    for (po = 1; po < NUM_TOKENS; po++) {
-        if(counter[po].size() > 0) {
-            tempcount = counter[po].size();
-            set<string>::iterator it = counter[po].begin();
-            cout << left
-                 << setfill(' ')
-                 << setw(20)
-                 << tokens[po]
-                 << left
-                 << setfill(' ')
-                 << setw(20)
-                 << counter[po].size()
-                 << (*it)
-                 << endl;
-            while(tempcount > 1) {
-                 it++;
-                 tempcount--;
-                 cout << string(40, ' ')
-                      << (*it)
-                      <<endl;
-                 
-            }
-        }
-
-    }
-}

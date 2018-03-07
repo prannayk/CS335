@@ -1,6 +1,11 @@
 %{
-#define yyerror atoi
-extern "C" int yylex();
+#include <stdlib.h>
+#include <stdio.h>
+#define YY_DECL extern "C" int yylex()
+YY_DECL;
+extern "C" int yyparse();
+extern "C" FILE *yyin;
+void yyerror(const char *s);
 %}
 
 %union {
@@ -143,3 +148,17 @@ expr:   OCTAL_BYTE
             ;
 
 %%
+
+int main(int argc, char** argv) {
+	FILE *myfile = fopen(argv[1], "r");
+        yyin = myfile;
+        do {
+            yyparse();
+        } while (!feof(yyin));
+    return 0;
+}
+
+void yyerror(const char *s) {
+    printf("EEK, parse error!  Message: %s\n", s);
+    exit(-1);
+}
