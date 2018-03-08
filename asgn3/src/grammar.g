@@ -10,6 +10,7 @@ ImportDecls:
 
 ImportDecl:
     IMPORT ID STMTEND
+    %
 
 TopLevelDecls:
     TopLevelDecl TopLevelDecls
@@ -17,6 +18,7 @@ TopLevelDecls:
 
 TopLevelDecl:
     expression STMTEND
+    %
 
 expression:
     term ADD expression

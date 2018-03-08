@@ -11,6 +11,8 @@ def source_to_rules(filename):
             pipes = []
         elif (line.strip())[-1] == ":":
             rule.append(line[:-2])
+        elif (line.strip())[-1] == "%":
+            pipes.append("")
         else:
             pipes.append(line.strip())
     return rules
@@ -38,7 +40,7 @@ for key, value in rules:
         if pipe != "":
             p_stmt.append(pipe + " { cout <<" + '<< " " <<'.join(vat_new) + " << endl ;}\n")
         else:
-            p_stmt.append(pipe)
+            p_stmt.append("/* Empty Rule */")
     print("\t\t| ".join(p_stmt))
     print(";")
 
