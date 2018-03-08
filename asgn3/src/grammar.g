@@ -3,7 +3,6 @@ StartSymbol:
 
 Block:
     BLOCK_OPEN StatementList BLOCK_CLOSE
-    VarDecl
 
 StatementList:
     Statement STMTEND StatementList
@@ -11,6 +10,8 @@ StatementList:
 
 Statement:
     SimpleStmt
+    IfStmt
+    ForStmt
 
 SimpleStmt:
     EmptyStmt
@@ -19,6 +20,44 @@ SimpleStmt:
 
 EmptyStmt:
     %
+
+IfStmt:
+    IF Expression Block
+    IF SimpleStmt STMTEND Expression Block
+    IF Expression Block ELSE IfStmt
+    IF SimpleStmt STMTEND Expression Block ELSE IfStmt
+    IF Expression Block ELSE Block
+    IF SimpleStmt STMTEND Expression Block ELSE Block
+
+ForStmt:
+    FOR Block
+    FOR Condition Block
+    FOR ForClause Block
+    FOR RangeClause Block
+
+Condition:
+    Expression
+
+ForClause:
+    STMTEND STMTEND
+    InitStmt STMTEND STMTEND
+    STMTEND Condition STMTEND
+    InitStmt STMTEND Condition STMTEND
+    STMTEND STMTEND PostStmt
+    InitStmt STMTEND STMTEND PostStmt
+    STMTEND Condition STMTEND PostStmt
+    InitStmt STMTEND Condition STMTEND PostStmt
+
+InitStmt:
+    SimpleStmt
+
+PostStmt:
+    SimpleStmt
+
+RangeClause:
+    RANGE Expression
+    ExpressionList ASSGN_OP RANGE Expression
+    IdentifierList DECL RANGE Expression
 
 ExpressionStmt:
     Expression
@@ -128,4 +167,7 @@ VarDecl:
 VarDeclHelp:
     VarSpec STMTEND VarDeclHelp
     %
+
+ShortVarDecl:
+    IdentifierList DECL ExpressionList
 

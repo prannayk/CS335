@@ -265,37 +265,6 @@ SQUARE_CLOSE "]"
 {GEN} { yylval.str = strdup(yytext);
           return GEN; }
 
-{UINT8} { yylval.str = strdup(yytext);
-          return UINT8; }
-{UINT16} { yylval.str = strdup(yytext);
-          return UINT16; }
-{UINT32} { yylval.str = strdup(yytext);
-          return UINT32; }
-{UINT64} { yylval.str = strdup(yytext);
-          return UINT64; }
-{INT8} { yylval.str = strdup(yytext);
-          return INT8; }
-{INT16} { yylval.str = strdup(yytext);
-          return INT16; }
-{INT32} { yylval.str = strdup(yytext);
-          return INT32; }
-{INT64} { yylval.str = strdup(yytext);
-          return INT64; }
-{FLOAT32} { yylval.str = strdup(yytext);
-          return FLOAT32; }
-{FLOAT64} { yylval.str = strdup(yytext);
-          return FLOAT64; }
-{BYTE} { yylval.str = strdup(yytext);
-          return BYTE; }
-{BOOL} { yylval.str = strdup(yytext);
-          return BOOL; }
-{UINT} { yylval.str = strdup(yytext);
-          return UINT; }
-{INT} { yylval.str = strdup(yytext);
-          return INT; }
-{UINTPTR} { yylval.str = strdup(yytext);
-          return UINTPTR; }
-
 {TRUE} { yylval.str = strdup(yytext);
           return TRUE; }
 {FALSE} { yylval.str = strdup(yytext);
