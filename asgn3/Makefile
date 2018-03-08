@@ -8,7 +8,7 @@ BIN=bin
 
 .PHONY: all clean setup pogo lexer parser parser-defines
 
-all: pogo
+all: parser-pure pogo
 
 setup:
 	mkdir -p $(BIN)

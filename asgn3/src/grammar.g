@@ -1,34 +1,37 @@
-SourceFile:
-    PackageClause STMTEND ImportDecls TopLevelDecls
-
-PackageClause:
-    PACKAGE ID
-
-ImportDecls:
-    ImportDecl ImportDecls
+RMBlockStmt:
+    SimpleStmt RMBlockStmt
     %
 
-ImportDecl:
-    IMPORT ID STMTEND
+SimpleStmt:
+    EmptyStmt
+    ExpressionStmt
+    Assignment
 
-TopLevelDecls:
-    TopLevelDecl TopLevelDecls
-    %
+EmptyStmt:
+    STMTEND 
 
-TopLevelDecl:
-    expression STMTEND
+ExpressionStmt:
+    Expression STMTEND
 
-expression:
-    term ADD expression
-    term SUB expression
-    term
+Assignment:
+    Expression ExpressionBuild Expression STMTEND
 
-term:
-    factor STAR term
-    factor DIV term
-    factor
+ExpressionBuild:
+    ASSGN_OP
+    COMMA Expression ExpressionBuild Expression COMMA
 
-factor:
-    PAREN_OPEN expression PAREN_CLOSE
+Expression:
+    Term ADD Expression
+    Term SUB Expression
+    Term
+
+Term:
+    Factor STAR Term
+    Factor DIV Term
+    Factor
+
+Factor:
+    PAREN_OPEN Expression PAREN_CLOSE
     FLOAT_LIT
+    ID
 
