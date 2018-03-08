@@ -6,19 +6,17 @@ PackageClause:
 
 ImportDecls:
     ImportDecl ImportDecls
-    ImportDecl
+    %
 
 ImportDecl:
     IMPORT ID STMTEND
-    %
 
 TopLevelDecls:
     TopLevelDecl TopLevelDecls
-    TopLevelDecl
+    %
 
 TopLevelDecl:
     expression STMTEND
-    %
 
 expression:
     term ADD expression

@@ -12,8 +12,13 @@ extern "C" FILE *yyin;
 void yyerror(const char *s);
 %}
 
+%code requires {
+    #include "Node.h"
+}
+
 %union {
     char* str;
+    Node* nt;
 };
 
 %token   <str>          DEFAULT 1
@@ -146,5 +151,4 @@ void yyerror(const char *s);
 %token   <str>          SQUARE_CLOSE 128
 %token   <str>          BREAK 129
 
-%%
 ''')

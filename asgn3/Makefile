@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-lfl -std=c++14
-TEST=test
-BISON_FLAGS=-d -Wconflicts-sr
+TESTS=tests
+BISON_FLAGS=-d
 
 SRC=src
 BIN=bin
@@ -31,4 +31,10 @@ lexer: parser-defines $(SRC)/golang.l
 	flex -o golang.yy.c golang.l
 
 pogo: lexer parser setup
-	$(CC) $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(FLAGS) -o $(BIN)/executable
+	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(FLAGS) -o $(BIN)/executable
+
+test: pogo
+	for number in {1..1} ; do \
+		echo "Testing with $$number.go"; \
+		$(BIN)/executable $(TESTS)/$$number.go; \
+	done
