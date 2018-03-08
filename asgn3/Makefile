@@ -9,6 +9,7 @@ BIN=bin
 .PHONY: all clean setup pogo lexer parser parser-defines
 
 all: parser-pure pogo
+	make render_one
 
 setup:
 	mkdir -p $(BIN)
@@ -39,5 +40,5 @@ test: pogo
 		$(BIN)/executable $(TESTS)/$$number.go; \
 	done
 
-render_one: pogo
+render_one: 
 	$(BIN)/executable $(TESTS)/1.gop 1> /dev/null 2> $(SRC)/display/data.js

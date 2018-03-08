@@ -23,7 +23,6 @@ def source_to_rules(filename):
 rules, list_of_non_terminals = source_to_rules("grammar.g")
 
 import golang_y_prefix
-
 print('\n'.join(['%type\t\t<nt>\t\t' + x for x in list_of_non_terminals]))
 print("%%")
 

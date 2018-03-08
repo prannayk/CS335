@@ -105,37 +105,16 @@ void yyerror(const char *s);
 %token   <str>          UINT 82
 %token   <str>          INT 83
 %token   <str>          UINTPTR 84
-%token   <str>          OR 85
-%token   <str>          AND 86
-%token   <str>          LE 87
-%token   <str>          LT 88
-%token   <str>          GE 89
-%token   <str>          GT 90
-%token   <str>          EQ 91
-%token   <str>          NE 92
-%token   <str>          LS 93
-%token   <str>          RS 94
-%token   <str>          NOT_AND 95
 %token   <str>          INC 96
 %token   <str>          DEC 97
 %token   <str>          DECL 98
-%token   <str>          ADD 99
-%token   <str>          SUB 100
-%token   <str>          STAR 101
-%token   <str>          DIV 102
-%token   <str>          MOD 103
-%token   <str>          BIT_OR 104
-%token   <str>          BIT_AND 105
-%token   <str>          CARET 106
-%token   <str>          NOT_OP 107
-%token   <str>          BIT_NOT 108
 %token   <str>          PTR_OP 109
-%token   <str>          AMPERSAND 110
 %token   <str>          STMTEND 111
 %token   <str>          TRUE 112
 %token   <str>          FALSE 113
 %token   <str>          REL_OP 114
 %token   <str>          ADD_OP 115
+%token   <str>          NOT_OP
 %token   <str>          MUL_OP 116
 %token   <str>          UNARY_OP 117
 %token   <str>          BIN_OP 118
@@ -152,4 +131,31 @@ void yyerror(const char *s);
 %token   <str>          BREAK 129
 %token   <str>          COLON 130
 
+%left <str> STAR DIV MOD LS RS AMPERSAND NOT_AND
+%right <str> CARET
+%left <str> ADD SUB BIT_OR
+%left <str> EQ NE GE GT LE LT
+%left <str> AND
+%left <str> OR
+
 ''')
+
+'''
+
+%right CARET
+%left ADD SUB BIT_OR
+%left EQ NE GE GT LE LT
+%left AND
+%left OR
+%token   <str>          OR 85
+%token   <str>          AND 86
+%token   <str>          LE 87
+%token   <str>          LT 88
+%token   <str>          GE 89
+%token   <str>          GT 90
+%token   <str>          EQ 91
+%token   <str>          NE 92
+%token   <str>          LS 93
+%token   <str>          RS 94
+%token   <str>          NOT_AND 95
+'''
