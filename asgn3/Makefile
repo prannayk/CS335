@@ -19,7 +19,8 @@ clean:
 	rm $(SRC)/golang.yy.c
 
 parser-pure:
-	python3 $(SRC)/ankit_bhardwaj.py > $(SRC)/golang.y
+	cd $(SRC); \
+	python3 ankit_bhardwaj.py > golang.y
 
 parser parser-defines: parser-pure $(SRC)/golang.y
 	cd $(SRC); \

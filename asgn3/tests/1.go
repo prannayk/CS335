@@ -1,7 +1,5 @@
 package chicken;
-345345;
-34534534;
-3433;
-3453;
+import x;
+import z;
 5.2;
 5.3+65.2;
