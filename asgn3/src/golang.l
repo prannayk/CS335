@@ -141,6 +141,7 @@ NOT_AND "&^"
 INC "++"
 DEC "--"
 DECL ":="
+COLON ":"
 ADD "+"
 SUB "-"
 STAR "*"
@@ -155,9 +156,14 @@ STMTEND ";"
 TRUE true
 FALSE false
 
+REL_OP  {EQ}|{NE}|{GE}|{GT}|{LE}|{LT}
+ADD_OP {ADD}|{SUB}|{BIT_OR}|{CARET}
+MUL_OP {STAR}|{DIV}|{MOD}|{LS}|{RS}|{AMPERSAND}|{NOT_AND}
+UNARY_OP {ADD}|{SUB}|{NOT_OP}|{CARET}|{STAR}|{AMPERSAND}
+BIN_OP {OR}|{AND}|{REL_OP}|{ADD_OP}|{MUL_OP}
 
 VARIADIC "..."
-ASSGN_OP "="
+ASSGN_OP ({ADD_OP}|{MUL_OP})?"="
 
 PAREN_OPEN "("
 PAREN_CLOSE ")"
@@ -177,6 +183,8 @@ SQUARE_CLOSE "]"
           return DEFAULT; }
 {FUNC} { yylval.str = strdup(yytext);
           return FUNC; }
+{COLON} { yylval.str = strdup(yytext);
+          return COLON; }
 {INTERFACE} { yylval.str = strdup(yytext);
           return INTERFACE; }
 {SELECT} { yylval.str = strdup(yytext);

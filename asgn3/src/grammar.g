@@ -20,18 +20,53 @@ ExpressionBuild:
     ASSGN_OP
     COMMA Expression ExpressionBuild Expression COMMA
 
-Expression:
-    Term ADD Expression
-    Term SUB Expression
-    Term
+Operand:
+    Literal
+    OperandName
 
-Term:
-    Factor STAR Term
-    Factor DIV Term
-    Factor
-
-Factor:
-    PAREN_OPEN Expression PAREN_CLOSE
-    FLOAT_LIT
+OperandName:
     ID
+
+Literal:
+    BasicLit
+
+BasicLit:
+    DECIMAL_LIT
+    FLOAT_LIT
+    STRING_LIT
+
+LiteralValue:
+    BLOCK_OPEN BLOCK_CLOSE
+    BLOCK_OPEN ElementLists BLOCK_CLOSE
+    BLOCK_OPEN ElementList COMMA BLOCK_CLOSE
+
+ElementList:
+    KeyedElement KeyedElements
+
+KeyedElements:
+    COMMA KeyedElement KeyedElements
+    %
+
+KeyedElement:
+    Element
+    Key  Element
+
+Key:
+    FieldName
+    Expression
+    LiteralValue
+
+FieldName:
+    ID
+
+PrimaryExpr:
+    Operand
+
+UnaryExpr:
+    UNARY_OP UnaryExpr
+    PrimaryExpr
+
+Expression:
+    Expression BIN_OP Expression
+    UnaryExpr
 

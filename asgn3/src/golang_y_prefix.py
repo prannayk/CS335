@@ -150,5 +150,6 @@ void yyerror(const char *s);
 %token   <str>          SQUARE_OPEN 127
 %token   <str>          SQUARE_CLOSE 128
 %token   <str>          BREAK 129
+%token   <str>          COLON 130
 
 ''')
