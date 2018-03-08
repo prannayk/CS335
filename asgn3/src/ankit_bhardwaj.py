@@ -52,7 +52,8 @@ for key, value in rules:
             p_stmt.append(stmt)
             # p_stmt.append(pipe + " { " + '\n'.join(stmt_list) + "cout <<" + '<< " " <<'.join(vat_new) + " << endl ; }\n")
         else:
-            p_stmt.append("/* Empty Rule */ {" + stmt_list[0] + "}")
+            stmt_list.append('$$->Add({});'.format('""'))
+            p_stmt.append("/* Empty Rule */ {" + '\n'.join(stmt_list) + "}")
     print("\t\t| ".join(p_stmt))
     print(";")
 

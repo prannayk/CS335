@@ -24,12 +24,11 @@ Node::Node(string aMatched, Type aType)
 void
 Node::Print()
 {
-    cout << this->matched << " : [";
+    cout << "{ \"name\" : \"" << this->matched << "\", \"children\" : [";
     for (int i = 0; i < this->children.size(); ++i) {
         this->children[i]->Print();
-        cout << "," << endl;
     }
-    cout << "]" << endl;
+    cout << "]}," << endl;
 }
 
 // int
