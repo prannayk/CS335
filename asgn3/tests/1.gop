@@ -1,6 +1,6 @@
 {
 
-       for 34 = range 3 {
-           67;
-                       };
+       for x := range 3 {
+           67
+                       }
 }

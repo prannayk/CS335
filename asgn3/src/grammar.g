@@ -1,5 +1,5 @@
 StartSymbol:
-    Block
+    Block STMTEND
 
 Block:
     BLOCK_OPEN StatementList BLOCK_CLOSE
