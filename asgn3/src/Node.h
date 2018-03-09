@@ -22,4 +22,5 @@ class Node
     Node* Add(Node* aNode);
     Node* Add(string str);
     void Print();
+    void PrintJS();
 };

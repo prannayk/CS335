@@ -24,7 +24,7 @@ function printCurrent(derivs, index) {
     str += "⇒ <br>";
 }
 
-let currDerivation = [data];
+let currDerivation = data;
 
 while (!currDerivation.every(isTerminal)) {
   let rIndex;

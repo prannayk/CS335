@@ -35,6 +35,9 @@ pogo: lexer parser setup
 
 test: pogo
 	for number in {1..1} ; do \
-		echo "Testing with $$number.go"; \
+		echo "Testing with $$number.gop"; \
 		$(BIN)/executable $(TESTS)/$$number.go; \
 	done
+
+render_one: pogo
+	$(BIN)/executable $(TESTS)/1.gop 1> /dev/null 2> $(SRC)/display/data.js

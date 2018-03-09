@@ -24,13 +24,20 @@ Node::Node(string aMatched, Type aType)
 void
 Node::Print()
 {
-    cout << "{ \"name\" : \"" << this->matched << "\", \"children\" : [";
+    cerr << "{ \"name\" : \"" << this->matched << "\", \"children\" : [";
     for (int i = 0; i < this->children.size(); ++i) {
         this->children[i]->Print();
     }
-    cout << "]}," << endl;
+    cerr << "]}," << endl;
 }
 
+void
+Node::PrintJS()
+{
+    cerr << "const data = [";
+    this->Print();
+    cerr << "];";
+}
 // int
 // main()
 // {

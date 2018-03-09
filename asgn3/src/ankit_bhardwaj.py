@@ -48,6 +48,8 @@ for key, value in rules:
             stmt = pipe
             stmt += "{"
             stmt += '\n'.join(stmt_list)
+            if key == "StartSymbol":
+                stmt += '$$->PrintJS();'
             stmt += "cout <<" + '<< " " <<'.join(vat_new) + " << endl ;}\n"
             p_stmt.append(stmt)
             # p_stmt.append(pipe + " { " + '\n'.join(stmt_list) + "cout <<" + '<< " " <<'.join(vat_new) + " << endl ; }\n")

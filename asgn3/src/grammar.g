@@ -1,3 +1,6 @@
+StartSymbol:
+    RMBlockStmt
+
 RMBlockStmt:
     SimpleStmt RMBlockStmt
     %
