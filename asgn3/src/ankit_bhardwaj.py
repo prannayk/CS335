@@ -38,6 +38,7 @@ for key, value in rules:
         for vat in pipe.split():
             index += 1
             if vat[0] == "%":
+                vat_new.append('" "')
                 break
             stmt_list.append('$$->Add(${});'.format(index))
             if vat.upper() == vat:

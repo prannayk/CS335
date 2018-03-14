@@ -4,3 +4,7 @@ var x, y, z float
 const (x, y, z int = 45, 45, 45+90
     k, l, m float = x + x, y * 2, -z
     )
+type MyType int
+func (x MyType)  myFunc(x, y int, z MyTypiiie) (x, y int) {
++
+}
