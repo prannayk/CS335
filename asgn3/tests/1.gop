@@ -1,6 +1,6 @@
-{
-
-       for x := range 3 {
-           67
-                       }
-}
+package main
+const x int = t[9:6:-1]
+var x, y, z float
+const (x, y, z int = 45, 45, 45+90
+    k, l, m float = x + x, y * 2, -z
+    )

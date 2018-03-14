@@ -1,123 +1,73 @@
 StartSymbol:
-    Block STMTEND
+    SourceFile
 
-Block:
-    BLOCK_OPEN StatementList BLOCK_CLOSE
+SourceFile:
+    Package Imports DeclarationList
 
-StatementList:
-    Statement STMTEND StatementList
+Package:
+    PACKAGE ID STMTEND
+
+Imports:
     %
+    Imports Import STMTEND
 
-Statement:
-    SimpleStmt
-    IfStmt
-    ForStmt
+Import:
+    IMPORT ImportStatement
+    IMPORT PAREN_OPEN ImportStatementList Ostmtend PAREN_CLOSE
+    IMPORT PAREN_OPEN PAREN_CLOSE
 
-SimpleStmt:
-    EmptyStmt
-    ExpressionStmt
-    Assignment
-
-EmptyStmt:
-    %
-
-IfStmt:
-    IF Expression Block
-    IF SimpleStmt STMTEND Expression Block
-    IF Expression Block ELSE IfStmt
-    IF SimpleStmt STMTEND Expression Block ELSE IfStmt
-    IF Expression Block ELSE Block
-    IF SimpleStmt STMTEND Expression Block ELSE Block
-
-ForStmt:
-    FOR Block
-    FOR Condition Block
-    FOR ForClause Block
-    FOR RangeClause Block
-
-Condition:
-    Expression
-
-ForClause:
-    STMTEND STMTEND
-    InitStmt STMTEND STMTEND
-    STMTEND Condition STMTEND
-    InitStmt STMTEND Condition STMTEND
-    STMTEND STMTEND PostStmt
-    InitStmt STMTEND STMTEND PostStmt
-    STMTEND Condition STMTEND PostStmt
-    InitStmt STMTEND Condition STMTEND PostStmt
-
-InitStmt:
-    SimpleStmt
-
-PostStmt:
-    SimpleStmt
-
-RangeClause:
-    RANGE Expression
-    ExpressionList ASSGN_OP RANGE Expression
-    IdentifierList DECL RANGE Expression
-
-ExpressionStmt:
-    Expression
-
-Assignment:
-    Expression ExpressionBuild Expression 
-
-ExpressionBuild:
-    ASSGN_OP
-    COMMA Expression ExpressionBuild Expression COMMA
-
-Operand:
-    Literal
-    OperandName
-
-OperandName:
+ImportStatement:
     ID
 
-Literal:
-    BasicLit
+ImportStatementList:
+    ImportStatement
+    ImportStatementList STMTEND ImportStatement
 
-BasicLit:
-    DECIMAL_LIT
-    FLOAT_LIT
-    STRING_LIT
-
-LiteralValue:
-    BLOCK_OPEN BLOCK_CLOSE
-    BLOCK_OPEN ElementList BLOCK_CLOSE
-    BLOCK_OPEN ElementList COMMA BLOCK_CLOSE
-
-ElementList:
-    KeyedElement KeyedElements
-
-KeyedElements:
-    COMMA KeyedElement KeyedElements
+Ostmtend:
     %
+    STMTEND
 
-KeyedElement:
-    Element
-    Key Element
+DeclarationList:
+    %
+    DeclarationList Declaration STMTEND
 
-Element:
-    Expression
-    LiteralValue
+Declaration:
+    CommonDeclaration
 
-Key:
-    FieldName
-    Expression
-    LiteralValue
+CommonDeclaration:
+    VAR VarDeclaration
+    VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE
+    VAR PAREN_OPEN PAREN_CLOSE
+    CONST ConstDeclaration
+    CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE
+    CONST PAREN_OPEN PAREN_CLOSE
 
-FieldName:
+VarDeclaration:
+    DeclarationNameList ASSGN_OP ExpressionList
+    DeclarationNameList TypeName
+    DeclarationNameList TypeName ASSGN_OP ExpressionList
+
+ConstDeclaration:
+    DeclarationNameList ASSGN_OP ExpressionList
+    DeclarationNameList TypeName ASSGN_OP ExpressionList
+
+DeclarationNameList:
+    DeclarationName
+    DeclarationNameList COMMA DeclarationName
+
+DeclarationName:
     ID
 
-PrimaryExpr:
-    Operand
+TypeName:
+    ID
 
-UnaryExpr:
-    UNARY_OP UnaryExpr
-    PrimaryExpr
+VarDeclarationList:
+    VarDeclarationList STMTEND VarDeclaration
+    VarDeclaration
+
+ConstDeclarationList:
+    ConstDeclaration
+    ConstDeclarationList STMTEND ConstDeclaration
 
 Expression:
     Expression STAR Expression
@@ -133,41 +83,80 @@ Expression:
     Expression CARET Expression
     Expression AND Expression
     Expression OR Expression
+    Expression EQ Expression
+    Expression NE Expression
+    Expression GE Expression
+    Expression GT Expression
+    Expression LE Expression
+    Expression LT Expression
     UnaryExpr
 
-Type:
-    TypeName
+OExpression:
+    %
+    Expression
 
-TypeName:
+UnaryExpr:
+    STAR UnaryExpr
+    AMPERSAND UnaryExpr
+    ADD UnaryExpr
+    SUB UnaryExpr
+    NOT_OP UnaryExpr
+    PrimaryExpr
+
+PrimaryExpr:
+    PrimaryExprNoParen
+    PAREN_OPEN ExpressionOrType PAREN_CLOSE
+
+ExpressionOrType:
+    Expression
+    NonExpressionType
+
+PrimaryExprNoParen:
+    Name
+    Literal
+    PrimaryExpr DOT ID
+    PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE
+    PrimaryExpr DOT PAREN_OPEN TypeName PAREN_OPEN
+    PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE
+    PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE
+    PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE
+
+NonExpressionType:
+    // FunctionType
+    OtherType
+    STAR NonExpressionType
+
+OtherType:
+    SQUARE_OPEN SQUARE_CLOSE
+
+// FunctionType:
+    // FUNC PAREN_OPEN
+    //
+NewName:
     ID
 
+DeclName:
+    ID
+
+ONewName:
+    %
+    NewName
+
+Name:
+    ID %prec NotParen
+
 ExpressionList:
-    Expression ExpressionListHelp
+    Expression
+    ExpressionList COMMA Expression
 
-ExpressionListHelp:
+OExpressionList:
     %
-    COMMA Expression ExpressionListHelp
+    ExpressionList
 
-IdentifierList:
-    ID IdentifierListHelp
-
-IdentifierListHelp:
-    %
-    COMMA ID IdentifierListHelp
-
-VarSpec:
-    IdentifierList Type
-    IdentifierList Type ASSGN_OP ExpressionList
-    IdentifierList ASSGN_OP ExpressionList
-
-VarDecl:
-    VAR VarSpec
-    VAR PAREN_OPEN VarDeclHelp PAREN_CLOSE
-
-VarDeclHelp:
-    VarSpec STMTEND VarDeclHelp
-    %
-
-ShortVarDecl:
-    IdentifierList DECL ExpressionList
+Literal:
+    RAW_STRING
+    INTER_STRING
+    DECIMAL_LIT
+    OCTAL_LIT
+    HEX_LIT
 

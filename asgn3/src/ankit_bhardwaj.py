@@ -10,6 +10,8 @@ def source_to_rules(filename):
             rules.append(rule)
             rule = []
             pipes = []
+        elif (line.strip())[0] == "/":
+            continue
         elif (line.strip())[-1] == ":":
             rule.append(line[:-2])
             list_of_non_terminals.append(line[:-2])
@@ -35,6 +37,8 @@ for key, value in rules:
         vat_new = []
         for vat in pipe.split():
             index += 1
+            if vat[0] == "%":
+                break
             stmt_list.append('$$->Add(${});'.format(index))
             if vat.upper() == vat:
                 # Terminal

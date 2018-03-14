@@ -138,6 +138,10 @@ void yyerror(const char *s);
 %left <str> AND
 %left <str> OR
 
+%left NotParen
+
+%error-verbose
+
 ''')
 
 '''

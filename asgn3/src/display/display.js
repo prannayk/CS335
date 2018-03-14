@@ -15,13 +15,16 @@ function printCurrent(derivs, index) {
     if (isTerminal(term)) {
       if (term.name === "") continue;
       str += " <span class='terminal'>" + term.name + "</span> ";
+      if (term.name == ";") {
+        str += "<br>";
+      }
       continue;
     }
 
     str += " <span class='var'>" + term.name + "</span> ";
   }
   if (index >= 0)
-    str += "⇒ <br>";
+    str += "<br><br>";
 }
 
 let currDerivation = data;
