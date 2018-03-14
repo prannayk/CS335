@@ -1,7 +1,7 @@
 CC=g++
 FLAGS=-lfl -std=c++14
 TESTS=tests
-BISON_FLAGS=-d -Wall
+BISON_FLAGS=-d -Wall -v
 
 SRC=src
 BIN=bin

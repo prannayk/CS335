@@ -138,9 +138,12 @@ void yyerror(const char *s);
 %left <str> AND
 %left <str> OR
 
-%left NotParen
-
 %error-verbose
+%glr-parser
+
+// Note:
+// There is a Shift Reduce conflict due to DotName and PrimaryExpr
+// But the correct resolution is provided by bison (shifting, which leads to dotname)
 
 ''')
 

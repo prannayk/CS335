@@ -1,10 +1,10 @@
 package main
-const x int = t[9:6:-1]
-var x, y, z float
-const (x, y, z int = 45, 45, 45+90
-    k, l, m float = x + x, y * 2, -z
-    )
-type MyType int
-func (x MyType)  myFunc(x, y int, z MyTypiiie) (x, y int) {
-+
+func (x MyType)  myFunc(x, y int, z MyTypiiie) a.B {
+     if x == 4 {
+       y = 3
+     } else if x > 4 {
+       y[i] = 3
+     } else {
+       *y = 4
+     }
 }

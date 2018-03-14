@@ -93,9 +93,9 @@ NewNameList:
     NewNameList COMMA NewName
 
 TypeName:
-    FunctionType
-    PointerType
-    OtherType
+    // FunctionType
+    // PointerType
+    // OtherType
     DotName
     PAREN_OPEN TypeName PAREN_CLOSE
 
@@ -159,27 +159,29 @@ ExpressionOrType:
     Expression
     NonExpressionType
 
+DotName:
+    Name
+    Name DOT ID %prec DotNamePrec
+
 PrimaryExprNoParen:
     Name
     Literal
-    PrimaryExpr DOT ID
+    PrimaryExpr DOT ID %prec DotNamePrec
     PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE
-    PrimaryExpr DOT PAREN_OPEN TypeName PAREN_OPEN
+    // ID here is predefined types
+    PrimaryExpr DOT PAREN_OPEN ID PAREN_OPEN
     PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE
 
 NonExpressionType:
-    // FunctionType
+    FunctionType
     OtherType
     STAR NonExpressionType
 
 OtherType:
     SQUARE_OPEN SQUARE_CLOSE
 
-// FunctionType:
-    // FUNC PAREN_OPEN
-    //
 NewName:
     ID
 
@@ -191,7 +193,7 @@ ONewName:
     NewName
 
 Name:
-    ID
+    ID %prec NotParen
 
 ExpressionList:
     Expression
@@ -231,6 +233,7 @@ FunctionType:
     FUNC PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
 
 FunctionResult:
+    // %prec NotParen
     %
     FunctionReturnType
     PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE
@@ -240,12 +243,8 @@ FunctionReturnType:
     OtherType
     DotName
 
-DotName:
-    Name
-    Name DOT ID
-
 FunctionBody:
-    BLOCK_OPEN ADD STMTEND BLOCK_CLOSE
+    CompoundStatement
 
 OArgumentTypeListOComma:
     %
@@ -268,4 +267,54 @@ NameOrType:
 OComma:
     COMMA
     %
+
+// Statements
+OSimpleStatement:
+    %
+    SimpleStatement
+
+SimpleStatement:
+    Expression
+    ExpressionList ASSGN_OP ExpressionList
+    ExpressionList COLON ExpressionList
+    Expression INC
+    Expression DEC
+
+CompoundStatement:
+    BLOCK_OPEN StatementList BLOCK_CLOSE
+
+StatementList:
+    Statement
+    StatementList STMTEND Statement
+
+Statement:
+    %
+    CompoundStatement
+    CommonDeclaration
+    NonDeclarationStatement
+
+NonDeclarationStatement:
+    SimpleStatement
+    IfStatement
+
+IfStatement:
+    IF IfHeader LoopBody ElseIfList Else
+
+ElseIf:
+    ELSE IF IfHeader LoopBody
+
+ElseIfList:
+    %
+    ElseIfList ElseIf
+
+Else:
+    %
+    ELSE CompoundStatement
+
+LoopBody:
+    BLOCK_OPEN StatementList BLOCK_CLOSE
+
+IfHeader:
+    OSimpleStatement
+    OSimpleStatement STMTEND OSimpleStatement
 
