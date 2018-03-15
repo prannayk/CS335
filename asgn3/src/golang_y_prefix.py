@@ -46,6 +46,7 @@ void yyerror(const char *s);
 %token   <str>          RETURN 23
 %token   <str>          VAR 24
 %token   <str>          NIL 25
+%token   <str>          AS
 %token   <str>          COMMENT_ST 26
 %token   <str>          COMMENT_EN 27
 %token   <str>          COMMENT_LN 28
@@ -128,6 +129,8 @@ void yyerror(const char *s);
 %token   <str>          COMMA 126
 %token   <str>          SQUARE_OPEN 127
 %token   <str>          SQUARE_CLOSE 128
+%token   <str>          SQ_PIPE_OPEN
+%token   <str>          SQ_PIPE_CLOSE
 %token   <str>          BREAK 129
 %token   <str>          COLON 130
 
@@ -139,11 +142,6 @@ void yyerror(const char *s);
 %left <str> OR
 
 %error-verbose
-%glr-parser
-
-// Note:
-// There is a Shift Reduce conflict due to DotName and PrimaryExpr
-// But the correct resolution is provided by bison (shifting, which leads to dotname)
 
 ''')
 

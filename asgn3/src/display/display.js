@@ -15,7 +15,7 @@ function printCurrent(derivs, index) {
     if (isTerminal(term)) {
       if (term.name === "") continue;
       str += " <span class='terminal'>" + term.name + "</span> ";
-      if (term.name == ";") {
+      if (term.name === ";" || term.name === "{") {
         str += "<br>";
       }
       continue;

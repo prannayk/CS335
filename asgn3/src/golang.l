@@ -50,6 +50,7 @@ IMPORT import
 RETURN return
 VAR var
 NIL nil
+AS "::"
 
 COMMENT_LN "//"
 
@@ -169,6 +170,8 @@ PAREN_OPEN "("
 PAREN_CLOSE ")"
 BLOCK_OPEN "{"
 BLOCK_CLOSE "}"
+SQ_PIPE_OPEN "[|"
+SQ_PIPE_CLOSE "|]"
 DOT "."
 COMMA ","
 
@@ -231,6 +234,8 @@ SQUARE_CLOSE "]"
           return VAR; }
 {NIL} { yylval.str = strdup(yytext);
           return NIL; }
+{AS} { yylval.str = strdup(yytext);
+          return AS; }
 
 {COMMENT_LN} { BEGIN(COMMENT); }
 
@@ -366,6 +371,10 @@ SQUARE_CLOSE "]"
           return SQUARE_OPEN; }
 {SQUARE_CLOSE} { yylval.str = strdup(yytext);
           return SQUARE_CLOSE; }
+{SQ_PIPE_OPEN} { yylval.str = strdup(yytext);
+          return SQ_PIPE_OPEN; }
+{SQ_PIPE_CLOSE} { yylval.str = strdup(yytext);
+          return SQ_PIPE_CLOSE; }
 {DOT} { yylval.str = strdup(yytext);
           return DOT; }
 {COMMA} { yylval.str = strdup(yytext);

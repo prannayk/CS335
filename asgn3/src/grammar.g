@@ -34,6 +34,7 @@ DeclarationList:
 Declaration:
     CommonDeclaration
     FunctionDeclaration
+    GeneratorDeclaration
 
 CommonDeclaration:
     VAR VarDeclaration
@@ -93,9 +94,9 @@ NewNameList:
     NewNameList COMMA NewName
 
 TypeName:
-    // FunctionType
-    // PointerType
-    // OtherType
+    FunctionType
+    PointerType
+    OtherType
     DotName
     PAREN_OPEN TypeName PAREN_CLOSE
 
@@ -173,14 +174,23 @@ PrimaryExprNoParen:
     PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE
+    ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE
+    CompType BLOCK_OPEN BracedKeyValList BLOCK_CLOSE
+    PrimaryExprNoParen SQ_PIPE_OPEN BracedKeyValList SQ_PIPE_CLOSE
+    FunctionLiteral
+    GeneratorLiteral
 
 NonExpressionType:
     FunctionType
+    GeneratorType
     OtherType
     STAR NonExpressionType
 
 OtherType:
-    SQUARE_OPEN SQUARE_CLOSE
+    SQUARE_OPEN OExpression SQUARE_CLOSE TypeName
+    SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName
+    StructType
+    InterfaceType
 
 NewName:
     ID
@@ -218,12 +228,16 @@ Literal:
 FunctionDeclaration:
     FUNC FunctionHeader FunctionBody
 
+GeneratorDeclaration:
+    GEN FunctionHeader FunctionBody
+
 FunctionHeader:
     ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
     PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
 
 ConvType:
     FunctionType
+    GeneratorType
     OtherType
 
 CompType:
@@ -231,6 +245,9 @@ CompType:
 
 FunctionType:
     FUNC PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
+
+GeneratorType:
+    GEN PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
 
 FunctionResult:
     // %prec NotParen
@@ -240,6 +257,7 @@ FunctionResult:
 
 FunctionReturnType:
     FunctionType
+    GeneratorType
     OtherType
     DotName
 
@@ -276,7 +294,7 @@ OSimpleStatement:
 SimpleStatement:
     Expression
     ExpressionList ASSGN_OP ExpressionList
-    ExpressionList COLON ExpressionList
+    ExpressionList DECL ExpressionList
     Expression INC
     Expression DEC
 
@@ -296,6 +314,17 @@ Statement:
 NonDeclarationStatement:
     SimpleStatement
     IfStatement
+    ForStatement
+    SwitchStatement
+    LabelName COLON Statement
+    FALLTHROUGH
+    BREAK ONewName
+    CONTINUE ONewName
+    GOTO NewName
+    RETURN OExpressionList
+
+LabelName:
+    NewName
 
 IfStatement:
     IF IfHeader LoopBody ElseIfList Else
@@ -317,4 +346,93 @@ LoopBody:
 IfHeader:
     OSimpleStatement
     OSimpleStatement STMTEND OSimpleStatement
+
+ForStatement:
+    FOR ForBody
+
+ForBody:
+    ForHeader LoopBody
+
+ForHeader:
+    OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement
+    OSimpleStatement
+    RangeStatement
+
+RangeStatement:
+    ExpressionList ASSGN_OP RANGE Expression
+    ExpressionList DECL RANGE Expression
+    RANGE Expression
+
+SwitchStatement:
+    SWITCH IfHeader BLOCK_OPEN CaseBlockList BLOCK_CLOSE
+
+CaseBlockList:
+    %
+    CaseBlockList CaseBlock
+
+CaseBlock:
+    Case StatementList
+
+Case:
+    CASE ExpressionOrTypeList COLON
+    CASE ExpressionOrTypeList ASSGN_OP Expression COLON
+    CASE ExpressionOrTypeList DECL Expression COLON
+    DEFAULT COLON
+
+ExpressionOrTypeList:
+    ExpressionOrTypeList COMMA ExpressionOrType
+    ExpressionOrType
+
+// Main main
+InterfaceDeclaration:
+    NewName InterfaceDecl
+    PAREN_OPEN PackName PAREN_CLOSE
+    PackName
+
+// Helper
+InterfaceDecl:
+    PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
+
+InterfaceDeclarationList:
+    InterfaceDeclaration
+    InterfaceDeclarationList STMTEND InterfaceDeclaration
+
+InterfaceType:
+    INTERFACE BLOCK_OPEN InterfaceDeclarationList Ostmtend BLOCK_CLOSE
+    INTERFACE BLOCK_OPEN BLOCK_CLOSE
+
+// Literals
+FunctionLiteral:
+    FunctionLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE
+    // FunctionLiteralDeclaration Error
+
+GeneratorLiteral:
+    GeneratorLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE
+
+FunctionLiteralDeclaration:
+    FunctionType
+
+GeneratorLiteralDeclaration:
+    GeneratorType
+
+KeyVal:
+    Expression COLON CompLiteralExpression
+
+KeyValList:
+    KeyVal
+    BareCompLiteralExpression
+    KeyValList COMMA KeyVal
+    KeyValList COMMA BareCompLiteralExpression
+
+BareCompLiteralExpression:
+    Expression
+    BLOCK_OPEN BracedKeyValList BLOCK_CLOSE
+
+CompLiteralExpression:
+    Expression
+    BLOCK_OPEN BracedKeyValList BLOCK_CLOSE
+
+BracedKeyValList:
+    %
+    KeyValList OComma
 
