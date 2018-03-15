@@ -3,6 +3,7 @@ function isTerminal(node) {
 }
 
 let str = "";
+let level = 0;
 function printCurrent(derivs, index) {
   for (let i = 0; i < derivs.length; i++) {
     const term = derivs[i];
@@ -15,8 +16,14 @@ function printCurrent(derivs, index) {
     if (isTerminal(term)) {
       if (term.name === "") continue;
       str += " <span class='terminal'>" + term.name + "</span> ";
+      if (term.name === "{") {
+        level++;
+      }
+      if (term.name === "}") {
+        level--;
+      }
       if (term.name === ";" || term.name === "{") {
-        str += "<br>";
+        str += "<br>" + "&nbsp;".repeat(level * 4);
       }
       continue;
     }

@@ -67,8 +67,8 @@ PointerType:
     STAR TypeName
 
 StructType:
-    STRUCT BLOCK_OPEN StructDeclarationList Ostmtend BLOCK_CLOSE
-    STRUCT BLOCK_OPEN BLOCK_CLOSE
+    STRUCT OGenericTypeList BLOCK_OPEN StructDeclarationList Ostmtend BLOCK_CLOSE
+    STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE
 
 StructDeclarationList:
     StructDeclaration
@@ -226,10 +226,10 @@ Literal:
 
 // Function Decl
 FunctionDeclaration:
-    FUNC FunctionHeader FunctionBody
+    FUNC OGenericTypeList FunctionHeader FunctionBody
 
 GeneratorDeclaration:
-    GEN FunctionHeader FunctionBody
+    GEN OGenericTypeList FunctionHeader FunctionBody
 
 FunctionHeader:
     ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
@@ -244,10 +244,10 @@ CompType:
     OtherType
 
 FunctionType:
-    FUNC PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
+    FUNC OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
 
 GeneratorType:
-    GEN PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
+    GEN OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult
 
 FunctionResult:
     // %prec NotParen
@@ -435,4 +435,20 @@ CompLiteralExpression:
 BracedKeyValList:
     %
     KeyValList OComma
+
+TypeNameList:
+    TypeName
+    TypeNameList COMMA TypeName
+
+GenericType:
+    Name
+    Name COLON TypeNameList
+
+GenericTypeList:
+    GenericType
+    GenericTypeList GENERIC_CONCAT GenericType
+
+OGenericTypeList:
+    LT GenericTypeList GT
+    %
 

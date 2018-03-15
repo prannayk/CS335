@@ -1,7 +1,8 @@
 package main
-gen (x MyType)  myFunc(x, y int, z MyTypiiie) gen(int) int {
-     x = gen(int) ty {
-       return;
-     }
+type Human struct< K $ L: Thing1, Thing > {}
+func< T: Person $ K > (x MyType)  myFunc()  {
+       return func(int) int {
+
+       }
 }
 

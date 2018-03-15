@@ -278,8 +278,8 @@ SQUARE_CLOSE "]"
 {ID} { yylval.str = strdup(yytext);
           return ID; }
 
-{GENERIC_LIST} { yylval.str = strdup(yytext);
-          return GENERIC_LIST; }
+{GENERIC_CONCAT} { yylval.str = strdup(yytext);
+          return GENERIC_CONCAT; }
 
 {HEX_LIT} { yylval.str = strdup(yytext);
           return HEX_LIT; }
