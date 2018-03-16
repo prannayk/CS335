@@ -17,7 +17,9 @@ Import:
     IMPORT PAREN_OPEN PAREN_CLOSE
 
 ImportStatement:
-    ID
+    Literal
+    ID Literal
+    DOT Literal
 
 ImportStatementList:
     ImportStatement
@@ -170,7 +172,7 @@ PrimaryExprNoParen:
     PrimaryExpr DOT ID %prec DotNamePrec
     PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE
     // ID here is predefined types
-    PrimaryExpr DOT PAREN_OPEN ID PAREN_OPEN
+    PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE
     PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE
     PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE
@@ -179,6 +181,7 @@ PrimaryExprNoParen:
     PrimaryExprNoParen SQ_PIPE_OPEN BracedKeyValList SQ_PIPE_CLOSE
     FunctionLiteral
     GeneratorLiteral
+    PseudoCall
 
 NonExpressionType:
     FunctionType
@@ -223,6 +226,8 @@ Literal:
     DECIMAL_LIT
     OCTAL_LIT
     HEX_LIT
+    TRUE
+    FALSE
 
 // Function Decl
 FunctionDeclaration:
@@ -322,6 +327,7 @@ NonDeclarationStatement:
     CONTINUE ONewName
     GOTO NewName
     RETURN OExpressionList
+    YIELD OExpressionList
 
 LabelName:
     NewName
@@ -451,4 +457,9 @@ GenericTypeList:
 OGenericTypeList:
     LT GenericTypeList GT
     %
+
+PseudoCall:
+    PrimaryExpr PAREN_OPEN PAREN_CLOSE
+    PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE
+    PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE
 

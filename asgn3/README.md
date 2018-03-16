@@ -9,9 +9,10 @@
 ## Instructions
 
 ``` shell
-$ cd asgn1
+$ cd asgn3
 $ make
-$ make (test | clean) or bin/lexer test/1.go
+$ make (render FNUM=1 | clean)
+$ firefox src/display/index.html
 ```
 
 `make test` will test all 10 test files and print the output.
@@ -19,7 +20,7 @@ $ make (test | clean) or bin/lexer test/1.go
 As done for the 'identifiers' in the Assignment 1 example, the occurances
 are only the unique occurances (number of unique lexemes per token).
 
-## Test cases 
+## Test cases
 Functionality being demonstrated by every test file (added functionality is **bold**):
 
 1. ``` 1.gop ``` : Loop variants and string constructs
@@ -28,7 +29,7 @@ Functionality being demonstrated by every test file (added functionality is **bo
 4. ``` 4.gop ``` : Struct and Interface
 5. ``` 5.gop ``` : **Generics**
 6. ``` 6.gop ``` : Labels for jumping etc
-7. ``` 7.gop ``` : Extensive Literals **not done**
+7. ``` 7.gop ``` : Function Literals
 8. ``` 8.gop ``` : Strings, arrays, slicing
 9. ``` 9.gop ``` : TypeCasting
 10. ``` 10.gop ``` : Embeds for Golang

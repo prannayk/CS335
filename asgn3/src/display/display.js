@@ -31,7 +31,7 @@ function printCurrent(derivs, index) {
     str += " <span class='var'>" + term.name + "</span> ";
   }
   if (index >= 0)
-    str += "<br><br>";
+    str += "<br><hr><br>";
 }
 
 let currDerivation = data;

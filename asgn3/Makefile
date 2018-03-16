@@ -8,8 +8,8 @@ BIN=bin
 
 .PHONY: all clean setup pogo lexer parser parser-defines
 
-all: parser-pure pogo
-	make render_one
+all: pogo
+
 
 setup:
 	mkdir -p $(BIN)
@@ -32,15 +32,15 @@ lexer: parser-defines $(SRC)/golang.l
 	flex -o golang.yy.c golang.l
 
 pogo: lexer parser setup
-	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(FLAGS) -o $(BIN)/executable
+	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(FLAGS) -o $(BIN)/parser
 
 test: pogo
-	for number in {1..1} ; do \
+	for number in {1..10} ; do \
 		echo "Testing with $$number.gop"; \
 		./prepare.sh $(TESTS)/$$number.gop /tmp/$$number.gop;  \
-		$(BIN)/executable /tmp/$$number.gop; \
+		$(BIN)/parser /tmp/$$number.gop 1> /dev/null 2> $(SRC)/display/data$$number.js; \
 	done
 
-render_one: 
-	./prepare.sh $(TESTS)/1.gop /tmp/1.gop;  \
-	$(BIN)/executable /tmp/1.gop 1> /dev/null 2> $(SRC)/display/data.js
+render:
+	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop;  \
+	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/data$(FNUM).js;

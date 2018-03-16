@@ -4,6 +4,8 @@
 #include <string.h>
 #include <vector>
 #include <ostream>
+#include <sstream>
+#include <iomanip>
 
 using namespace std;
 

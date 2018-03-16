@@ -230,6 +230,8 @@ SQUARE_CLOSE "]"
           return IMPORT; }
 {RETURN} { yylval.str = strdup(yytext);
           return RETURN; }
+{YIELD} { yylval.str = strdup(yytext);
+          return YIELD; }
 {VAR} { yylval.str = strdup(yytext);
           return VAR; }
 {NIL} { yylval.str = strdup(yytext);
@@ -239,34 +241,6 @@ SQUARE_CLOSE "]"
 
 {COMMENT_LN} { BEGIN(COMMENT); }
 
-{FOLDL} { yylval.str = strdup(yytext);
-          return FOLDL; }
-{FOLDR} { yylval.str = strdup(yytext);
-          return FOLDR; }
-{MMAP} { yylval.str = strdup(yytext);
-          return MMAP; }
-{YIELD} { yylval.str = strdup(yytext);
-          return YIELD; }
-{APPEND} { yylval.str = strdup(yytext);
-          return APPEND; }
-{CAP} { yylval.str = strdup(yytext);
-          return CAP; }
-{CLOSE} { yylval.str = strdup(yytext);
-          return CLOSE; }
-{COPY} { yylval.str = strdup(yytext);
-          return COPY; }
-{DELETE} { yylval.str = strdup(yytext);
-          return DELETE; }
-{LEN} { yylval.str = strdup(yytext);
-          return LEN; }
-{MAKE} { yylval.str = strdup(yytext);
-          return MAKE; }
-{NEW} { yylval.str = strdup(yytext);
-          return NEW; }
-{PRINT} { yylval.str = strdup(yytext);
-          return PRINT; }
-{PRINTLN} { yylval.str = strdup(yytext);
-          return PRINTLN; }
 {GEN} { yylval.str = strdup(yytext);
           return GEN; }
 

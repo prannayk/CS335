@@ -3,3 +3,5 @@ bin
 *.o
 data.js
 golang.y
+test*.html
+data*.js

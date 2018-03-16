@@ -11,7 +11,7 @@ int main(int argc, char** argv) {
 }
 
 void yyerror(const char *s) {
-    printf("EEK, parse error!  Message: %s\\n", s);
+    printf("ParseError: %s\\n", s);
     exit(-1);
 }
 ''')

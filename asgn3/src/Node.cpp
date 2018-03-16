@@ -24,7 +24,9 @@ Node::Node(string aMatched, Type aType)
 void
 Node::Print()
 {
-    cerr << "{ \"name\" : \"" << this->matched << "\", \"children\" : [";
+    stringstream ss;
+    ss << quoted(this->matched);
+    cerr << "{ \"name\" : " << ss.str() << ", \"children\" : [";
     for (int i = 0; i < this->children.size(); ++i) {
         this->children[i]->Print();
     }
