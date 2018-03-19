@@ -134,12 +134,12 @@ void yyerror(const char *s);
 %token   <str>          BREAK 129
 %token   <str>          COLON 130
 
-%left <str> STAR DIV MOD LS RS AMPERSAND NOT_AND
-%right <str> CARET
-%left <str> ADD SUB BIT_OR
-%left <str> EQ NE GE GT LE LT
-%left <str> AND
+
 %left <str> OR
+%left <str> AND
+%left <str> EQ NE GE GT LE LT
+%left <str> ADD SUB BIT_OR
+%left <str> STAR DIV MOD LS RS AMPERSAND NOT_AND CARET
 
 %error-verbose
 

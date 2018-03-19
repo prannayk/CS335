@@ -164,12 +164,12 @@ ExpressionOrType:
 
 DotName:
     Name
-    Name DOT ID %prec DotNamePrec
+    Name DOT ID
 
 PrimaryExprNoParen:
     Name
     Literal
-    PrimaryExpr DOT ID %prec DotNamePrec
+    PrimaryExpr DOT ID
     PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE
     // ID here is predefined types
     PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE
