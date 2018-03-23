@@ -18,8 +18,29 @@ Node::Node(string aMatched, Type aType)
   : matched(aMatched)
   , type(aType)
   , children()
+  , count(1)
+  , flag(false)
 {
 }
+
+Node::Node(string aMatched, Type aType, int aCount)
+  : matched(aMatched)
+  , type(aType)
+  , children()
+  , count(aCount)
+  , flag(false)
+{
+}
+
+Node::Node(string aMatched, Type aType, int aCount, bool aFlag)
+  : matched(aMatched)
+  , type(aType)
+  , children()
+  , count(aCount)
+  , flag(aFlag)
+{
+}
+
 
 void
 Node::Print()

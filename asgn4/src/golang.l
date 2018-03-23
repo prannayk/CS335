@@ -11,19 +11,36 @@
 #define YY_DECL extern "C" int yylex()
 
 #include "golang.tab.h"  // to get the token types that we return
-
+#include "helpers.h"	// to get helper for error handling
+int yycolumn = 1;
+myLoc *global_loc = new myLoc;
 /* extern "C" int yyparse(); */
 /* extern "C" void yyerror(const char*); */
-#define YY_USER_ACTION ++ctr[yy_act];
+#define YY_USER_ACTION                                  		          \ 
+  ++ctr[yy_act];                        				                      \
+  start_line = prev_yylineno; start_column = yycolumn;	                  \
+  if (yylineno == prev_yylineno) yycolumn += yyleng;    	              \
+  else {                                                                  \
+    for (yycolumn = 1; yytext[yyleng - yycolumn] != '\n'; ++yycolumn) {}  \
+    prev_yylineno = yylineno;                                             \
+  }                                                                       \
+  yylloc.first_line = yylloc.last_line = yylineno;                        \
+  global_loc->line = yylineno;                                            \
+  yylloc.last_column = yycolumn;                                          \
+  global_loc->col1 = yycolumn;                                            \
+  yylloc.first_column = yycolumn - yyleng;                                \
+  global_loc->col2 = yycolumn - yyleng; 
+
 
 #define NUM_TOKENS 130
 using namespace std;
 int ctr[YY_NUM_RULES];
 vector<set<string>> counter (NUM_TOKENS);
+int start_line, start_column, prev_yylineno=yylineno;
 %}
 
 /* start define keywords */
-
+%option yylineno
 BREAK break
 DEFAULT default
 FUNC func
@@ -180,6 +197,8 @@ SQUARE_CLOSE "]"
 
 %x COMMENT
 %%
+
+
 {BREAK} { yylval.str = strdup(yytext);
           return BREAK; }
 {DEFAULT} { yylval.str = strdup(yytext);

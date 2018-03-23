@@ -47,4 +47,4 @@ render:
 
 render_one:
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop; \
-	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/flare.js;
+	$(BIN)/parser /tmp/1.gop 2> $(SRC)/display/flare.js;
