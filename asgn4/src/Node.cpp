@@ -38,7 +38,7 @@ Node::PrintJS()
 {
     cerr << "const data = [";
     this->Print();
-    cerr << "];";
+    cerr << "][0];";
 }
 // int
 // main()

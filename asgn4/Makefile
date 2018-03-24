@@ -44,3 +44,7 @@ test: pogo
 render:
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop;  \
 	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/data$(FNUM).js;
+
+render_one:
+	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop; \
+	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/flare.js;
