@@ -32,7 +32,7 @@ lexer: parser-defines $(SRC)/golang.l
 	flex -o golang.yy.c golang.l
 
 pogo: lexer parser setup
-	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(FLAGS) -o $(BIN)/parser
+	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(FLAGS) -o $(BIN)/parser
 
 test: pogo
 	for number in {1..10} ; do \
@@ -45,6 +45,6 @@ render:
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop;  \
 	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/data$(FNUM).js;
 
-render_one:
+render_one: 
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop; \
 	$(BIN)/parser /tmp/1.gop 2> $(SRC)/display/flare.js;

@@ -1,3 +1,10 @@
+#pragma once
+#include <vector>
+#include <iostream>
+#include "Node.h"
+
+using namespace std;
+
 struct myLoc {
     int line = 0;
     int col1 = 0;
@@ -5,3 +12,5 @@ struct myLoc {
 };
 
 extern myLoc *global_loc;
+
+extern void inferListType(Node* target, Node* source);

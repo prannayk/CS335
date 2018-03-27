@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <string.h>
 #include "helpers.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
@@ -300,11 +301,8 @@ $$->Add($2);cout <<"dot" << " " << $1<< " " <<"Literal" << endl ;}
 
 ;
 ImportStatementList  :
-ImportStatement{$$ = $1; }
-		| ImportStatementList STMTEND ImportStatement{$$ = new Node("ImportStatementList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"ImportStatementList"<< " " <<"stmtend" << " " << $2<< " " <<"ImportStatement" << endl ;}
+ImportStatement{$$ = new Node("ImportStatement", NOTYPE); $$->Add($1);}
+		| ImportStatementList STMTEND ImportStatement{$$ = $1; $$->incrementCount($3);}
 
 ;
 Ostmtend  :
@@ -315,10 +313,7 @@ $$->Add($1);cout <<"stmtend" << " " << $1 << endl ;}
 ;
 DeclarationList  :
 /* Empty Rule */ {$$ = new Node("DeclarationList", NOTYPE, 0);
-$$->Add("");}		| DeclarationList Declaration STMTEND{$$ = new Node("DeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"DeclarationList"<< " " <<"Declaration"<< " " <<"stmtend" << " " << $3 << endl ;}
+$$->Add("");}		| DeclarationList Declaration STMTEND{$$ = $1; $$->incrementCount($2);}
 
 ;
 Declaration  :
@@ -397,11 +392,8 @@ $$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" <
 
 ;
 DeclarationNameList  :
-DeclarationName{$$ = $1; }
-		| DeclarationNameList COMMA DeclarationName{$$ = new Node("DeclarationNameList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"DeclarationNameList"<< " " <<"comma" << " " << $2<< " " <<"DeclarationName" << endl ;}
+DeclarationName{$$ = new Node("Declaration Name", NOTYPE); $$->Add($1); }
+		| DeclarationNameList COMMA DeclarationName{$$ = $1; $$->incrementCount($3);}
 
 ;
 DeclarationName  :
@@ -430,11 +422,8 @@ $$->Add($4);cout <<"struct" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"blo
 
 ;
 StructDeclarationList  :
-StructDeclaration{$$ = $1;}
-		| StructDeclarationList STMTEND StructDeclaration{$$ = new Node("StructDeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"StructDeclarationList"<< " " <<"stmtend" << " " << $2<< " " <<"StructDeclaration" << endl ;}
+StructDeclaration{$$ = new Node("Struct Declaration", NOTYPE); $$->Add($1);}
+		| StructDeclarationList STMTEND StructDeclaration{$$ = $1; $1->incrementCount($3);}
 
 ;
 StructDeclaration  :
@@ -481,11 +470,8 @@ $$->Add($3);cout <<"id" << " " << $1<< " " <<"dot" << " " << $2<< " " <<"id" << 
 
 ;
 NewNameList  :
-NewName{$$ = $1;}
-		| NewNameList COMMA NewName{$$ = new Node("NewNameList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"NewNameList"<< " " <<"comma" << " " << $2<< " " <<"NewName" << endl ;}
+NewName{$$ = new Node("NewName",NOTYPE); $$->Add($1);}
+		| NewNameList COMMA NewName{$$ = $1; $$->incrementCount($3);}
 
 ;
 TypeName  :
@@ -497,19 +483,13 @@ FunctionType{$$ = $1;}
 
 ;
 VarDeclarationList  :
-VarDeclarationList STMTEND VarDeclaration{$$ = new Node("VarDeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"VarDeclarationList"<< " " <<"stmtend" << " " << $2<< " " <<"VarDeclaration" << endl ;}
-		| VarDeclaration{$$ = $1;}
+VarDeclarationList STMTEND VarDeclaration{$$ = $1; $$->incrementCount($3); }
+		| VarDeclaration{$$ = new Node("VarDeclaration", NOTYPE); $$->Add($1);}
 
 ;
 ConstDeclarationList  :
-ConstDeclaration{$$ = $1;}
-		| ConstDeclarationList STMTEND ConstDeclaration{$$ = new Node("ConstDeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"ConstDeclarationList"<< " " <<"stmtend" << " " << $2<< " " <<"ConstDeclaration" << endl ;}
+ConstDeclaration{$$ = new Node("Constant Declaration", NOTYPE); $$->Add($1);}
+		| ConstDeclarationList STMTEND ConstDeclaration{$$ = $1; $$->incrementCount($3);}
 
 ;
 TypeDeclaration  :
@@ -524,11 +504,8 @@ $$->Add($1);cout <<"id" << " " << $1 << endl ;}
 
 ;
 TypeDeclarationList  :
-TypeDeclaration{$$ = $1;}
-		| TypeDeclarationList STMTEND TypeDeclaration{$$ = new Node("TypeDeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"TypeDeclarationList"<< " " <<"stmtend" << " " << $2<< " " <<"TypeDeclaration" << endl ;}
+TypeDeclaration{$$ = new Node("TypeDeclaration", NOTYPE); $$->Add($1);}
+		| TypeDeclarationList STMTEND TypeDeclaration{$$ = $1; $$->incrementCount($3); }
 
 ;
 Expression  :
@@ -608,7 +585,7 @@ $$->Add($3);cout <<"Expression"<< " " <<"le" << " " << $2<< " " <<"Expression" <
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"lt" << " " << $2<< " " <<"Expression" << endl ;}
-		| UnaryExpr{ $$ = $1; }
+		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); cout<<"Type: "<<$$->getType()<<endl; }
 
 ;
 OExpression  :
@@ -633,21 +610,21 @@ $$->Add($2);cout <<"sub" << " " << $1<< " " <<"UnaryExpr" << endl ;}
 		| NOT_OP UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
 $$->Add($1);
 $$->Add($2);cout <<"not_op" << " " << $1<< " " <<"UnaryExpr" << endl ;}
-		| PrimaryExpr{$$ = $1;}
+		| PrimaryExpr{$$ = $1;$$->setType($1->getType());}
 
 ;
 PrimaryExpr  :
-PrimaryExprNoParen{$$ = $1;}
+PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());}
 		| PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = $2; }
 
 ;
 ExpressionOrType  :
-Expression{$$ = $1;}
+Expression{$$ = $1;$$->setType($1->getType());}
 		| NonExpressionType{$$ = $1;}
 
 ;
 DotName  :
-Name{$$ = $1;}
+Name{$$ = $1;$$->setType($1->getType());}
 		| Name DOT ID{$$ = new Node("DotName", NOTYPE);
 $$->Add($1);
 $$->Add($2);
@@ -655,8 +632,8 @@ $$->Add($3);cout <<"Name"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 <
 
 ;
 PrimaryExprNoParen  :
-Name{$$ = $1;}
-		| Literal{$$ = $1;}
+Name{$$ = $1;$$->setType($1->getType());}
+		| Literal{$$ = $1;$$->setType($1->getType());}
 		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", NOTYPE);
 $$->Add($1);
 $$->Add($2);
@@ -758,11 +735,8 @@ ID %prec NotParen{$$ = new Node("Name", NOTYPE); $$->Add($1);}
 
 ;
 ExpressionList  :
-Expression{$$ = $1;}
-		| ExpressionList COMMA Expression{$$ = new Node("ExpressionList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"ExpressionList"<< " " <<"comma" << " " << $2<< " " <<"Expression" << endl ;}
+Expression{$$ = new Node("Expression", NOTYPE); $$->Add($1);}
+		| ExpressionList COMMA Expression{$$ = $1; $$->incrementCount($3);}
 
 ;
 OExpressionList  :
@@ -772,24 +746,24 @@ OExpressionList  :
 ;
 OLiteral  :
 /* Empty Rule */ {$$ = new Node("Empty Literal", NOTYPE, 0);}		
-| Literal{$$ = $1;}
+| Literal{$$ = $1; $$->setType($1->getType());}
 
 ;
 Literal  :
 RAW_STRING{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"raw_string" << " " << $1 << endl ;}
+$$->Add($1); $$->setType(STR_TYPE);}
 		| INTER_STRING{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"inter_string" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(BYTE_TYPE);}
 		| DECIMAL_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"decimal_lit" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(INT_TYPE);}
 		| OCTAL_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"octal_lit" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(INT_TYPE);}
 		| HEX_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"hex_lit" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(HEX_TYPE);}
 		| TRUE{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"true" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(BOOL_TYPE);}
 		| FALSE{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);cout <<"false" << " " << $1 << endl ;}
+$$->Add($1);$$->setType(BOOL_TYPE);}
 
 ;
 FunctionDeclaration  :
@@ -894,12 +868,8 @@ $$->Add($2);cout <<"ArgumentTypeList"<< " " <<"OComma" << endl ;}
 
 ;
 ArgumentTypeList  :
-ArgumentType{$$ = $1;}
-		| ArgumentTypeList COMMA ArgumentType{$$ = new Node("ArgumentTypeList", NOTYPE, $1->count + 1, $3->flag || $1->flag);
-if($3->flag && $1->flag){ /* error stmt */ } 
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"ArgumentTypeList"<< " " <<"comma" << " " << $2<< " " <<"ArgumentType" << endl ;}
+ArgumentType{$$ = new Node("ArgumentType", NOTYPE); $$->Add($1);}
+		| ArgumentTypeList COMMA ArgumentType{$$ = $1 ; $$->incrementCount($3);}
 
 ;
 ArgumentType  :
@@ -943,7 +913,7 @@ $$->Add($3);cout <<"ExpressionList"<< " " <<"assgn_op" << " " << $2<< " " <<"Exp
 		| ExpressionList DECL ExpressionList{$$ = new Node("SimpleStatement", NOTYPE);
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"ExpressionList"<< " " <<"decl" << " " << $2<< " " <<"ExpressionList" << endl ;}
+$$->Add($3);inferListType($1, $3);}
 		| Expression INC{$$ = new Node("SimpleStatement", NOTYPE);
 $$->Add($1);
 $$->Add($2);cout <<"Expression"<< " " <<"inc" << " " << $2 << endl ;}
@@ -960,11 +930,8 @@ $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"bl
 
 ;
 StatementList  :
-Statement{$$ = $1;}
-		| StatementList STMTEND Statement{$$ = new Node("StatementList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"StatementList"<< " " <<"stmtend" << " " << $2<< " " <<"Statement" << endl ;}
+Statement{$$ = new Node("Statement", NOTYPE); $$->Add($1);}
+		| StatementList STMTEND Statement{$$ = $1; $$->incrementCount($3); }
 
 ;
 Statement  :
@@ -1025,9 +992,7 @@ $$->Add($4);cout <<"else" << " " << $1<< " " <<"if" << " " << $2<< " " <<"IfHead
 ;
 ElseIfList  :
 /* Empty Rule */ {$$ = new Node("Empty ElseIfList", NOTYPE, 0);
-$$->Add("");}		| ElseIfList ElseIf{$$ = new Node("ElseIfList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);cout <<"ElseIfList"<< " " <<"ElseIf" << endl ;}
+$$->Add("");}		| ElseIfList ElseIf{$$ = $1 ; $$->incrementCount($2);}
 
 ;
 Else  :
@@ -1102,9 +1067,7 @@ $$->Add($5);cout <<"switch" << " " << $1<< " " <<"IfHeader"<< " " <<"block_open"
 ;
 CaseBlockList  :
 /* Empty Rule */ {$$ = new Node("CaseBlockList", NOTYPE, 0);
-$$->Add("");}		| CaseBlockList CaseBlock{$$ = new Node("CaseBlockList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);cout <<"CaseBlockList"<< " " <<"CaseBlock" << endl ;}
+$$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);}
 
 ;
 CaseBlock  :
@@ -1136,12 +1099,9 @@ $$->Add($2);cout <<"default" << " " << $1<< " " <<"colon" << " " << $2 << endl ;
 
 ;
 ExpressionOrTypeList  :
-ExpressionOrTypeList COMMA ExpressionOrType{$$ = new Node("ExpressionOrTypeList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"ExpressionOrTypeList"<< " " <<"comma" << " " << $2<< " " <<"ExpressionOrType" << endl ;}
+ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3);}
 		| ExpressionOrType{$$ = new Node("ExpressionOrTypeList", NOTYPE);
-$$->Add($1);cout <<"ExpressionOrType" << endl ;}
+$$->Add($1);}
 
 ;
 InterfaceDeclaration  :
@@ -1166,11 +1126,8 @@ $$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<<
 ;
 InterfaceDeclarationList  :
 InterfaceDeclaration{$$ = new Node("InterfaceDeclarationList", NOTYPE);
-$$->Add($1);cout <<"InterfaceDeclaration" << endl ;}
-		| InterfaceDeclarationList STMTEND InterfaceDeclaration{$$ = new Node("InterfaceDeclarationList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"InterfaceDeclarationList"<< " " <<"stmtend" << " " << $2<< " " <<"InterfaceDeclaration" << endl ;}
+$$->Add($1);}
+		| InterfaceDeclarationList STMTEND InterfaceDeclaration{$$ = $1 ; $$->incrementCount($1);}
 
 ;
 InterfaceType  :
@@ -1220,17 +1177,11 @@ $$->Add($3);cout <<"Expression"<< " " <<"colon" << " " << $2<< " " <<"CompLitera
 
 ;
 KeyValList  :
-KeyVal{$$ = $1;}
+KeyVal{$$ = new Node("KeyVal declaration", NOTYPE); $$->Add($1);}
 		| BareCompLiteralExpression{$$ = new Node("KeyValList", NOTYPE);
 $$->Add($1);cout <<"BareCompLiteralExpression" << endl ;}
-		| KeyValList COMMA KeyVal{$$ = new Node("KeyValList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"KeyValList"<< " " <<"comma" << " " << $2<< " " <<"KeyVal" << endl ;}
-		| KeyValList COMMA BareCompLiteralExpression{$$ = new Node("KeyValList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"KeyValList"<< " " <<"comma" << " " << $2<< " " <<"BareCompLiteralExpression" << endl ;}
+		| KeyValList COMMA KeyVal{$$ = $1; $$->incrementCount($3);}
+		| KeyValList COMMA BareCompLiteralExpression{$$ = $1; $$->incrementCount($3);}
 
 ;
 BareCompLiteralExpression  :
@@ -1253,17 +1204,12 @@ $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"BracedKeyValList"<< " " <<
 ;
 BracedKeyValList  :
 /* Empty Rule */ {$$ = new Node("BracedKeyValList", NOTYPE, 0);
-$$->Add("");}		| KeyValList OComma{$$ = new Node("BracedKeyValList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);cout <<"KeyValList"<< " " <<"OComma" << endl ;}
+$$->Add("");}		| KeyValList OComma{$$ = $1;}
 
 ;
 TypeNameList  :
-TypeName{$$ = $1 ;}
-		| TypeNameList COMMA TypeName{$$ = new Node("TypeNameList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"TypeNameList"<< " " <<"comma" << " " << $2<< " " <<"TypeName" << endl ;}
+TypeName{$$ = new Node("TypeNameList", NOTYPE) ;}
+		| TypeNameList COMMA TypeName{$$ = $1; $$->incrementCount($3);}
 
 ;
 GenericType  :
@@ -1275,11 +1221,8 @@ $$->Add($3);cout <<"Name"<< " " <<"colon" << " " << $2<< " " <<"TypeNameList" <<
 
 ;
 GenericTypeList  :
-GenericType{$$ = $1;}
-		| GenericTypeList GENERIC_CONCAT GenericType{$$ = new Node("GenericTypeList", NOTYPE, $1->count + 1);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"GenericTypeList"<< " " <<"generic_concat" << " " << $2<< " " <<"GenericType" << endl ;}
+GenericType{$$ = new Node("GenericTypeList", NOTYPE); $$->Add($1);}
+		| GenericTypeList GENERIC_CONCAT GenericType{$$ = $1; $$->incrementCount($3);}
 
 ;
 OGenericTypeList  :
@@ -1312,6 +1255,14 @@ $$->Add($6);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"Expr
 
 %%
 
+int TypeForSymbol(char* input){
+    // returns only INT for now
+    if(strlen(input) > 0)
+        return INT; // assuming INT 
+    else
+        return NOTYPE; // empty statement have no type
+}
+
 int main(int argc, char** argv) {
 	FILE *myfile = fopen(argv[1], "r");
         yyin = myfile;
@@ -1323,7 +1274,7 @@ int main(int argc, char** argv) {
 
 void yyerror(const char *s) {
     printf("ParseError: %s\n", s);
-	cout<<global_loc->line << endl;
+	cout<< "Error on line : "<<global_loc->line << ":" << global_loc->col2 << " to " << global_loc->line << ":" << global_loc->col1 << endl;
     exit(-1);
 }
 

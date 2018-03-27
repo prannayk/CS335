@@ -11,6 +11,11 @@ using namespace std;
 
 enum Type
 {
+    INT_TYPE = 1,
+    STR_TYPE,
+    BYTE_TYPE,
+    HEX_TYPE,
+    BOOL_TYPE,
     NOTYPE,
 };
 
@@ -18,6 +23,7 @@ class Node
 {
   public:
     string matched;
+    string content;
     Type type;
     vector<Node*> children;
     int count; // number of args or elements in list
@@ -29,4 +35,7 @@ class Node
     Node* Add(string str);
     void Print();
     void PrintJS();
+    void incrementCount(Node * nNode); // add a Node, make a list
+    void setType(Type aType){ type = aType; }
+    Type getType() { return this->type; }
 };

@@ -21,6 +21,7 @@ Node::Node(string aMatched, Type aType)
   , count(1)
   , flag(false)
 {
+    type = NOTYPE;
 }
 
 Node::Node(string aMatched, Type aType, int aCount)
@@ -30,6 +31,7 @@ Node::Node(string aMatched, Type aType, int aCount)
   , count(aCount)
   , flag(false)
 {
+    type = NOTYPE;
 }
 
 Node::Node(string aMatched, Type aType, int aCount, bool aFlag)
@@ -39,6 +41,7 @@ Node::Node(string aMatched, Type aType, int aCount, bool aFlag)
   , count(aCount)
   , flag(aFlag)
 {
+    type = NOTYPE;
 }
 
 
@@ -61,6 +64,14 @@ Node::PrintJS()
     this->Print();
     cerr << "][0];";
 }
+
+void 
+Node::incrementCount(Node *nNode){
+    this->children.push_back(nNode);
+    count++;
+}
+
+
 // int
 // main()
 // {
