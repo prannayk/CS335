@@ -1,0 +1,111 @@
+.define ; main ; .i32 , .i32 ; .i32 @
+%cd1 : .i32 = $10
+%azerod1 : .i32 = $1
+%aoned1 : .i32 = $1
+%atwod1 : .i32 = $1
+%athreed1 : .i32 = $2
+%afourd1 : .i32 = $0
+%afived1 : .i32 = $1
+%asixd1 : .i32 = $0
+%asevend1 : .i32 = $1
+%aeightd1 : .i32 = $0
+%anined1 : .i32 = $2
+%atend1 : .i32 = $1
+%aelevend1 : .i32 = $2
+%atwelved1 : .i32 = $0
+%athirteend1 : .i32 = $2
+%afourteend1 : .i32 = $0
+%afifteend1 : .i32 = $1
+%ast1 : .i32 = $2 + $0
+%aseventeend1 : .i32 = $2
+%aeighteend1 : .i32 = $0
+%aninteend1 : .i32 = $1
+%atwentyd1 : .i32 = $0
+%atwentyoned1 : .i32 = $1
+%atwentytwod1 : .i32 = $0
+%atwentythreed1 : .i32 = $1
+%atwentyfourd1 : .i32 = $0
+%atwentyfivd1 : .i32 = $0
+%atwentysixd1 : .i32 = $0
+%atwentysevend1 : .i32 = $2
+%atwentyeightd1 : .i32 = $2
+%atwentynined1 : .i32 = $0
+%athirtyd1 : .i32 = $0
+%athirtyoned1 : .i32 = $1
+
+%t1 : .i32 = %cd1 > $0
+goto %t1 == 0 ? else
+goto if
+.label if
+%sum1 : .i32 = %azerod1 + $0
+%sum1 : .i32 = %sum1 + %aoned1
+%sum1 : .i32 = %sum1 + %atwod1
+%sum1 : .i32 = %sum1 + %athreed1
+%sum1 : .i32 = %sum1 + %afourd1
+%sum1 : .i32 = %sum1 + %afived1
+%sum1 : .i32 = %sum1 + %asixd1
+%sum1 : .i32 = %sum1 + %asevend1
+%sum1 : .i32 = %sum1 + %aeightd1
+%sum1 : .i32 = %sum1 + %anined1
+%sum1 : .i32 = %sum1 + %atend1
+%sum1 : .i32 = %sum1 + %aelevend1
+%sum1 : .i32 = %sum1 + %atwelved1
+%sum1 : .i32 = %sum1 + %athirteend1
+%sum1 : .i32 = %sum1 + %afourteend1
+%sum1 : .i32 = %sum1 + %afifteend1
+%sum1 : .i32 = %sum1 + %asixteend1
+%sum1 : .i32 = %sum1 + %aseventeend1
+%sum1 : .i32 = %sum1 + %aeighteend1
+%sum1 : .i32 = %sum1 + %aninteend1
+%sum1 : .i32 = %sum1 + %atwentyd1
+%sum1 : .i32 = %sum1 + %atwentyoned1
+%sum1 : .i32 = %sum1 + %atwentytwod1
+%sum1 : .i32 = %sum1 + %atwentythreed1
+%sum1 : .i32 = %sum1 + %atwentyfourd1
+%sum1 : .i32 = %sum1 + %atwentyfivd1
+%sum1 : .i32 = %sum1 + %atwentysixd1
+%sum1 : .i32 = %sum1 + %atwentysevend1
+%sum1 : .i32 = %sum1 + %atwentyeightd1
+%sum1 : .i32 = %sum1 + %atwentynined1
+%sum1 : .i32 = %sum1 + %athirtyd1
+%sum1 : .i32 = %sum1 + %athirtyoned1
+%bd1 : .i32 = %sum1 + $0
+goto postold
+.label else
+%sum1 : .i32 = %azerod1 + $0
+%sum1 : .i32 = %sum1 - %aoned1
+%sum1 : .i32 = %sum1 + %atwod1
+%sum1 : .i32 = %sum1 + %athreed1
+%sum1 : .i32 = %sum1 + %afourd1
+%sum1 : .i32 = %sum1 + %afived1
+%sum1 : .i32 = %sum1 + %asixd1
+%sum1 : .i32 = %sum1 + %asevend1
+%sum1 : .i32 = %sum1 + %aeightd1
+%sum1 : .i32 = %sum1 + %anined1
+%sum1 : .i32 = %sum1 + %atend1
+%sum1 : .i32 = %sum1 + %aelevend1
+%sum1 : .i32 = %sum1 + %atwelved1
+%sum1 : .i32 = %sum1 + %athirteend1
+%sum1 : .i32 = %sum1 + %afourteend1
+%sum1 : .i32 = %sum1 + %afifteend1
+%sum1 : .i32 = %sum1 + %asixteend1
+%sum1 : .i32 = %sum1 + %aseventeend1
+%sum1 : .i32 = %sum1 + %aeighteend1
+%sum1 : .i32 = %sum1 + %aninteend1
+%sum1 : .i32 = %sum1 + %atwentyd1
+%sum1 : .i32 = %sum1 + %atwentyoned1
+%sum1 : .i32 = %sum1 + %atwentytwod1
+%sum1 : .i32 = %sum1 + %atwentythreed1
+%sum1 : .i32 = %sum1 + %atwentyfourd1
+%sum1 : .i32 = %sum1 + %atwentyfivd1
+%sum1 : .i32 = %sum1 + %atwentysixd1
+%sum1 : .i32 = %sum1 + %atwentysevend1
+%sum1 : .i32 = %sum1 + %atwentyeightd1
+%sum1 : .i32 = %sum1 + %atwentynined1
+%sum1 : .i32 = %sum1 + %athirtyd1
+%sum1 : .i32 = %sum1 + %athirtyoned1
+%bd1 : .i32 = %sum1 + $0
+.label postold
+printint %bd1
+ret $0
+!

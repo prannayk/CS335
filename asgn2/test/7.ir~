@@ -1,0 +1,5 @@
+.define ; main ; .i32, .i32 ; .i32 @
+%da1 : .i32 = $0 - $60
+%da2 : .i32 = %da1 / 10
+printint %da2
+!

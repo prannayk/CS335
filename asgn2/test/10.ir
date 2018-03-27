@@ -1,0 +1,38 @@
+.define ; main ; .i32 , .i32 ; .i32 @
+%c1 : .i32 = $10
+%azeroa1 : .i32 = $1
+%aonea1 : .i32 = $1
+%atwoa1 : .i32 = $1
+%athreea1 : .i32 = $2
+%afoura1 : .i32 = $0
+%afivea1 : .i32 = $1
+%asixa1 : .i32 = $0
+%asevena1 : .i32 = $1
+%result1 : .i32 = %c1 > $10
+goto %result1 == $1 ? one
+goto second
+.label one
+%tmp1 : .i32 = %azeroa1 + $0
+%tmp1 : .i32 = %tmp1 + %aonea1
+%tmp1 : .i32 = %tmp1 + %atwoa1
+%tmp1 : .i32 = %tmp1 + %athreea1
+%tmp1 : .i32 = %tmp1 + %afoura1
+%tmp1 : .i32 = %tmp1 + %afivea1
+%tmp1 : .i32 = %tmp1 + %asixa1
+%b1   : .i32 = %tmp1 + $0
+%b1   : .i32 = %b1 + %asevena1
+goto third
+.label second
+%tmp1 : .i32 = %azeroa1 + $0
+%tmp1 : .i32 = %tmp1 - %aonea1
+%tmp1 : .i32 = %tmp1 + %atwoa1
+%tmp1 : .i32 = %tmp1 + %athreea1
+%tmp1 : .i32 = %tmp1 + %afoura1
+%tmp1 : .i32 = %tmp1 + %afivea1
+%tmp1 : .i32 = %tmp1 + %asixa1
+%b1 : .i32 = %tmp1 + $0
+%b1 : .i32 = %tmp1 + %asevena1
+.label third
+printint %b
+ret $0
+!

@@ -1,0 +1,48 @@
+.define ; main ; .i32, .i32 ; .i32 @
+%res1 : .i32 = $0
+%i1 : .i32 = $0
+goto checkone
+.label loopbodyone
+
+%j1 : .i32 = $0
+goto checktwo
+.label loopbodytwo
+
+%k1 : .i32 = $0
+goto checkthree
+.label loopbodythree
+
+%res1 : .i32 = %res1 + $1
+%k1 : .i32 = %k1 + $1
+
+.label checkthree
+%resthree1 : .i32 = %k1 <= $9
+goto %resthree1 == $1 ? loopbodythree
+
+%j1 : .i32 = %j1 + $1
+
+.label checktwo
+%restwo1 : .i32 = %j1 <= $9
+goto %restwo1 == $1 ? loopbodytwo
+
+%i1 : .i32 = %i32 + $1
+.label checkone
+%resone1 : .i32 = %i1 <= $9
+goto %resone1 == $1 ? loopbodyone
+printint %res1
+ret $0
+!
+
+
+%J1745 : .i32 = %aa1 - %ab1
+%K1746 : .i32 = %J1737 + %ac1
+%L1747 : .i32 = %K1738 + %ad1
+%M1748 : .i32 = %L1739 + %ae1
+%N1749 : .i32 = %M1740 + %af1
+%O1750 : .i32 = %N1741 + %ag1
+%bb1 : .i32 = %O1750 + %a7
+%b1 : .i32 = %bb1
+
+
+ upper
+

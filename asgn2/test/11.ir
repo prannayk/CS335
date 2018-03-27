@@ -1,0 +1,29 @@
+.define ; main ; .i32 , .i32 ; .i32 @
+
+%a : .i32 = $10
+%b : .i32 = %a + $2
+%c : .i32 = %a * $7
+%d  : .i32 = %a - $40
+goto %a > $5 ? first
+goto second
+.label first:
+%f  : .i32 = %a + $20
+%g3 : .i32 = %a - $40
+goto third
+.label second:
+%i : .i32 = %a + $20
+%j : .i32 = %a - $20
+.label third:
+$k : .i32 = $0
+goto fifth
+.label fourth:
+%a : .i32 = %a + $1
+%i : .i32 = %i + $1
+%j : .i32 = %j + %i
+%k : .i32 = %k + $1
+.label fifth:
+goto %k < %b ? fourth
+goto sixth
+.label sixth
+ret 
+!

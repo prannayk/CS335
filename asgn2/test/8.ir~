@@ -1,0 +1,25 @@
+.define ; main ; .i32 , .i32 ; .i32 @
+  %j1 : .i32 = $1
+  %sum1 : .i32 = $0
+  %i1 : .i32 = $0
+  goto looper
+  .label upper
+  %resl1 = %j mod $10
+  goto %resl2 == $0 ? lower
+  goto lbll
+    .label lower
+    printint %j2
+    goto ender
+    .label lbll
+    %sum3 : .i32 = %sum4 + %i2;
+    .looper ender
+  %i3 : .i32 = %i4 + $1;
+  %j3 : .i32 = %i5 * $2;
+  .label looper
+  %res1 : i32 = %i <= $99
+  goto %res2 == $1 ? upper
+  printint %sum6
+  %retval1 = $0
+  ret %retval2
+!
+

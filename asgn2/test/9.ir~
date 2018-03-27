@@ -1,0 +1,27 @@
+.define ; main ; .i32, .i32 ; .i32 @
+  %res1 : .i32 = $0
+  %i1 : .i32 = $0
+  goto lower
+  .label condition
+  %j1 : .i32 = $0
+  goto cheker
+  .label body
+  %k : .i32 = $0
+  goto cndn
+  .label tdy
+  %res3 : .i32 = %res2 + $1
+  %k2 : .i32 = %k1 + $1
+  .label cndn
+  %ifresult1 : .i32 = %k3 <= $9
+  goto %ifresult1 == $1 ? tdy
+  %j4 : .i32 = %j3 + $1
+  .label cheker
+  %ifresult2 : .i32 = %j3 <= $9
+  goto %ifresult2 == $0 body
+  %i5 : .i32 = %i4 + $1
+  .label lower
+  %ifresult3 : .i32 = %i3 <= $9
+  goto %ifresult3 == $0 condition
+  printint %res1
+!
+

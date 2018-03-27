@@ -1,0 +1,39 @@
+$asdfgdfg : .i32 = $0
+
+.define ; main ; .i32 , .i32 ; .i32 @
+%c : .i32 = $1
+%aa : .i32 = $1
+%ab : .i32 = $1
+%ac : .i32 = $1
+%ad : .i32 = $2
+%ae : .i32 = $0
+%af : .i32 = $1
+%ag : .i32 = $0
+%ah : .i32 = $1
+%result1 : .i32 = %c > $0
+goto %result1 == $1 ? first
+goto second
+.label first
+%D1737 : .i32 = %aa + %ab
+%E1738 : .i32 = %D1737 + %ac
+%F1739 : .i32 = %E1738 + %ad
+%G1740 : .i32 = %F1739 + %ae
+%H1741 : .i32 = %G1740 + %af
+%I1742 : .i32 = %H1741 + %ag
+%ba : .i32 = %D1742 + %ah
+%b : .i32 = %ba
+goto third
+.label second
+%J1745 : .i32 = %aa - %ab
+%K1746 : .i32 = %J1737 + %ac
+%L1747 : .i32 = %K1738 + %ad
+%M1748 : .i32 = %L1739 + %ae
+%N1749 : .i32 = %M1740 + %af
+%O1750 : .i32 = %N1741 + %ag
+%bb : .i32 = %O1750 + %a7
+%b : .i32 = %bb
+.label third
+printint %b
+%T : .i32 = $0
+ret %T
+!

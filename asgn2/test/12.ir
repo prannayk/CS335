@@ -1,0 +1,15 @@
+%g1 : .i32 = $5
+
+.define ; main ; .i32 , .i32 ; .i32 @
+%y1 : .i32 = call myFunc
+ret $0
+!
+
+.define ; myFunc ; .i32 ; .i32 @
+goto %g2 == $0 ? fin
+printint %g3
+%g5 : .i32 = %g4 - $1
+%z1 : .i32 = call myFunc
+.label fin
+ret $0
+!
