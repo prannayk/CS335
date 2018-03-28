@@ -382,7 +382,14 @@ $$->Add($2);
 $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
 		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", NOTYPE);
 $$->Add($1);
-$$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl ;}
+$$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
+// TODO: here is where the symboltable is populated (UNCOMMENT)
+// I assume that the node 1 has a vector of strings called elements for the symbols of the variables, and typename has its "matched" set as the type string
+// vector<string>::iterator it;
+// for (it = $1->elements.begin(); it != $1->elements.end(); it++) {
+// curr->addEntry(it*, $2->matched);
+// }
+}
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", NOTYPE);
 $$->Add($1);
 $$->Add($2);
