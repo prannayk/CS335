@@ -333,10 +333,10 @@ LabelName:
     NewName
 
 IfStatement:
-    IF IfHeader LoopBody ElseIfList Else
+    IF IfHeader CompoundStatement ElseIfList Else
 
 ElseIf:
-    ELSE IF IfHeader LoopBody
+    ELSE IF IfHeader CompoundStatement
 
 ElseIfList:
     %
@@ -346,9 +346,6 @@ Else:
     %
     ELSE CompoundStatement
 
-LoopBody:
-    BLOCK_OPEN StatementList BLOCK_CLOSE
-
 IfHeader:
     OSimpleStatement
     OSimpleStatement STMTEND OSimpleStatement
@@ -357,7 +354,7 @@ ForStatement:
     FOR ForBody
 
 ForBody:
-    ForHeader LoopBody
+    ForHeader CompoundStatement
 
 ForHeader:
     OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement
