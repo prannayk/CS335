@@ -1108,9 +1108,9 @@ $$->Add($2);cout <<"CaseBlockList"<< " " <<"CaseBlock" << endl ;}
 
 ;
 CaseBlock  :
-Case StatementList{$$ = new Node("CaseBlock", NOTYPE);
+Case CompoundStatement STMTEND {$$ = new Node("CaseBlock", NOTYPE);
 $$->Add($1);
-$$->Add($2);cout <<"Case"<< " " <<"StatementList" << endl ;}
+$$->Add($2)->Add($3);cout <<"Case"<< " " <<"CompoundStatement" << $3 << endl ;}
 
 ;
 Case  :
