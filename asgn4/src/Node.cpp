@@ -71,3 +71,25 @@ Node::PrintJS()
 //       ->Print();
 //     return 0;
 // }
+//
+
+STEntry::STEntry(string aName, string aType) {
+  name = aName;
+  type = aType;
+}
+
+ ST::ST(int aDepth, ST* aParent) {
+   depth = aDepth;
+   parent = aParent;
+ }
+ 
+ void
+ ST::addEntry(string aName, string aType) {
+   STEntry* t = new STEntry(aName, aType);
+   entries.push_back(t);
+ }
+ 
+ void
+ ST::addChild(ST* aChild) {
+   children.push_back(aChild);
+ }
