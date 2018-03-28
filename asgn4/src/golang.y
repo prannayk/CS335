@@ -11,11 +11,17 @@ YY_DECL;
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 void yyerror(const char *s);
+
+#include "Node.h"
+ST* root = new ST(0, nullptr);
+ST* curr = root;
+
 %}
 
 %code requires {
     #include "Node.h"
 }
+
 %locations
 %union {
     char* str;
@@ -953,10 +959,20 @@ $$->Add($2);cout <<"Expression"<< " " <<"dec" << " " << $2 << endl ;}
 
 ;
 CompoundStatement  :
-BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("CompoundStatement", NOTYPE, $2->count);
+BLOCK_OPEN {
+  // This is when a new scope starts
+  ST* t = new ST(curr->depth + 1, curr);
+  curr->addChild(t);
+  curr = t;
+}
+StatementList {
+  // This is where stuff ends
+  curr = curr->parent;
+} 
+BLOCK_CLOSE{$$ = new Node("CompoundStatement", NOTYPE, $3->count);
 $$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $3 << endl ;}
+$$->Add($3);
+$$->Add($5);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $5 << endl ;}
 
 ;
 StatementList  :
@@ -1318,6 +1334,8 @@ int main(int argc, char** argv) {
         do {
             yyparse();
         } while (!feof(yyin));
+    cout << curr->children.size() << endl;
+    cout << "fin \n";
     return 0;
 }
 
