@@ -4,13 +4,19 @@
 #include <map>
 #include <string.h>
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
 class Type
 {
+  protected:
+    string representation;
+
   public:
-  bool operator==(const Type& rhs);
+    Type();
+    string GetRepresentation() const;
+    bool operator==(const Type& rhs);
 };
 
 class BasicType : public Type
@@ -19,36 +25,32 @@ class BasicType : public Type
     string name;
 
   public:
+    string GetName() const;
     BasicType(string aName);
-    bool operator==(const Type& rhs);
 };
 
-/* class FuncType : public Type */
-/* { */
-/*   private: */
-/*     vector<Type*> params; */
-/*     Type* returnType; */
+class FuncType : public Type
+{
+  private:
+    Type* returnType;
+    vector<Type*> paramTypes;
 
-/*   public: */
-/*     vector<Type*> GetParams() const; */
-/*     Type* GetReturnType() const; */
-/*     FuncType(vector<Type*> aParams, Type* aReturnType); */
-/*     bool operator==(const FuncType& rhs); */
-/*     bool operator==(const Type& rhs); */
-/* }; */
+  public:
+    Type* GetReturnType() const;
+    vector<Type*> GetParamTypes() const;
+    FuncType(Type* aReturnType, vector<Type*> aParamTypes);
+};
 
-/* class StructType : public Type */
-/* { */
-/*   private: */
-/*     map<string, Type*> fields; */
-/*     string randomSuffix; */
+class StructType : public Type
+{
+  private:
+    map<string, Type*> fields;
+    string randomSuffix;
 
-/*   public: */
-/*     map<string, Type*> GetFields() const; */
-/*     string Hoist(string aStructVariableName, string aFieldName) const; */
-/*     Type* GetTypeFor(string aFieldName) const; */
-/*     StructType(map<string, Type*> aFields); */
-/*     StructType(vector<string> fieldNames, vector<Type*> fieldTypes); */
-/*     bool operator==(const StructType& rhs); */
-/*     bool operator==(const Type& rhs); */
-/* }; */
+  public:
+    map<string, Type*> GetFields() const;
+    string Hoist(string aStructVariableName, string aFieldName) const;
+    Type* GetTypeFor(string aFieldName);
+    StructType(map<string, Type*> aFields);
+    StructType(vector<string> fieldNames, vector<Type*> fieldTypes);
+};
