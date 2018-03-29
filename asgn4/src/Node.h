@@ -55,5 +55,5 @@ class ST {
      ST(int aDepth, ST* aParent);
      void addEntry(string aName, string aType);
      void addChild(ST* aChild);
-
+     Type* getType(string aName);
 };

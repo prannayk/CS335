@@ -375,8 +375,9 @@ VarDeclaration  :
 DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
-		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
+$$->Add($3);inferListType($1, $3); // TODO : Add symbol table entry creation here
+}
+| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
 vector<string>::iterator it;
@@ -385,7 +386,7 @@ cout<<$1->children[i]->children[0]->matched << " : " << $2->type->GetRepresentat
 curr->addEntry($1->children[i]->children[0]->matched, $2->type->GetRepresentation());
 }
 }
-		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
+| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -396,7 +397,8 @@ ConstDeclaration  :
 DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
+$$->Add($3);inferListType($1, $3); // TODO: Add symboltable entry creation here
+}
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -414,9 +416,9 @@ ID{$$ = new Node("Declaration Name", new BasicType("NOTYPE")); $$->Add($1);}
 
 ;
 PointerType  :
-STAR TypeName{$$ = new Node("PointerType", new BasicType("NOTYPE"));
+STAR TypeName{$$ = new Node("PointerType", new BasicType($2->getType()->GetRepresentation(), false, true));
 $$->Add($1);
-$$->Add($2);cout <<"star" << " " << $1<< " " <<"TypeName" << endl ;}
+$$->Add($2);}
 
 ;
 StructType  :
@@ -489,6 +491,7 @@ NewName{$$ = new Node("NewName",new BasicType("NOTYPE")); $$->Add($1);}
 ;
 TypeName  :
 FunctionType{$$ = $1;}
+        | GeneratorType{$$ = $1;}
 		| PointerType{$$ = $1;}
 		| OtherType{$$ = $1;}
 		| DotName{$$ = $1;}
@@ -638,10 +641,18 @@ Expression{$$ = $1;$$->setType($1->getType());}
 ;
 DotName  :
 Name{$$ = $1;}
-		| Name DOT ID{$$ = new Node("DotName", new BasicType("NOTYPE"));
+		| Name DOT ID{
+string s = $1->content;
+string s1  = ".";
+string s3;
+string s2 = $3;
+s = s + s1 + s3;
+$$ = new Node("DotName", new BasicType(s));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Name"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
+$$->Add($3);
+}
+
 
 ;
 PrimaryExprNoParen  :
@@ -744,7 +755,9 @@ ONewName  :
 
 ;
 Name  :
-ID %prec NotParen{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));}
+ID %prec NotParen{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));
+$$->content = $1; 
+}
 
 ;
 ExpressionList  :
@@ -834,8 +847,10 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"paren_open" << " " << $3<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $5<< " " <<"FunctionResult" << endl ;}
-
+$$->Add($6); 
+vector<Type*> paramTypes = createParamList($4);
+$$->setType(new FuncType($6->getType(), paramTypes));
+}
 ;
 GeneratorType  :
 GEN OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("GeneratorType", new BasicType("NOTYPE"));
@@ -844,28 +859,29 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"paren_open" << " " << $3<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $5<< " " <<"FunctionResult" << endl ;}
+$$->Add($6);
+vector <Type*> paramTypes = createParamList($4);
+$$->setType(new FuncType($6->getType(), paramTypes, true));
+}
 
 ;
 FunctionResult  :
 /* Empty Rule */ {$$ = new Node("FunctionResult", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| FunctionReturnType{$$ = new Node("FunctionResult", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"FunctionReturnType" << endl ;}
+$$->Add("");}		| FunctionReturnType{$$ = $1;}
 		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE{$$ = new Node("FunctionResult", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $3 << endl ;}
+$$->Add($3);
+vector<Type*> paramTypes = createParamList($2);
+$$->setType(new CompoundType(paramTypes));
+}
 
 ;
 FunctionReturnType  :
-FunctionType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"FunctionType" << endl ;}
-		| GeneratorType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"GeneratorType" << endl ;}
-		| OtherType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"OtherType" << endl ;}
-		| DotName{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"DotName" << endl ;}
+FunctionType{$$ = $1;}
+		| GeneratorType{$$ = $1;}
+		| OtherType{$$ = $1; }
+		| DotName{$$ = $1;}
 
 ;
 FunctionBody  :
@@ -881,23 +897,26 @@ $$->Add($2);cout <<"ArgumentTypeList"<< " " <<"OComma" << endl ;}
 
 ;
 ArgumentTypeList  :
-ArgumentType{$$ = new Node("ArgumentType", new BasicType("NOTYPE")); $$->Add($1);}
+ArgumentType{$$ = new Node("ArgumentType", $1->getType()); $$->Add($1);}
 		| ArgumentTypeList COMMA ArgumentType{$$ = $1 ; $$->incrementCount($3);}
 
 ;
 ArgumentType  :
-NameOrType{$$ = $1;}
-		| ID NameOrType{$$ = new Node("ArgumentType", new BasicType("NOTYPE"));
+NameOrType{$$ = $1; $$->count = 1;
+//    $$ = new Node() TODO : handle this somehow
+}
+		| ID NameOrType{$$ = new Node("ArgumentType", $2->getType()); $$->count = 2; 
 $$->Add($1);
-$$->Add($2);cout <<"id" << " " << $1<< " " <<"NameOrType" << endl ;}
-		| ID VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
+$$->Add($2);$$->content = $1; }
+		| ID VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
-		| VARIADIC TypeName{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
-$$->Add($1);
+		| VARIADIC TypeName{$$ = new Node("ArgumentType", $2->getType(), 1, true); $$->count = 2;
+$$->Add($1); // TODO : handling this is unclear
 $$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
-		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
-$$->Add($1);cout <<"variadic" << " " << $1 << endl ;}
+		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
+$$->Add($1);cout <<"variadic" << " " << $1 << endl ; // TODO: handle this, since it opens possibility of no types being defined for the entire list
+}
 
 ;
 NameOrType  :

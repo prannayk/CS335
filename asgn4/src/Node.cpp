@@ -21,7 +21,6 @@ Node::Node(string aMatched, Type* aType)
   , count(1)
   , flag(false)
 {
-    type = new BasicType("NOTYPE");
 }
 
 Node::Node(string aMatched, Type* aType, int aCount)
@@ -31,7 +30,6 @@ Node::Node(string aMatched, Type* aType, int aCount)
   , count(aCount)
   , flag(false)
 {
-    type = new BasicType("NOTYPE");
 }
 
 Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
@@ -41,7 +39,6 @@ Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
   , count(aCount)
   , flag(aFlag)
 {
-    type = new BasicType("NOTYPE");
 }
 
 
@@ -103,4 +100,10 @@ STEntry::STEntry(string aName, string aType) {
  void
  ST::addChild(ST* aChild) {
    children.push_back(aChild);
+ }
+ Type*
+ ST::getType(string aName){
+    // redundant code
+    // TODO : replace with real code
+    return new BasicType("random");
  }
