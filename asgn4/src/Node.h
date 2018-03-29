@@ -39,3 +39,27 @@ class Node
     void setType(Type aType){ type = aType; }
     Type getType() { return this->type; }
 };
+
+class STEntry
+{
+  public:
+    string name;
+    string type;
+
+    STEntry(string aName, string aType);
+
+};
+
+class ST {
+   public:
+     int depth;
+     vector<STEntry*> entries;
+     vector<ST*> children;
+     ST* parent;
+     // prefix method?
+ 
+     ST(int aDepth, ST* aParent);
+     void addEntry(string aName, string aType);
+     void addChild(ST* aChild);
+
+};

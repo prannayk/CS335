@@ -12,11 +12,17 @@ YY_DECL;
 extern "C" int yyparse();
 extern "C" FILE *yyin;
 void yyerror(const char *s);
+
+#include "Node.h"
+ST* root = new ST(0, nullptr);
+ST* curr = root;
+
 %}
 
 %code requires {
     #include "Node.h"
 }
+
 %locations
 %union {
     char* str;
@@ -371,7 +377,14 @@ $$->Add($2);
 $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
 		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", NOTYPE);
 $$->Add($1);
-$$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl ;}
+$$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
+// TODO: here is where the symboltable is populated (UNCOMMENT)
+// I assume that the node 1 has a vector of strings called elements for the symbols of the variables, and typename has its "matched" set as the type string
+// vector<string>::iterator it;
+// for (it = $1->elements.begin(); it != $1->elements.end(); it++) {
+// curr->addEntry(it*, $2->matched);
+// }
+}
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", NOTYPE);
 $$->Add($1);
 $$->Add($2);
@@ -923,10 +936,20 @@ $$->Add($2);cout <<"Expression"<< " " <<"dec" << " " << $2 << endl ;}
 
 ;
 CompoundStatement  :
-BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("CompoundStatement", NOTYPE, $2->count);
+BLOCK_OPEN {
+  // This is when a new scope starts
+  ST* t = new ST(curr->depth + 1, curr);
+  curr->addChild(t);
+  curr = t;
+}
+StatementList {
+  // This is where stuff ends
+  curr = curr->parent;
+} 
+BLOCK_CLOSE{$$ = new Node("CompoundStatement", NOTYPE, $3->count);
 $$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $3 << endl ;}
+$$->Add($3);
+$$->Add($5);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $5 << endl ;}
 
 ;
 StatementList  :
@@ -1071,9 +1094,9 @@ $$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);}
 
 ;
 CaseBlock  :
-Case StatementList{$$ = new Node("CaseBlock", NOTYPE);
+Case CompoundStatement STMTEND {$$ = new Node("CaseBlock", NOTYPE);
 $$->Add($1);
-$$->Add($2);cout <<"Case"<< " " <<"StatementList" << endl ;}
+$$->Add($2)->Add($3);cout <<"Case"<< " " <<"CompoundStatement" << $3 << endl ;}
 
 ;
 Case  :
@@ -1269,6 +1292,8 @@ int main(int argc, char** argv) {
         do {
             yyparse();
         } while (!feof(yyin));
+    cout << curr->children.size() << endl;
+    cout << "fin \n";
     return 0;
 }
 
