@@ -58,5 +58,6 @@ class ST {
      ST(int aDepth, ST* aParent);
      void addEntry(string aName, Type* aType, bool aConstant);
      void addChild(ST* aChild);
+     STEntry* getVar(string a);
 
 };

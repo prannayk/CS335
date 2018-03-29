@@ -110,3 +110,17 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
  ST::addChild(ST* aChild) {
    children.push_back(aChild);
  }
+
+STEntry*
+ST::getVar(string a) {
+  vector<STEntry*>::iterator it;
+  for (it = entries.begin(); it != entries.end(); it++) {
+    if (a.compare((*it)->name) == 0) {
+      return *it;
+    }
+  }
+  if (depth == 0) {
+    return nullptr;
+  }
+  return parent->getVar(a);
+}
