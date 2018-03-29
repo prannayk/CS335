@@ -12,17 +12,17 @@ extern vector<Type*>
 createParamList(Node * list){
     vector<Type*> paramTypes; // parameter type list
     Type* def, *ntype; int mode = 1; // checks if the passed types are valid or not
-    def = list->children[0]->children[list->count-1]->getType(); // default paramter in the right to left pass
+    def = list->children[list->count-1]->getType(); // default paramter in the right to left pass
     ntype = new BasicType("NOTYPE"); // works, but never used, check before removing
     for (int i=list->count - 1; i>= 0; i--){
-        if (list->children[0]->children[i]->count > 1)  mode = 0; // TODO : error condition
+        if (list->children[i]->count > 1)  mode = 0; // TODO : error condition
         if(mode)
-            paramTypes.push_back(list->children[0]->children[i]->getType());
+            paramTypes.push_back(list->children[i]->getType());
         else{
-            if(list->children[0]->children[i]->count > 1){
-                if (def != list->children[0]->children[i]->getType()) 
-                    def = list->children[0]->children[i]->getType();
-                paramTypes.push_back(list->children[0]->children[i]->getType());
+            if(list->children[i]->count > 1){
+                if (def != list->children[i]->getType()) 
+                    def = list->children[i]->getType();
+                paramTypes.push_back(list->children[i]->getType());
             } else {
                 paramTypes.push_back(def);
             }
@@ -31,6 +31,7 @@ createParamList(Node * list){
     reverse(paramTypes.begin(), paramTypes.end());
     return paramTypes;
 }
+
 extern void printST(ST* root) {
   
   cout << string(root->depth * 8, ' ') << "Variables in this scope: " << endl;
@@ -58,3 +59,44 @@ extern void populateST(Node* declNameList, Node* TypeName, ST* curr, bool consta
 extern void populateST(Node* declNameList, Node* TypeName, ST* curr) {
   populateST(declNameList, TypeName, curr, 0);
 }
+
+extern vector<string> getNameList(Node * list){
+   vector<string> names;
+   for(int i=0; i< list->children.size(); i++)
+       names.push_back(list->children[i]->content);
+   return names;
+}
+
+extern vector<Type*> repeatType(Node * TypeName, int count){
+    vector<Type*> repeats;
+    for(int i=0; i<count; ++i)  repeats.push_back(TypeName->getType());
+    return repeats;
+}
+
+extern vector<string> getNames(Node * list){
+    vector<string> nameList;
+    for(int i=0;  i < list->children.size() ; ++i ){
+        if(list->children[i]->count > 1){
+            for(int j = 0; j < list->children[i]->str_child.size(); ++j)
+                nameList.push_back(list->children[i]->str_child[j]);
+        } else {
+            string s1 = "empty";
+            nameList.push_back(s1);
+        }
+    }
+    return nameList;
+}
+
+extern vector<Type*> getTypes(Node * list){
+    vector<Type*> typeList;
+    for(int i=0; i < list->children.size() ; ++i ){
+        if(list->children[i]->count > 1){
+            for(int j = 0; j < list->children[i]->type_child.size(); ++j)
+                typeList.push_back(list->children[i]->type_child[j]);
+        } else {
+            typeList.push_back(list->children[i]->getType());
+        }
+    }
+    return typeList;
+}
+

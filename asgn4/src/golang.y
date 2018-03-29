@@ -426,49 +426,81 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);cout <<"struct" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"block_open" << " " << $3<< " " <<"StructDeclarationList"<< " " <<"Ostmtend"<< " " <<"block_close" << " " << $6 << endl ;}
+$$->Add($6);
+vector<string> fieldNames = getNames($4);
+vector<Type*> typeList = getTypes($4);
+$$->setType(new StructType(fieldNames, typeList));
+}
 		| STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("StructType", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"struct" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"block_open" << " " << $3<< " " <<"block_close" << " " << $4 << endl ;}
+$$->Add($4);
+vector <string> fieldNames;
+vector<Type*> typeList;
+$$->setType(new StructType(fieldNames, typeList));
+}
 
 ;
 StructDeclarationList  :
-StructDeclaration{$$ = new Node("Struct Declaration", new BasicType("NOTYPE")); $$->Add($1);}
-		| StructDeclarationList STMTEND StructDeclaration{$$ = $1; $1->incrementCount($3);}
+StructDeclaration{$$ = new Node("Struct Declaration", $$->getType()); $$->Add($1); $$->content = $1->content;}
+| StructDeclarationList STMTEND StructDeclaration{$$ = $1; $1->incrementCount($3);}
 
 ;
 StructDeclaration  :
 NewNameList TypeName OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"NewNameList"<< " " <<"TypeName"<< " " <<"OLiteral" << endl ;}
-		| Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
+$$->Add($3);
+$$->str_child = getNameList($1); 
+$$->type_child = repeatType($2, $$->str_child.size());
+if ($3->getType() != new BasicType("NOTYPE"))
+    $$->content = $3->content;
+$$->count = 2;
+}
+| Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"Embed"<< " " <<"OLiteral" << endl ;}
+$$->Add($2);
+$$->setType($1->getType());
+if ($2->getType() != new BasicType("NOTYPE"))
+    $$->content = $2->content;
+}
 		| PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"Embed"<< " " <<"paren_close" << " " << $3<< " " <<"OLiteral" << endl ;}
+$$->Add($4);
+$$->setType($2->getType());
+if ($4->getType() != new BasicType("NOTYPE"))
+    $$->content = $4->content;
+}
 		| STAR Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"star" << " " << $1<< " " <<"Embed"<< " " <<"OLiteral" << endl ;}
-		| PAREN_OPEN STAR Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
+$$->setType(new BasicType($2->getType()->GetRepresentation(), false, true));
+if ($3->getType() != new BasicType("NOTYPE"))
+    $$->content = $3->content;
+}
+        | PAREN_OPEN STAR Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"paren_open" << " " << $1<< " " <<"star" << " " << $2<< " " <<"Embed"<< " " <<"paren_close" << " " << $4<< " " <<"OLiteral" << endl ;}
+$$->Add($5);
+$$->setType(new BasicType($3->getType()->GetRepresentation(), false, true));
+if ($5->getType() != new BasicType("NOTYPE"))
+    $$->content = $5->content;
+}
 		| STAR PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"star" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"Embed"<< " " <<"paren_close" << " " << $4<< " " <<"OLiteral" << endl ;}
-
+$$->Add($5);
+$$->setType(new BasicType($3->getType()->GetRepresentation(), false, true));
+if ($5->getType() != new BasicType("NOTYPE"))
+    $$->content = $5->content;
+}
 ;
 Embed  :
 PackName{$$ = $1;}
@@ -478,8 +510,13 @@ PackName  :
 ID DOT ID{$$ = new Node("PackName", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"id" << " " << $1<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
-		| ID{$$ = new Node("PackName", new BasicType("NOTYPE")); $$->Add($1);}
+$$->Add($3);
+string s1, s2, s3;
+s1 = $1; s2 = "." ; s3 = $3;
+s1 = s1 + s2 + s3;
+$$->setType(new BasicType(s1));
+}
+| ID{$$ = new Node("PackName", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1)); }
 
 ;
 NewNameList  :
@@ -725,12 +762,12 @@ $$->Add($2);cout <<"star" << " " << $1<< " " <<"NonExpressionType" << endl ;}
 
 ;
 OtherType  :
-SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new BasicType("NOTYPE"));
+SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"square_open" << " " << $1<< " " <<"OExpression"<< " " <<"square_close" << " " << $3<< " " <<"TypeName" << endl ;}
-		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new BasicType("NOTYPE"));
+		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -740,7 +777,7 @@ $$->Add($4);cout <<"square_open" << " " << $1<< " " <<"variadic" << " " << $2<< 
 
 ;
 NewName  :
-ID{$$ = new Node("NewName", new BasicType("NOTYPE")); $$->Add($1);}
+ID{$$ = new Node("NewName", new BasicType("NOTYPE")); $$->Add($1); $$->content = $1;}
 
 ;
 DeclName  :
@@ -846,7 +883,7 @@ $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6); 
-vector<Type*> paramTypes = createParamList($4);
+vector<Type*> paramTypes = createParamList($4->children[0]);
 $$->setType(new FuncType($6->getType(), paramTypes));
 }
 ;
@@ -858,7 +895,7 @@ $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);
-vector <Type*> paramTypes = createParamList($4);
+vector <Type*> paramTypes = createParamList($4->children[0]);
 $$->setType(new FuncType($6->getType(), paramTypes, true));
 }
 
@@ -870,7 +907,7 @@ $$->Add("");}		| FunctionReturnType{$$ = $1;}
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-vector<Type*> paramTypes = createParamList($2);
+vector<Type*> paramTypes = createParamList($2->children[0]);
 $$->setType(new CompoundType(paramTypes));
 }
 
@@ -1167,7 +1204,7 @@ $$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<<
 InterfaceDeclarationList  :
 InterfaceDeclaration{$$ = new Node("InterfaceDeclarationList", new BasicType("NOTYPE"));
 $$->Add($1);}
-		| InterfaceDeclarationList STMTEND InterfaceDeclaration{$$ = $1 ; $$->incrementCount($1);}
+		| InterfaceDeclarationList STMTEND InterfaceDeclaration{$$ = $1 ; $$->incrementCount($3);}
 
 ;
 InterfaceType  :

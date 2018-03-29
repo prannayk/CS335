@@ -22,3 +22,7 @@ extern vector<Type*> createParamList(Node * list);
 extern void printST(ST* root);
 extern void populateST(Node* declNameList, Node* TypeName, ST* curr);
 extern void populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant);
+extern vector<string> getNames(Node * list);
+extern vector<Type*> getTypes(Node * list);
+extern vector<string> getNameList(Node * list);
+extern vector<Type*> repeatType(Node * TypeName, int count);

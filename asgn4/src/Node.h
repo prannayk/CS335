@@ -18,6 +18,8 @@ class Node
     string content;
     Type *type;
     vector<Node*> children;
+    vector<string> str_child;
+    vector<Type*> type_child;
     int count; // number of args or elements in list
     bool flag; // variadic function marked
     Node(string aMatched, Type* aType, int aCount, bool aFlag);
