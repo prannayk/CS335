@@ -81,9 +81,15 @@ Node::incrementCount(Node *nNode){
 // }
 //
 
-STEntry::STEntry(string aName, string aType) {
+STEntry::STEntry(string aName, Type* aType) {
   name = aName;
   type = aType;
+}
+
+STEntry::STEntry(string aName, Type* aType, bool aConstant) {
+  name = aName;
+  type = aType;
+  constant = aConstant;
 }
 
  ST::ST(int aDepth, ST* aParent) {
@@ -92,8 +98,8 @@ STEntry::STEntry(string aName, string aType) {
  }
  
  void
- ST::addEntry(string aName, string aType) {
-   STEntry* t = new STEntry(aName, aType);
+ ST::addEntry(string aName, Type* aType, bool aConstant) {
+   STEntry* t = new STEntry(aName, aType, aConstant);
    entries.push_back(t);
  }
  

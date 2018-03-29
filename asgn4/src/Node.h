@@ -30,6 +30,7 @@ class Node
     void incrementCount(Node * nNode); // add a Node, make a list
     void setType(Type *aType){ type = aType; }
     Type* getType() { return this->type; }
+
 };
 
 // symbol table entry data
@@ -38,9 +39,11 @@ class STEntry
 {
   public:
     string name;
-    string type;
+    Type* type;
+    bool constant;
 
-    STEntry(string aName, string aType);
+    STEntry(string aName, Type* aType);
+    STEntry(string aName, Type* aType, bool aConstant);
 
 };
 
@@ -53,7 +56,7 @@ class ST {
      // prefix method?
  
      ST(int aDepth, ST* aParent);
-     void addEntry(string aName, string aType);
+     void addEntry(string aName, Type* aType, bool aConstant);
      void addChild(ST* aChild);
      Type* getType(string aName);
 };
