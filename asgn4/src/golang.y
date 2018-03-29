@@ -382,7 +382,7 @@ $$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
 vector<string>::iterator it;
 for (int i = 0; i < $1->children.size(); ++i) {
 cout<<$1->children[i]->children[0]->matched << " : " << $2->type->GetRepresentation()<<endl;
-curr->addEntry($1->children[i]->children[0]->mathced, $2->type->GetRepresentation());
+curr->addEntry($1->children[i]->children[0]->matched, $2->type->GetRepresentation());
 }
 }
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
