@@ -379,17 +379,14 @@ $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <
 		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
-vector<string>::iterator it;
-for (int i = 0; i < $1->children.size(); ++i) {
-cout<<$1->children[i]->children[0]->matched << " : " << $2->type->GetRepresentation()<<endl;
-curr->addEntry($1->children[i]->children[0]->matched, $2->type->GetRepresentation());
-}
+populateST($1, $2, curr);
 }
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;}
+$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;
+populateST($1, $2, curr);}
 
 ;
 ConstDeclaration  :
@@ -401,7 +398,8 @@ $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;}
+$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;
+populateST($1, $2, curr, 1);}
 
 ;
 DeclarationNameList  :
@@ -1292,8 +1290,9 @@ int main(int argc, char** argv) {
         do {
             yyparse();
         } while (!feof(yyin));
-    cout << curr->children.size() << endl;
-    cout << "fin \n";
+    cout << "Printing ST" << endl;
+    printST(root);
+    cout << "fin" << endl;
     return 0;
 }
 
