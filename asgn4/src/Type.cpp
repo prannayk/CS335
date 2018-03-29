@@ -34,8 +34,29 @@ Type::operator==(const Type& rhs)
 BasicType::BasicType(string aName)
   : Type()
   , name(aName)
+  , variadic(false)
+  , pointer(false)
 {
     this->representation = aName;
+}
+
+BasicType::BasicType(string aName, bool flag)
+    : Type()
+    , name(aName)
+    , variadic(flag)
+    , pointer(false)
+{
+    this->representation = aName;
+}
+
+BasicType::BasicType(string aName, bool aFlag, bool aPointer)
+    : Type()
+    , name(aName)
+    , variadic(aFlag)
+    , pointer(aPointer)
+{
+    string star = "*";
+    this->representation = star + aName;
 }
 
 string
@@ -44,9 +65,27 @@ BasicType::GetName() const
     return this->name;
 }
 
+FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
+  : returnType(aReturnType)
+  , paramTypes(aParamTypes)
+  , generator(flag)
+{
+    if(flag)    this->representation = "gen(";
+    else this->representation = "func(";
+    vector<Type*>::iterator it;
+    for (it = paramTypes.begin(); it != paramTypes.end(); ++it) {
+        this->representation += (*it)->GetRepresentation();
+        if (it + 1 != paramTypes.end()) {
+            this->representation += ", ";
+        }
+    }
+    this->representation += ") " + returnType->GetRepresentation();
+}
+
 FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
   : returnType(aReturnType)
   , paramTypes(aParamTypes)
+  , generator(false)
 {
     this->representation = "func(";
     vector<Type*>::iterator it;
@@ -102,4 +141,24 @@ string
 StructType::Hoist(string aStructVariableName, string aFieldName) const
 {
     return aStructVariableName + "_" + aFieldName + "_" + this->randomSuffix;
+}
+
+CompoundType::CompoundType( vector<Type*> aParamTypes)
+  : typeList(aParamTypes)
+{
+    this->representation = "(";
+    vector<Type*>::iterator it;
+    for (it = aParamTypes.begin(); it != aParamTypes.end(); ++it) {
+        this->representation += (*it)->GetRepresentation();
+        if (it + 1 != aParamTypes.end()) {
+            this->representation += ", ";
+        }
+    }
+    this->representation += ") ";
+}
+
+vector<Type*>
+CompoundType::GetTypeList() const
+{
+    return this->typeList;
 }

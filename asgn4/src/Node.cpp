@@ -21,7 +21,6 @@ Node::Node(string aMatched, Type* aType)
   , count(1)
   , flag(false)
 {
-    type = new BasicType("NOTYPE");
 }
 
 Node::Node(string aMatched, Type* aType, int aCount)
@@ -31,7 +30,6 @@ Node::Node(string aMatched, Type* aType, int aCount)
   , count(aCount)
   , flag(false)
 {
-    type = new BasicType("NOTYPE");
 }
 
 Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
@@ -41,7 +39,6 @@ Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
   , count(aCount)
   , flag(aFlag)
 {
-    type = new BasicType("NOTYPE");
 }
 
 
