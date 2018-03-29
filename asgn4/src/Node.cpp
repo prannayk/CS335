@@ -10,38 +10,38 @@ Node::Add(Node* aNode)
 Node*
 Node::Add(string str)
 {
-    this->children.push_back(new Node(str, NOTYPE));
+    this->children.push_back(new Node(str, new BasicType("NoType")));
     return this;
 }
 
-Node::Node(string aMatched, Type aType)
+Node::Node(string aMatched, Type* aType)
   : matched(aMatched)
   , type(aType)
   , children()
   , count(1)
   , flag(false)
 {
-    type = NOTYPE;
+    type = new BasicType("NOTYPE");
 }
 
-Node::Node(string aMatched, Type aType, int aCount)
+Node::Node(string aMatched, Type* aType, int aCount)
   : matched(aMatched)
   , type(aType)
   , children()
   , count(aCount)
   , flag(false)
 {
-    type = NOTYPE;
+    type = new BasicType("NOTYPE");
 }
 
-Node::Node(string aMatched, Type aType, int aCount, bool aFlag)
+Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
   : matched(aMatched)
   , type(aType)
   , children()
   , count(aCount)
   , flag(aFlag)
 {
-    type = NOTYPE;
+    type = new BasicType("NOTYPE");
 }
 
 
@@ -75,10 +75,10 @@ Node::incrementCount(Node *nNode){
 // int
 // main()
 // {
-//     Node* parentNode = new Node("parent", NOTYPE);
+//     Node* parentNode = new Node("parent", new BasicType("NOTYPE"));
 //     parentNode->Add("terminalChild")
 //       ->Add((new Node("nonTerminalChild",
-//       NOTYPE))->Add("SecondTerminalChild"))
+//       new BasicType("NOTYPE")))->Add("SecondTerminalChild"))
 //       ->Print();
 //     return 0;
 // }

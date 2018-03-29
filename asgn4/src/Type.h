@@ -5,6 +5,7 @@
 #include <string.h>
 #include <vector>
 #include <ctime>
+#include <typeinfo>
 
 using namespace std;
 

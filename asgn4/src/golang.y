@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string.h>
 #include "helpers.h"
+#include "Type.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -254,43 +255,43 @@ ST* curr = root;
 %type		<nt>		PseudoCall
 %%
 StartSymbol  :
-SourceFile{$$ = new Node("StartSymbol", NOTYPE);
+SourceFile{$$ = new Node("StartSymbol", new BasicType("NOTYPE"));
 $$->Add($1);$$->PrintJS();cout <<"SourceFile" << endl ;}
 
 ;
 SourceFile  :
-Package Imports DeclarationList{$$ = new Node("SourceFile", NOTYPE);
+Package Imports DeclarationList{$$ = new Node("SourceFile", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Package"<< " " <<"Imports"<< " " <<"DeclarationList" << endl ;}
 
 ;
 Package  :
-PACKAGE ID STMTEND{$$ = new Node("Package", NOTYPE);
+PACKAGE ID STMTEND{$$ = new Node("Package", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"package" << " " << $1<< " " <<"id" << " " << $2<< " " <<"stmtend" << " " << $3 << endl ;}
 
 ;
 Imports  :
-/* Empty Rule */ {$$ = new Node("Imports", NOTYPE, 0);
-$$->Add("");}		| Imports Import STMTEND{$$ = new Node("Imports", NOTYPE, $1->count + 1);
+/* Empty Rule */ {$$ = new Node("Imports", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| Imports Import STMTEND{$$ = new Node("Imports", new BasicType("NOTYPE"), $1->count + 1);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Imports"<< " " <<"Import"<< " " <<"stmtend" << " " << $3 << endl ;}
 
 ;
 Import  :
-IMPORT ImportStatement{$$ = new Node("Import", NOTYPE);
+IMPORT ImportStatement{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"import" << " " << $1<< " " <<"ImportStatement" << endl ;}
-		| IMPORT PAREN_OPEN ImportStatementList Ostmtend PAREN_CLOSE{$$ = new Node("Import", NOTYPE);
+		| IMPORT PAREN_OPEN ImportStatementList Ostmtend PAREN_CLOSE{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"import" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"ImportStatementList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| IMPORT PAREN_OPEN PAREN_CLOSE{$$ = new Node("Import", NOTYPE);
+		| IMPORT PAREN_OPEN PAREN_CLOSE{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"import" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
@@ -298,27 +299,27 @@ $$->Add($3);cout <<"import" << " " << $1<< " " <<"paren_open" << " " << $2<< " "
 ;
 ImportStatement  :
 Literal{$$ = $1;}
-		| ID Literal{$$ = new Node("ImportStatement", NOTYPE);
+		| ID Literal{$$ = new Node("ImportStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"Literal" << endl ;}
-		| DOT Literal{$$ = new Node("ImportStatement", NOTYPE);
+		| DOT Literal{$$ = new Node("ImportStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"dot" << " " << $1<< " " <<"Literal" << endl ;}
 
 ;
 ImportStatementList  :
-ImportStatement{$$ = new Node("ImportStatement", NOTYPE); $$->Add($1);}
+ImportStatement{$$ = new Node("ImportStatement", new BasicType("NOTYPE")); $$->Add($1);}
 		| ImportStatementList STMTEND ImportStatement{$$ = $1; $$->incrementCount($3);}
 
 ;
 Ostmtend  :
-/* Empty Rule */ {$$ = new Node("Ostmtend", NOTYPE, 0);
-$$->Add("");}		| STMTEND{$$ = new Node("Ostmtend", NOTYPE);
+/* Empty Rule */ {$$ = new Node("Ostmtend", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| STMTEND{$$ = new Node("Ostmtend", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"stmtend" << " " << $1 << endl ;}
 
 ;
 DeclarationList  :
-/* Empty Rule */ {$$ = new Node("DeclarationList", NOTYPE, 0);
+/* Empty Rule */ {$$ = new Node("DeclarationList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| DeclarationList Declaration STMTEND{$$ = $1; $$->incrementCount($2);}
 
 ;
@@ -329,63 +330,62 @@ CommonDeclaration{$$ = $1;}
 
 ;
 CommonDeclaration  :
-VAR VarDeclaration{$$ = new Node("CommonDeclaration", NOTYPE);
+VAR VarDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"var" << " " << $1<< " " <<"VarDeclaration" << endl ;}
-		| VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"var" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"VarDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| VAR PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| VAR PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"var" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
-		| CONST ConstDeclaration{$$ = new Node("CommonDeclaration", NOTYPE);
+		| CONST ConstDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"const" << " " << $1<< " " <<"ConstDeclaration" << endl ;}
-		| CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"const" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"ConstDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| CONST PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| CONST PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"const" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
-		| TYPE TypeDeclaration{$$ = new Node("CommonDeclaration", NOTYPE);
+		| TYPE TypeDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"type" << " " << $1<< " " <<"TypeDeclaration" << endl ;}
-		| TYPE PAREN_OPEN TypeDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| TYPE PAREN_OPEN TypeDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"type" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"TypeDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| TYPE PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", NOTYPE);
+		| TYPE PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"type" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
 
 ;
 VarDeclaration  :
-DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", NOTYPE);
+DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
-		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", NOTYPE);
+		| DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
-// TODO: here is where the symboltable is populated (UNCOMMENT)
-// I assume that the node 1 has a vector of strings called elements for the symbols of the variables, and typename has its "matched" set as the type string
-// vector<string>::iterator it;
-// for (it = $1->elements.begin(); it != $1->elements.end(); it++) {
-// curr->addEntry(it*, $2->matched);
-// }
+vector<string>::iterator it;
+for (int i = 0; i < $1->children.size(); ++i) {
+cout<<$1->children[i]->children[0]->matched << " : " << $2->type->GetRepresentation()<<endl;
+curr->addEntry($1->children[i]->children[0]->mathced, $2->type->GetRepresentation());
 }
-		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", NOTYPE);
+}
+		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -393,11 +393,11 @@ $$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" <
 
 ;
 ConstDeclaration  :
-DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", NOTYPE);
+DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"DeclarationNameList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
-		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", NOTYPE);
+		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -405,29 +405,29 @@ $$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" <
 
 ;
 DeclarationNameList  :
-DeclarationName{$$ = new Node("Declaration Name", NOTYPE); $$->Add($1); }
+DeclarationName{$$ = new Node("Declaration Name List", new BasicType("NOTYPE")); $$->Add($1); }
 		| DeclarationNameList COMMA DeclarationName{$$ = $1; $$->incrementCount($3);}
 
 ;
 DeclarationName  :
-ID{$$ = new Node("Declaration Name", NOTYPE); $$->Add($1);}
+ID{$$ = new Node("Declaration Name", new BasicType("NOTYPE")); $$->Add($1);}
 
 ;
 PointerType  :
-STAR TypeName{$$ = new Node("PointerType", NOTYPE);
+STAR TypeName{$$ = new Node("PointerType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"star" << " " << $1<< " " <<"TypeName" << endl ;}
 
 ;
 StructType  :
-STRUCT OGenericTypeList BLOCK_OPEN StructDeclarationList Ostmtend BLOCK_CLOSE{$$ = new Node("StructType", NOTYPE, $2->count);
+STRUCT OGenericTypeList BLOCK_OPEN StructDeclarationList Ostmtend BLOCK_CLOSE{$$ = new Node("StructType", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);cout <<"struct" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"block_open" << " " << $3<< " " <<"StructDeclarationList"<< " " <<"Ostmtend"<< " " <<"block_close" << " " << $6 << endl ;}
-		| STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("StructType", NOTYPE, $2->count);
+		| STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("StructType", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -435,34 +435,34 @@ $$->Add($4);cout <<"struct" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"blo
 
 ;
 StructDeclarationList  :
-StructDeclaration{$$ = new Node("Struct Declaration", NOTYPE); $$->Add($1);}
+StructDeclaration{$$ = new Node("Struct Declaration", new BasicType("NOTYPE")); $$->Add($1);}
 		| StructDeclarationList STMTEND StructDeclaration{$$ = $1; $1->incrementCount($3);}
 
 ;
 StructDeclaration  :
-NewNameList TypeName OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+NewNameList TypeName OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"NewNameList"<< " " <<"TypeName"<< " " <<"OLiteral" << endl ;}
-		| Embed OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+		| Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"Embed"<< " " <<"OLiteral" << endl ;}
-		| PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+		| PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"Embed"<< " " <<"paren_close" << " " << $3<< " " <<"OLiteral" << endl ;}
-		| STAR Embed OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+		| STAR Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"star" << " " << $1<< " " <<"Embed"<< " " <<"OLiteral" << endl ;}
-		| PAREN_OPEN STAR Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+		| PAREN_OPEN STAR Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"paren_open" << " " << $1<< " " <<"star" << " " << $2<< " " <<"Embed"<< " " <<"paren_close" << " " << $4<< " " <<"OLiteral" << endl ;}
-		| STAR PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", NOTYPE);
+		| STAR PAREN_OPEN Embed PAREN_CLOSE OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -475,15 +475,15 @@ PackName{$$ = $1;}
 
 ;
 PackName  :
-ID DOT ID{$$ = new Node("PackName", NOTYPE);
+ID DOT ID{$$ = new Node("PackName", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"id" << " " << $1<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
-		| ID{$$ = new Node("PackName", NOTYPE); $$->Add($1);}
+		| ID{$$ = new Node("PackName", new BasicType("NOTYPE")); $$->Add($1);}
 
 ;
 NewNameList  :
-NewName{$$ = new Node("NewName",NOTYPE); $$->Add($1);}
+NewName{$$ = new Node("NewName",new BasicType("NOTYPE")); $$->Add($1);}
 		| NewNameList COMMA NewName{$$ = $1; $$->incrementCount($3);}
 
 ;
@@ -497,104 +497,104 @@ FunctionType{$$ = $1;}
 ;
 VarDeclarationList  :
 VarDeclarationList STMTEND VarDeclaration{$$ = $1; $$->incrementCount($3); }
-		| VarDeclaration{$$ = new Node("VarDeclaration", NOTYPE); $$->Add($1);}
+		| VarDeclaration{$$ = new Node("VarDeclaration", new BasicType("NOTYPE")); $$->Add($1);}
 
 ;
 ConstDeclarationList  :
-ConstDeclaration{$$ = new Node("Constant Declaration", NOTYPE); $$->Add($1);}
+ConstDeclaration{$$ = new Node("Constant Declaration", new BasicType("NOTYPE")); $$->Add($1);}
 		| ConstDeclarationList STMTEND ConstDeclaration{$$ = $1; $$->incrementCount($3);}
 
 ;
 TypeDeclaration  :
-TypeDeclarationName TypeName{$$ = new Node("TypeDeclaration", NOTYPE);
+TypeDeclarationName TypeName{$$ = new Node("TypeDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"TypeDeclarationName"<< " " <<"TypeName" << endl ;}
 
 ;
 TypeDeclarationName  :
-ID{$$ = new Node("TypeDeclarationName", NOTYPE);
+ID{$$ = new Node("TypeDeclarationName", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"id" << " " << $1 << endl ;}
 
 ;
 TypeDeclarationList  :
-TypeDeclaration{$$ = new Node("TypeDeclaration", NOTYPE); $$->Add($1);}
+TypeDeclaration{$$ = new Node("TypeDeclaration", new BasicType("NOTYPE")); $$->Add($1);}
 		| TypeDeclarationList STMTEND TypeDeclaration{$$ = $1; $$->incrementCount($3); }
 
 ;
 Expression  :
-Expression STAR Expression{$$ = new Node("Expression", NOTYPE);
+Expression STAR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"star" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression DIV Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression DIV Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"div" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression MOD Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression MOD Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"mod" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression LS Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression LS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"ls" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression RS Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression RS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"rs" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression AMPERSAND Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression AMPERSAND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"ampersand" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression NOT_AND Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression NOT_AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"not_and" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression ADD Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression ADD Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"add" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression SUB Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression SUB Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"sub" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression BIT_OR Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression BIT_OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"bit_or" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression CARET Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression CARET Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"caret" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression AND Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"and" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression OR Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"or" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression EQ Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression EQ Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"eq" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression NE Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression NE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"ne" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression GE Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression GE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"ge" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression GT Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression GT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"gt" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression LE Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression LE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"le" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression LT Expression{$$ = new Node("Expression", NOTYPE);
+		| Expression LT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"lt" << " " << $2<< " " <<"Expression" << endl ;}
@@ -602,25 +602,25 @@ $$->Add($3);cout <<"Expression"<< " " <<"lt" << " " << $2<< " " <<"Expression" <
 
 ;
 OExpression  :
-/* Empty Rule */ {$$ = new Node("OExpression", NOTYPE, 0);
-$$->Add("");}		| Expression{$$ = new Node("OExpression", NOTYPE);
+/* Empty Rule */ {$$ = new Node("OExpression", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| Expression{$$ = new Node("OExpression", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"Expression" << endl ;}
 
 ;
 UnaryExpr  :
-STAR UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
+STAR UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"star" << " " << $1<< " " <<"UnaryExpr" << endl ;}
-		| AMPERSAND UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
+		| AMPERSAND UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"ampersand" << " " << $1<< " " <<"UnaryExpr" << endl ;}
-		| ADD UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
+		| ADD UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"add" << " " << $1<< " " <<"UnaryExpr" << endl ;}
-		| SUB UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
+		| SUB UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"sub" << " " << $1<< " " <<"UnaryExpr" << endl ;}
-		| NOT_OP UnaryExpr{$$ = new Node("UnaryExpr", NOTYPE);
+		| NOT_OP UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"not_op" << " " << $1<< " " <<"UnaryExpr" << endl ;}
 		| PrimaryExpr{$$ = $1;$$->setType($1->getType());}
@@ -637,8 +637,8 @@ Expression{$$ = $1;$$->setType($1->getType());}
 
 ;
 DotName  :
-Name{$$ = $1;$$->setType($1->getType());}
-		| Name DOT ID{$$ = new Node("DotName", NOTYPE);
+Name{$$ = $1;}
+		| Name DOT ID{$$ = new Node("DotName", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Name"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
@@ -647,35 +647,35 @@ $$->Add($3);cout <<"Name"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 <
 PrimaryExprNoParen  :
 Name{$$ = $1;$$->setType($1->getType());}
 		| Literal{$$ = $1;$$->setType($1->getType());}
-		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
-		| PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"ExpressionOrType"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"type" << " " << $4<< " " <<"paren_close" << " " << $5 << endl ;}
-		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"Expression"<< " " <<"square_close" << " " << $4 << endl ;}
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"OExpression"<< " " <<"colon" << " " << $4<< " " <<"OExpression"<< " " <<"square_close" << " " << $6 << endl ;}
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -684,19 +684,19 @@ $$->Add($5);
 $$->Add($6);
 $$->Add($7);
 $$->Add($8);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"OExpression"<< " " <<"colon" << " " << $4<< " " <<"OExpression"<< " " <<"colon" << " " << $6<< " " <<"OExpression"<< " " <<"square_close" << " " << $8 << endl ;}
-		| ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);cout <<"ConvType"<< " " <<"as" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"Expression"<< " " <<"OComma"<< " " <<"paren_close" << " " << $6 << endl ;}
-		| CompType BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| CompType BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"CompType"<< " " <<"block_open" << " " << $2<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $4 << endl ;}
-		| PrimaryExprNoParen SQ_PIPE_OPEN BracedKeyValList SQ_PIPE_CLOSE{$$ = new Node("PrimaryExprNoParen", NOTYPE);
+		| PrimaryExprNoParen SQ_PIPE_OPEN BracedKeyValList SQ_PIPE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -710,18 +710,18 @@ NonExpressionType  :
 FunctionType{$$ = $1;}
 		| GeneratorType{$$ = $1;}
 		| OtherType{$$ = $1;}
-		| STAR NonExpressionType{$$ = new Node("NonExpressionType", NOTYPE);
+		| STAR NonExpressionType{$$ = new Node("NonExpressionType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"star" << " " << $1<< " " <<"NonExpressionType" << endl ;}
 
 ;
 OtherType  :
-SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", NOTYPE);
+SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"square_open" << " " << $1<< " " <<"OExpression"<< " " <<"square_close" << " " << $3<< " " <<"TypeName" << endl ;}
-		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", NOTYPE);
+		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -731,7 +731,7 @@ $$->Add($4);cout <<"square_open" << " " << $1<< " " <<"variadic" << " " << $2<< 
 
 ;
 NewName  :
-ID{$$ = new Node("NewName", NOTYPE); $$->Add($1);}
+ID{$$ = new Node("NewName", new BasicType("NOTYPE")); $$->Add($1);}
 
 ;
 DeclName  :
@@ -739,48 +739,48 @@ ID{$$ = $1;}
 
 ;
 ONewName  :
-/* Empty Rule */ {$$ = new Node("Empty New Name", NOTYPE, 0); $$->Add("");}		
+/* Empty Rule */ {$$ = new Node("Empty New Name", new BasicType("NOTYPE"), 0); $$->Add("");}		
 | NewName{$$ = $1;}
 
 ;
 Name  :
-ID %prec NotParen{$$ = new Node("Name", NOTYPE); $$->Add($1);}
+ID %prec NotParen{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));}
 
 ;
 ExpressionList  :
-Expression{$$ = new Node("Expression", NOTYPE); $$->Add($1);}
+Expression{$$ = new Node("Expression", new BasicType("NOTYPE")); $$->Add($1);}
 		| ExpressionList COMMA Expression{$$ = $1; $$->incrementCount($3);}
 
 ;
 OExpressionList  :
-/* Empty Rule */ {$$ = new Node("Empty Expression List", NOTYPE, 0);}
+/* Empty Rule */ {$$ = new Node("Empty Expression List", new BasicType("NOTYPE"), 0);}
     | ExpressionList{$$ = $1;}
 
 ;
 OLiteral  :
-/* Empty Rule */ {$$ = new Node("Empty Literal", NOTYPE, 0);}		
+/* Empty Rule */ {$$ = new Node("Empty Literal", new BasicType("NOTYPE"), 0);}		
 | Literal{$$ = $1; $$->setType($1->getType());}
 
 ;
 Literal  :
-RAW_STRING{$$ = new Node("Literal", NOTYPE);
-$$->Add($1); $$->setType(STR_TYPE);}
-		| INTER_STRING{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(BYTE_TYPE);}
-		| DECIMAL_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(INT_TYPE);}
-		| OCTAL_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(INT_TYPE);}
-		| HEX_LIT{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(HEX_TYPE);}
-		| TRUE{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(BOOL_TYPE);}
-		| FALSE{$$ = new Node("Literal", NOTYPE);
-$$->Add($1);$$->setType(BOOL_TYPE);}
+RAW_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1); $$->setType(new BasicType("STR"));}
+		| INTER_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("BYTE"));}
+		| DECIMAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("INT"));}
+		| OCTAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("INT"));}
+		| HEX_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("HEX"));}
+		| TRUE{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("BOOL"));}
+		| FALSE{$$ = new Node("Literal", new BasicType("NOTYPE"));
+$$->Add($1);$$->setType(new BasicType("BOOL"));}
 
 ;
 FunctionDeclaration  :
-FUNC OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("FunctionDeclaration", NOTYPE, $2->count, $3->flag);
+FUNC OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -788,7 +788,7 @@ $$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"Funct
 
 ;
 GeneratorDeclaration  :
-GEN OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("GeneratorDeclaration", NOTYPE, $2->count, $3->flag);
+GEN OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -796,13 +796,13 @@ $$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"Functi
 
 ;
 FunctionHeader  :
-ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", NOTYPE, $3->count, $3->flag);
+ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"id" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $4<< " " <<"FunctionResult" << endl ;}
-		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", NOTYPE, $2->count, $2->flag);
+		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -814,21 +814,21 @@ $$->Add($8);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<<
 
 ;
 ConvType  :
-FunctionType{$$ = new Node("ConvType", NOTYPE);
+FunctionType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"FunctionType" << endl ;}
-		| GeneratorType{$$ = new Node("ConvType", NOTYPE);
+		| GeneratorType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"GeneratorType" << endl ;}
-		| OtherType{$$ = new Node("ConvType", NOTYPE);
+		| OtherType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"OtherType" << endl ;}
 
 ;
 CompType  :
-OtherType{$$ = new Node("CompType", NOTYPE);
+OtherType{$$ = new Node("CompType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"OtherType" << endl ;}
 
 ;
 FunctionType  :
-FUNC OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionType", NOTYPE);
+FUNC OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -838,7 +838,7 @@ $$->Add($6);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"paren
 
 ;
 GeneratorType  :
-GEN OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("GeneratorType", NOTYPE);
+GEN OGenericTypeList PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("GeneratorType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -848,55 +848,55 @@ $$->Add($6);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"paren_
 
 ;
 FunctionResult  :
-/* Empty Rule */ {$$ = new Node("FunctionResult", NOTYPE, 0);
-$$->Add("");}		| FunctionReturnType{$$ = new Node("FunctionResult", NOTYPE);
+/* Empty Rule */ {$$ = new Node("FunctionResult", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| FunctionReturnType{$$ = new Node("FunctionResult", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"FunctionReturnType" << endl ;}
-		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE{$$ = new Node("FunctionResult", NOTYPE);
+		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE{$$ = new Node("FunctionResult", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $3 << endl ;}
 
 ;
 FunctionReturnType  :
-FunctionType{$$ = new Node("FunctionReturnType", NOTYPE);
+FunctionType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"FunctionType" << endl ;}
-		| GeneratorType{$$ = new Node("FunctionReturnType", NOTYPE);
+		| GeneratorType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"GeneratorType" << endl ;}
-		| OtherType{$$ = new Node("FunctionReturnType", NOTYPE);
+		| OtherType{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"OtherType" << endl ;}
-		| DotName{$$ = new Node("FunctionReturnType", NOTYPE);
+		| DotName{$$ = new Node("FunctionReturnType", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"DotName" << endl ;}
 
 ;
 FunctionBody  :
-CompoundStatement{$$ = new Node("FunctionBody", NOTYPE);
+CompoundStatement{$$ = new Node("FunctionBody", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"CompoundStatement" << endl ;}
 
 ;
 OArgumentTypeListOComma  :
-/* Empty Rule */ {$$ = new Node("OArgumentTypeListOComma", NOTYPE, 0);
-$$->Add("");}		| ArgumentTypeList OComma{$$ = new Node("OArgumentTypeListOComma", NOTYPE, $1->count, $1->flag);
+/* Empty Rule */ {$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| ArgumentTypeList OComma{$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), $1->count, $1->flag);
 $$->Add($1);
 $$->Add($2);cout <<"ArgumentTypeList"<< " " <<"OComma" << endl ;}
 
 ;
 ArgumentTypeList  :
-ArgumentType{$$ = new Node("ArgumentType", NOTYPE); $$->Add($1);}
+ArgumentType{$$ = new Node("ArgumentType", new BasicType("NOTYPE")); $$->Add($1);}
 		| ArgumentTypeList COMMA ArgumentType{$$ = $1 ; $$->incrementCount($3);}
 
 ;
 ArgumentType  :
 NameOrType{$$ = $1;}
-		| ID NameOrType{$$ = new Node("ArgumentType", NOTYPE);
+		| ID NameOrType{$$ = new Node("ArgumentType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"NameOrType" << endl ;}
-		| ID VARIADIC{$$ = new Node("ArgumentType", NOTYPE, 1, true);
+		| ID VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
-		| VARIADIC TypeName{$$ = new Node("ArgumentType", NOTYPE, 1, true);
+		| VARIADIC TypeName{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
 $$->Add($1);
 $$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
-		| VARIADIC{$$ = new Node("ArgumentType", NOTYPE, 1, true);
+		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true);
 $$->Add($1);cout <<"variadic" << " " << $1 << endl ;}
 
 ;
@@ -905,32 +905,32 @@ TypeName{$$ = $1;}
 
 ;
 OComma  :
-COMMA{$$ = new Node("OComma", NOTYPE);
+COMMA{$$ = new Node("OComma", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"comma" << " " << $1 << endl ;}
-		| /* Empty Rule */ {$$ = new Node("OComma", NOTYPE, 0);
+		| /* Empty Rule */ {$$ = new Node("OComma", new BasicType("NOTYPE"), 0);
 $$->Add("");}
 ;
 OSimpleStatement  :
-/* Empty Rule */ {$$ = new Node("OSimpleStatement", NOTYPE, 0);
-$$->Add("");}		| SimpleStatement{$$ = new Node("OSimpleStatement", NOTYPE);
+/* Empty Rule */ {$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| SimpleStatement{$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"SimpleStatement" << endl ;}
 
 ;
 SimpleStatement  :
-Expression{$$ = new Node("SimpleStatement", NOTYPE);
+Expression{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"Expression" << endl ;}
-		| ExpressionList ASSGN_OP ExpressionList{$$ = new Node("SimpleStatement", NOTYPE);
+		| ExpressionList ASSGN_OP ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"ExpressionList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
-		| ExpressionList DECL ExpressionList{$$ = new Node("SimpleStatement", NOTYPE);
+		| ExpressionList DECL ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);inferListType($1, $3);}
-		| Expression INC{$$ = new Node("SimpleStatement", NOTYPE);
+		| Expression INC{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"Expression"<< " " <<"inc" << " " << $2 << endl ;}
-		| Expression DEC{$$ = new Node("SimpleStatement", NOTYPE);
+		| Expression DEC{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"Expression"<< " " <<"dec" << " " << $2 << endl ;}
 
@@ -946,19 +946,19 @@ StatementList {
   // This is where stuff ends
   curr = curr->parent;
 } 
-BLOCK_CLOSE{$$ = new Node("CompoundStatement", NOTYPE, $3->count);
+BLOCK_CLOSE{$$ = new Node("CompoundStatement", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($3);
 $$->Add($5);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $5 << endl ;}
 
 ;
 StatementList  :
-Statement{$$ = new Node("Statement", NOTYPE); $$->Add($1);}
+Statement{$$ = new Node("Statement", new BasicType("NOTYPE")); $$->Add($1);}
 		| StatementList STMTEND Statement{$$ = $1; $$->incrementCount($3); }
 
 ;
 Statement  :
-/* Empty Rule */ {$$ = new Node("Statement", NOTYPE, 0);
+/* Empty Rule */ {$$ = new Node("Statement", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| CompoundStatement{$$ = $1;}
 		| CommonDeclaration{$$ = $1;}
 		| NonDeclarationStatement{$$ = $1;}
@@ -969,25 +969,25 @@ SimpleStatement{$$ = $1;}
 		| IfStatement{$$ = $1;}
 		| ForStatement{$$ = $1;}
 		| SwitchStatement{$$ = $1;}
-		| LabelName COLON Statement{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| LabelName COLON Statement{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"LabelName"<< " " <<"colon" << " " << $2<< " " <<"Statement" << endl ;}
-		| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"fallthrough" << " " << $1 << endl ;}
-		| BREAK ONewName{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"break" << " " << $1<< " " <<"ONewName" << endl ;}
-		| CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"continue" << " " << $1<< " " <<"ONewName" << endl ;}
-		| GOTO NewName{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"goto" << " " << $1<< " " <<"NewName" << endl ;}
-		| RETURN OExpressionList{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| RETURN OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"return" << " " << $1<< " " <<"OExpressionList" << endl ;}
-		| YIELD OExpressionList{$$ = new Node("NonDeclarationStatement", NOTYPE);
+		| YIELD OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"yield" << " " << $1<< " " <<"OExpressionList" << endl ;}
 
@@ -997,7 +997,7 @@ NewName{$$ = $1;}
 
 ;
 IfStatement  :
-IF IfHeader LoopBody ElseIfList Else{$$ = new Node("IfStatement", NOTYPE, $3->count);
+IF IfHeader LoopBody ElseIfList Else{$$ = new Node("IfStatement", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1006,7 +1006,7 @@ $$->Add($5);cout <<"if" << " " << $1<< " " <<"IfHeader"<< " " <<"LoopBody"<< " "
 
 ;
 ElseIf  :
-ELSE IF IfHeader LoopBody{$$ = new Node("ElseIf", NOTYPE);
+ELSE IF IfHeader LoopBody{$$ = new Node("ElseIf", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1014,19 +1014,19 @@ $$->Add($4);cout <<"else" << " " << $1<< " " <<"if" << " " << $2<< " " <<"IfHead
 
 ;
 ElseIfList  :
-/* Empty Rule */ {$$ = new Node("Empty ElseIfList", NOTYPE, 0);
+/* Empty Rule */ {$$ = new Node("Empty ElseIfList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| ElseIfList ElseIf{$$ = $1 ; $$->incrementCount($2);}
 
 ;
 Else  :
-/* Empty Rule */ {$$ = new Node("Else", NOTYPE, 0);
-$$->Add("");}		| ELSE CompoundStatement{$$ = new Node("Else", NOTYPE);
+/* Empty Rule */ {$$ = new Node("Else", new BasicType("NOTYPE"), 0);
+$$->Add("");}		| ELSE CompoundStatement{$$ = new Node("Else", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"else" << " " << $1<< " " <<"CompoundStatement" << endl ;}
 
 ;
 LoopBody  :
-BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("LoopBody", NOTYPE, $2->count);
+BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("LoopBody", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $3 << endl ;}
@@ -1034,26 +1034,26 @@ $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"bl
 ;
 IfHeader  :
 OSimpleStatement{$$ = $1;}
-		| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", NOTYPE);
+		| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"OSimpleStatement"<< " " <<"stmtend" << " " << $2<< " " <<"OSimpleStatement" << endl ;}
 
 ;
 ForStatement  :
-FOR ForBody{$$ = new Node("ForStatement", NOTYPE);
+FOR ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"for" << " " << $1<< " " <<"ForBody" << endl ;}
 
 ;
 ForBody  :
-ForHeader LoopBody{$$ = new Node("ForBody", NOTYPE);
+ForHeader LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"ForHeader"<< " " <<"LoopBody" << endl ;}
 
 ;
 ForHeader  :
-OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("ForHeader", NOTYPE);
+OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("ForHeader", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1064,23 +1064,23 @@ $$->Add($5);cout <<"OSimpleStatement"<< " " <<"stmtend" << " " << $2<< " " <<"OS
 
 ;
 RangeStatement  :
-ExpressionList ASSGN_OP RANGE Expression{$$ = new Node("RangeStatement", NOTYPE, $1->count);
+ExpressionList ASSGN_OP RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"ExpressionList"<< " " <<"assgn_op" << " " << $2<< " " <<"range" << " " << $3<< " " <<"Expression" << endl ;}
-		| ExpressionList DECL RANGE Expression{$$ = new Node("RangeStatement", NOTYPE, $1->count);
+		| ExpressionList DECL RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"ExpressionList"<< " " <<"decl" << " " << $2<< " " <<"range" << " " << $3<< " " <<"Expression" << endl ;}
-		| RANGE Expression{$$ = new Node("RangeStatement", NOTYPE, 0);
+		| RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), 0);
 $$->Add($1);
 $$->Add($2);cout <<"range" << " " << $1<< " " <<"Expression" << endl ;}
 
 ;
 SwitchStatement  :
-SWITCH IfHeader BLOCK_OPEN CaseBlockList BLOCK_CLOSE{$$ = new Node("SwitchStatement", NOTYPE, $4->count);
+SWITCH IfHeader BLOCK_OPEN CaseBlockList BLOCK_CLOSE{$$ = new Node("SwitchStatement", new BasicType("NOTYPE"), $4->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1089,58 +1089,58 @@ $$->Add($5);cout <<"switch" << " " << $1<< " " <<"IfHeader"<< " " <<"block_open"
 
 ;
 CaseBlockList  :
-/* Empty Rule */ {$$ = new Node("CaseBlockList", NOTYPE, 0);
+/* Empty Rule */ {$$ = new Node("CaseBlockList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);}
 
 ;
 CaseBlock  :
-Case CompoundStatement STMTEND {$$ = new Node("CaseBlock", NOTYPE);
+Case CompoundStatement STMTEND {$$ = new Node("CaseBlock", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2)->Add($3);cout <<"Case"<< " " <<"CompoundStatement" << $3 << endl ;}
 
 ;
 Case  :
-CASE ExpressionOrTypeList COLON{$$ = new Node("Case", NOTYPE);
+CASE ExpressionOrTypeList COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"colon" << " " << $3 << endl ;}
-		| CASE ExpressionOrTypeList ASSGN_OP Expression COLON{$$ = new Node("Case", NOTYPE);
+		| CASE ExpressionOrTypeList ASSGN_OP Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"assgn_op" << " " << $3<< " " <<"Expression"<< " " <<"colon" << " " << $5 << endl ;}
-		| CASE ExpressionOrTypeList DECL Expression COLON{$$ = new Node("Case", NOTYPE);
+		| CASE ExpressionOrTypeList DECL Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"decl" << " " << $3<< " " <<"Expression"<< " " <<"colon" << " " << $5 << endl ;}
-		| DEFAULT COLON{$$ = new Node("Case", NOTYPE);
+		| DEFAULT COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"default" << " " << $1<< " " <<"colon" << " " << $2 << endl ;}
 
 ;
 ExpressionOrTypeList  :
 ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3);}
-		| ExpressionOrType{$$ = new Node("ExpressionOrTypeList", NOTYPE);
+		| ExpressionOrType{$$ = new Node("ExpressionOrTypeList", new BasicType("NOTYPE"));
 $$->Add($1);}
 
 ;
 InterfaceDeclaration  :
-NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", NOTYPE);
+NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"NewName"<< " " <<"InterfaceDecl" << endl ;}
-		| PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", NOTYPE);
+		| PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"paren_open" << " " << $1<< " " <<"PackName"<< " " <<"paren_close" << " " << $3 << endl ;}
-		| PackName{$$ = new Node("InterfaceDeclaration", NOTYPE);
+		| PackName{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"PackName" << endl ;}
 
 ;
 InterfaceDecl  :
-PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("InterfaceDecl", NOTYPE);
+PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("InterfaceDecl", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1148,26 +1148,26 @@ $$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<<
 
 ;
 InterfaceDeclarationList  :
-InterfaceDeclaration{$$ = new Node("InterfaceDeclarationList", NOTYPE);
+InterfaceDeclaration{$$ = new Node("InterfaceDeclarationList", new BasicType("NOTYPE"));
 $$->Add($1);}
 		| InterfaceDeclarationList STMTEND InterfaceDeclaration{$$ = $1 ; $$->incrementCount($1);}
 
 ;
 InterfaceType  :
-INTERFACE BLOCK_OPEN InterfaceDeclarationList Ostmtend BLOCK_CLOSE{$$ = new Node("InterfaceType", NOTYPE);
+INTERFACE BLOCK_OPEN InterfaceDeclarationList Ostmtend BLOCK_CLOSE{$$ = new Node("InterfaceType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"interface" << " " << $1<< " " <<"block_open" << " " << $2<< " " <<"InterfaceDeclarationList"<< " " <<"Ostmtend"<< " " <<"block_close" << " " << $5 << endl ;}
-		| INTERFACE BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("InterfaceType", NOTYPE);
+		| INTERFACE BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("InterfaceType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"interface" << " " << $1<< " " <<"block_open" << " " << $2<< " " <<"block_close" << " " << $3 << endl ;}
 
 ;
 FunctionLiteral  :
-FunctionLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("FunctionLiteral", NOTYPE);
+FunctionLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("FunctionLiteral", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1175,7 +1175,7 @@ $$->Add($4);cout <<"FunctionLiteralDeclaration"<< " " <<"block_open" << " " << $
 
 ;
 GeneratorLiteral  :
-GeneratorLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("GeneratorLiteral", NOTYPE);
+GeneratorLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("GeneratorLiteral", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1183,90 +1183,90 @@ $$->Add($4);cout <<"GeneratorLiteralDeclaration"<< " " <<"block_open" << " " << 
 
 ;
 FunctionLiteralDeclaration  :
-FunctionType{$$ = new Node("FunctionLiteralDeclaration", NOTYPE);
+FunctionType{$$ = new Node("FunctionLiteralDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"FunctionType" << endl ;}
 
 ;
 GeneratorLiteralDeclaration  :
-GeneratorType{$$ = new Node("GeneratorLiteralDeclaration", NOTYPE);
+GeneratorType{$$ = new Node("GeneratorLiteralDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"GeneratorType" << endl ;}
 
 ;
 KeyVal  :
-Expression COLON CompLiteralExpression{$$ = new Node("KeyVal", NOTYPE);
+Expression COLON CompLiteralExpression{$$ = new Node("KeyVal", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"colon" << " " << $2<< " " <<"CompLiteralExpression" << endl ;}
 
 ;
 KeyValList  :
-KeyVal{$$ = new Node("KeyVal declaration", NOTYPE); $$->Add($1);}
-		| BareCompLiteralExpression{$$ = new Node("KeyValList", NOTYPE);
+KeyVal{$$ = new Node("KeyVal declaration", new BasicType("NOTYPE")); $$->Add($1);}
+		| BareCompLiteralExpression{$$ = new Node("KeyValList", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"BareCompLiteralExpression" << endl ;}
 		| KeyValList COMMA KeyVal{$$ = $1; $$->incrementCount($3);}
 		| KeyValList COMMA BareCompLiteralExpression{$$ = $1; $$->incrementCount($3);}
 
 ;
 BareCompLiteralExpression  :
-Expression{$$ = new Node("BareCompLiteralExpression", NOTYPE);
+Expression{$$ = new Node("BareCompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"Expression" << endl ;}
-		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("BareCompLiteralExpression", NOTYPE);
+		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("BareCompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $3 << endl ;}
 
 ;
 CompLiteralExpression  :
-Expression{$$ = new Node("CompLiteralExpression", NOTYPE);
+Expression{$$ = new Node("CompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);cout <<"Expression" << endl ;}
-		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("CompLiteralExpression", NOTYPE);
+		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("CompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"block_open" << " " << $1<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $3 << endl ;}
 
 ;
 BracedKeyValList  :
-/* Empty Rule */ {$$ = new Node("BracedKeyValList", NOTYPE, 0);
+/* Empty Rule */ {$$ = new Node("BracedKeyValList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| KeyValList OComma{$$ = $1;}
 
 ;
 TypeNameList  :
-TypeName{$$ = new Node("TypeNameList", NOTYPE) ;}
+TypeName{$$ = new Node("TypeNameList", new BasicType("NOTYPE")) ;}
 		| TypeNameList COMMA TypeName{$$ = $1; $$->incrementCount($3);}
 
 ;
 GenericType  :
 Name{$$ = $1;}
-		| Name COLON TypeNameList{$$ = new Node("GenericType", NOTYPE);
+		| Name COLON TypeNameList{$$ = new Node("GenericType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Name"<< " " <<"colon" << " " << $2<< " " <<"TypeNameList" << endl ;}
 
 ;
 GenericTypeList  :
-GenericType{$$ = new Node("GenericTypeList", NOTYPE); $$->Add($1);}
+GenericType{$$ = new Node("GenericTypeList", new BasicType("NOTYPE")); $$->Add($1);}
 		| GenericTypeList GENERIC_CONCAT GenericType{$$ = $1; $$->incrementCount($3);}
 
 ;
 OGenericTypeList  :
-LT GenericTypeList GT{$$ = new Node("OGenericTypeList", NOTYPE, $2->count);
+LT GenericTypeList GT{$$ = new Node("OGenericTypeList", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"lt" << " " << $1<< " " <<"GenericTypeList"<< " " <<"gt" << " " << $3 << endl ;}
-		| /* Empty Rule */ {$$ = new Node("Empty GenericTypeList", NOTYPE, 0);}
+		| /* Empty Rule */ {$$ = new Node("Empty GenericTypeList", new BasicType("NOTYPE"), 0);}
 ;
 PseudoCall  :
-PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", NOTYPE, 0);
+PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), 0);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
-		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", NOTYPE, $3->count);
+		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"ExpressionOrTypeList"<< " " <<"OComma"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", NOTYPE, $3->count+1, true);
+		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1278,12 +1278,12 @@ $$->Add($6);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"Expr
 
 %%
 
-int TypeForSymbol(char* input){
+Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
-        return INT; // assuming INT 
+        return new BasicType("int"); // assuming INT 
     else
-        return NOTYPE; // empty statement have no type
+        return new BasicType("NOTYPE"); // empty statement have no type
 }
 
 int main(int argc, char** argv) {
