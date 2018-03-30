@@ -100,7 +100,7 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
  void
  ST::addEntry(string aName, Type* aType, bool aConstant) {
    STEntry* t = new STEntry(aName, aType, aConstant);
-   entries.push_back(t);
+   table[aName] = t;
  }
  
  void
@@ -108,14 +108,30 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
    children.push_back(aChild);
  }
 
+bool
+ST::checkEntry(string a) {
+  if (getVar(a) == NULL) {
+    return true;
+  }
+  return false;
+}
+
+void
+ST::resetNextUseInfo(int a) {
+  map<string, STEntry*>::iterator iter;
+  for (iter = table.begin(); iter != table.end(); iter++) {
+    (*(iter->second)).setLive(false);
+    (*(iter->second)).setNextUse(a);
+  }
+}
+
 STEntry*
 ST::getVar(string a) {
-  vector<STEntry*>::iterator it;
-  for (it = entries.begin(); it != entries.end(); it++) {
-    if (a.compare((*it)->name) == 0) {
-      return *it;
-    }
+
+  if (table.count(a)) {
+    return table[a];
   }
+
   if (depth == 0) {
     return nullptr;
   }
