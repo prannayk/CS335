@@ -41,19 +41,19 @@ BasicType::BasicType(string aName)
 }
 
 BasicType::BasicType(string aName, bool flag)
-    : Type()
-    , name(aName)
-    , variadic(flag)
-    , pointer(false)
+  : Type()
+  , name(aName)
+  , variadic(flag)
+  , pointer(false)
 {
     this->representation = aName;
 }
 
 BasicType::BasicType(string aName, bool aFlag, bool aPointer)
-    : Type()
-    , name(aName)
-    , variadic(aFlag)
-    , pointer(aPointer)
+  : Type()
+  , name(aName)
+  , variadic(aFlag)
+  , pointer(aPointer)
 {
     string star = "*";
     this->representation = star + aName;
@@ -70,8 +70,10 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
   , paramTypes(aParamTypes)
   , generator(flag)
 {
-    if(flag)    this->representation = "gen(";
-    else this->representation = "func(";
+    if (flag)
+        this->representation = "gen(";
+    else
+        this->representation = "func(";
     vector<Type*>::iterator it;
     for (it = paramTypes.begin(); it != paramTypes.end(); ++it) {
         this->representation += (*it)->GetRepresentation();
@@ -143,7 +145,7 @@ StructType::Hoist(string aStructVariableName, string aFieldName) const
     return aStructVariableName + "_" + aFieldName + "_" + this->randomSuffix;
 }
 
-CompoundType::CompoundType( vector<Type*> aParamTypes)
+CompoundType::CompoundType(vector<Type*> aParamTypes)
   : typeList(aParamTypes)
 {
     this->representation = "(";
@@ -161,4 +163,24 @@ vector<Type*>
 CompoundType::GetTypeList() const
 {
     return this->typeList;
+}
+
+ArrayType::ArrayType(Type* aArrayType, int aSize)
+  : arrayType(aArrayType)
+  , size(aSize)
+{
+    this->representation =
+      "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
+}
+
+int
+ArrayType::GetSize() const
+{
+    return this->size;
+}
+
+Type*
+ArrayType::GetArrayType() const
+{
+    return this->arrayType;
 }
