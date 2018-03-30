@@ -1,5 +1,7 @@
 #include "helpers.h"
 
+vector<Instruction*> instructionList;
+
 extern void 
 inferListType(Node * target, Node * source){
     for(int i = 0; i< target->children.size() ; ++i){
@@ -100,3 +102,13 @@ extern vector<Type*> getTypes(Node * list){
     return typeList;
 }
 
+extern string generateInstruction(OpCode op, Node * n1, Node * n2, ST *curr){
+    STEntry * arg1 = curr->getVar(n1->tmp);
+    STEntry * arg2 = curr->getVar(n2->tmp);
+    string str = "tmp"; // TODO : replace with random string
+    STEntry * arg3 = curr->getVar(str);
+    if (n1->getType() != n2->getType()) cout << "Error : types mismatch" << endl;
+    Instruction * instr = new Instruction(op, arg3, arg2, arg1, REGISTER, n1->addrMode, n2->addrMode, n1->getType(), n2->getType(), n1->getType() );
+    instructionList.push_back(instr); // TODO: replace with real list of instruction 
+    return str;
+}

@@ -6,6 +6,7 @@
 #include <string.h>
 #include "helpers.h"
 #include "Type.h"
+#include "block.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -588,14 +589,18 @@ $$->Add($3);cout <<"Expression"<< " " <<"ampersand" << " " << $2<< " " <<"Expres
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"not_and" << " " << $2<< " " <<"Expression" << endl ;}
-		| Expression ADD Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
+		| Expression ADD Expression{$$ = new Node("Expression", $1->getType());
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"add" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->tmp = generateInstruction(ADD_OPER, $1, $3, curr);
+}
 		| Expression SUB Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"sub" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->tmp = generateInstruction(SUB_OP, $1, $3, curr);
+}
 		| Expression BIT_OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -636,7 +641,7 @@ $$->Add($3);cout <<"Expression"<< " " <<"le" << " " << $2<< " " <<"Expression" <
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);cout <<"Expression"<< " " <<"lt" << " " << $2<< " " <<"Expression" << endl ;}
-		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); cout<<"Type: "<<$$->getType()<<endl; }
+		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); $$->tmp = $$->content; }
 
 ;
 OExpression  :
@@ -691,18 +696,31 @@ $$->Add($3);
 
 ;
 PrimaryExprNoParen  :
-Name{$$ = $1;$$->setType($1->getType());}
-		| Literal{$$ = $1;$$->setType($1->getType());}
+Name{$$ = $1;
+if(curr->getVar($1->content) != NULL)
+    $$->setType(curr->getVar($1->content)->type); 
+else 
+    $$->setType(new BasicType("NOTYPE")) ; // TODO : handle this well everywhere, basically infer type?
+$$->addrMode = REGISTER;}
+		| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
 		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"id" << " " << $3 << endl ;}
+$$->Add($3);
+string s = ".";
+string s1 = $3;
+s = s + s1 ;
+s = $1->getType()->GetRepresentation() + s;
+$$->setType(new BasicType(s));
+}
 		| PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"ExpressionOrType"<< " " <<"paren_close" << " " << $5 << endl ;}
+$$->Add($5); 
+$$->setType(new BasicType("NOTYPE")); // TODO : this is incomplete 
+}
 		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -749,19 +767,20 @@ $$->Add($3);
 $$->Add($4);cout <<"PrimaryExprNoParen"<< " " <<"sq_pipe_open" << " " << $2<< " " <<"BracedKeyValList"<< " " <<"sq_pipe_close" << " " << $4 << endl ;}
 		| FunctionLiteral{$$ = $1;}
 		| GeneratorLiteral{$$ = $1;}
-		| PseudoCall{$$ = $1;}
+		| PseudoCall{$$ = $1;} 
+            // get type of function return type here
 
 ;
 NonExpressionType  :
 FunctionType{$$ = $1;}
 		| GeneratorType{$$ = $1;}
 		| OtherType{$$ = $1;}
-		| STAR NonExpressionType{$$ = new Node("NonExpressionType", new BasicType("NOTYPE"));
+		| STAR NonExpressionType{$$ = new Node("NonExpressionType", new BasicType($2->getType()->GetRepresentation(),false, true));
 $$->Add($1);
-$$->Add($2);cout <<"star" << " " << $1<< " " <<"NonExpressionType" << endl ;}
+$$->Add($2);}
 
 ;
-OtherType  :
+OtherType  : // TODO : Handle this in semantics
 SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
 $$->Add($1);
 $$->Add($2);
@@ -812,19 +831,19 @@ OLiteral  :
 ;
 Literal  :
 RAW_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1); $$->setType(new BasicType("STR"));}
+$$->Add($1); $$->setType(new BasicType("STR")); $$->content = $1;}
 		| INTER_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BYTE"));}
+$$->Add($1);$$->setType(new BasicType("BYTE")); $$->content = $1;}
 		| DECIMAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("INT"));}
+$$->Add($1);$$->setType(new BasicType("INT")); $$->content = $1;}
 		| OCTAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("INT"));}
+$$->Add($1);$$->setType(new BasicType("INT")); $$->content = $1;}
 		| HEX_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("HEX"));}
+$$->Add($1);$$->setType(new BasicType("HEX")); $$->content = $1;}
 		| TRUE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BOOL"));}
+$$->Add($1);$$->setType(new BasicType("BOOL")); $$->content = $1;}
 		| FALSE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BOOL"));}
+$$->Add($1);$$->setType(new BasicType("BOOL")); $$->content = $1;}
 
 ;
 FunctionDeclaration  :
@@ -871,8 +890,7 @@ $$->Add($1);cout <<"OtherType" << endl ;}
 
 ;
 CompType  :
-OtherType{$$ = new Node("CompType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"OtherType" << endl ;}
+OtherType{$$ = $1;}
 
 ;
 FunctionType  :
@@ -1225,7 +1243,9 @@ FunctionLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("F
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"FunctionLiteralDeclaration"<< " " <<"block_open" << " " << $2<< " " <<"StatementList"<< " " <<"block_close" << " " << $4 << endl ;}
+$$->Add($4);
+$$->setType($1->getType());
+}
 
 ;
 GeneratorLiteral  :
@@ -1233,17 +1253,17 @@ GeneratorLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"GeneratorLiteralDeclaration"<< " " <<"block_open" << " " << $2<< " " <<"StatementList"<< " " <<"block_close" << " " << $4 << endl ;}
+$$->Add($4);
+$$->setType($1->getType());
+}
 
 ;
 FunctionLiteralDeclaration  :
-FunctionType{$$ = new Node("FunctionLiteralDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"FunctionType" << endl ;}
+FunctionType{$$ = $1 ;}
 
 ;
 GeneratorLiteralDeclaration  :
-GeneratorType{$$ = new Node("GeneratorLiteralDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"GeneratorType" << endl ;}
+GeneratorType{$$ = $1; }
 
 ;
 KeyVal  :

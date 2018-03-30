@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iomanip>
 #include "Type.h"
+#include "enums.h"
 
 using namespace std;
 
@@ -17,9 +18,11 @@ class Node
     string matched;
     string content;
     Type *type;
+    AddressingMode addrMode;
+    string tmp; // temp variable for value stored in expression eval
     vector<Node*> children;
-    vector<string> str_child;
-    vector<Type*> type_child;
+    vector<string> str_child; // to handle struct type
+    vector<Type*> type_child; // to handle types of decl in structs
     int count; // number of args or elements in list
     bool flag; // variadic function marked
     Node(string aMatched, Type* aType, int aCount, bool aFlag);
