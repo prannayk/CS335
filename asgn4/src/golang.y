@@ -700,7 +700,7 @@ Name{$$ = $1;
 if(curr->getVar($1->content) != NULL)
     $$->setType(curr->getVar($1->content)->type); 
 else 
-    $$->setType(new BasicType("NOTYPE")) ; // TODO : handle this well everywhere, basically infer type?
+    $$->setType(new BasicType("NOTYPE")) ; // TODO : handle this well everywhere, basically infer type, handle this someplace
 $$->addrMode = REGISTER;}
 		| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
 		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
@@ -719,26 +719,27 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5); 
-$$->setType(new BasicType("NOTYPE")); // TODO : this is incomplete 
+$$->setType(new BasicType("NOTYPE")); // TODO : do after function call 
 }
 		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"type" << " " << $4<< " " <<"paren_close" << " " << $5 << endl ;}
+$$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"type" << " " << $4<< " " <<"paren_close" << " " << $5 << endl ;} // 
 		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"Expression"<< " " <<"square_close" << " " << $4 << endl ;}
+$$->Add($4); // TODO : handle array access (needs discussion) 
+}
 		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"OExpression"<< " " <<"colon" << " " << $4<< " " <<"OExpression"<< " " <<"square_close" << " " << $6 << endl ;}
+$$->Add($6);}
 		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -767,7 +768,7 @@ $$->Add($3);
 $$->Add($4);cout <<"PrimaryExprNoParen"<< " " <<"sq_pipe_open" << " " << $2<< " " <<"BracedKeyValList"<< " " <<"sq_pipe_close" << " " << $4 << endl ;}
 		| FunctionLiteral{$$ = $1;}
 		| GeneratorLiteral{$$ = $1;}
-		| PseudoCall{$$ = $1;} 
+		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall 
             // get type of function return type here
 
 ;
@@ -780,7 +781,7 @@ $$->Add($1);
 $$->Add($2);}
 
 ;
-OtherType  : // TODO : Handle this in semantics
+OtherType  : // TODO : array types, create array type
 SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
 $$->Add($1);
 $$->Add($2);
