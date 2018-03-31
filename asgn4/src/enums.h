@@ -9,13 +9,17 @@ enum OpCode
     SL_OP,
     SR_OP,
     ASHR_OP,
-    AND_OP,
-    OR_OP,
+    AND_OP, // logical AND
+    OR_OP, // logical OR
     XOR_OP,
+    BOR_OP, // bitwise OR
+    BAND_OP, // bitwise AND
     MUL_OPER,
     DIV_OP,
     MOD_OP,
-
+    NOT_OPER,
+    NAND_OP, 
+    
     // Binary relops
     GT_OP = 50,
     LT_OP,
@@ -43,6 +47,8 @@ enum OpCode
     NEG,
     ASG,
     LNOT,
+    INC_OP,
+    DEC_OP,
     // Unary control flow/special operations
     GOTO_OP = 250,
     CALL_OP,

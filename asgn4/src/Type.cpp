@@ -168,6 +168,16 @@ CompoundType::GetTypeList() const
 ArrayType::ArrayType(Type* aArrayType, int aSize)
   : arrayType(aArrayType)
   , size(aSize)
+  , variadicSize(false)
+{
+    this->representation =
+      "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
+}
+
+ArrayType::ArrayType(Type* aArrayType, int aSize, bool flag)
+  : arrayType(aArrayType)
+  , size(aSize)
+  , variadicSize(flag)
 {
     this->representation =
       "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();

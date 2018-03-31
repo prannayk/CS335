@@ -77,9 +77,11 @@ class ArrayType : public Type
   private:
     Type* arrayType;
     int size;
+    bool variadicSize;
 
   public:
     int GetSize() const;
     Type* GetArrayType() const;
     ArrayType(Type* aArrayType, int aSize);
+    ArrayType(Type* aArrayType, int aSize, bool flag);
 };

@@ -6,7 +6,6 @@
 #include <string.h>
 #include "helpers.h"
 #include "Type.h"
-#include "block.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -564,90 +563,162 @@ Expression  :
 Expression STAR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"star" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(MUL_OPER, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression DIV Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"div" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(DIV_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression MOD Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"mod" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(MOD_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression LS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"ls" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(SL_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression RS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"rs" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(SR_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression AMPERSAND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"ampersand" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(BAND_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression NOT_AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"not_and" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(NAND_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression ADD Expression{$$ = new Node("Expression", $1->getType());
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->tmp = generateInstruction(ADD_OPER, $1, $3, curr);
+$$->instr_list = generateInstructionBIN(ADD_OPER, $1, $3, curr);
+cout<<"hello"<<endl;
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
 }
 		| Expression SUB Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->tmp = generateInstruction(SUB_OP, $1, $3, curr);
+$$->instr_list = generateInstructionBIN(SUB_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
 }
 		| Expression BIT_OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"bit_or" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(BOR_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression CARET Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"caret" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(NOT_OPER, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"and" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(AND_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"or" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(OR_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression EQ Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"eq" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(EQ_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression NE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"ne" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(NEQ_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression GE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"ge" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(GEQ_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression GT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"gt" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(GT_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression LE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"le" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(LEQ_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression LT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"lt" << " " << $2<< " " <<"Expression" << endl ;}
+$$->Add($3);
+$$->instr_list = generateInstructionBIN(LT_OP, $1, $3, curr);
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); $$->tmp = $$->content; }
 
 ;
 OExpression  :
 /* Empty Rule */ {$$ = new Node("OExpression", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| Expression{$$ = new Node("OExpression", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"Expression" << endl ;}
+$$->Add("");}		| Expression{$$ = $1;}
 
 ;
 UnaryExpr  :
@@ -697,10 +768,6 @@ $$->Add($3);
 ;
 PrimaryExprNoParen  :
 Name{$$ = $1;
-if(curr->getVar($1->content) != NULL)
-    $$->setType(curr->getVar($1->content)->type); 
-else 
-    $$->setType(new BasicType("NOTYPE")) ; // TODO : handle this well everywhere, basically infer type, handle this someplace
 $$->addrMode = REGISTER;}
 		| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
 		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
@@ -721,26 +788,27 @@ $$->Add($4);
 $$->Add($5); 
 $$->setType(new BasicType("NOTYPE")); // TODO : do after function call 
 }
-		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")); // for type switching, does not need to be done
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"PrimaryExpr"<< " " <<"dot" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"type" << " " << $4<< " " <<"paren_close" << " " << $5 << endl ;} // 
+$$->Add($5);cout <<"Warning : Unimplemented runtime feature being used!" << endl;
+}  
 		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4); // TODO : handle array access (needs discussion) 
+$$->Add($4); // TODO : handle array access  
 }
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);}
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")); // TODO : slices
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -749,24 +817,31 @@ $$->Add($5);
 $$->Add($6);
 $$->Add($7);
 $$->Add($8);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"OExpression"<< " " <<"colon" << " " << $4<< " " <<"OExpression"<< " " <<"colon" << " " << $6<< " " <<"OExpression"<< " " <<"square_close" << " " << $8 << endl ;}
-		| ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);
-$$->Add($5);
-$$->Add($6);cout <<"ConvType"<< " " <<"as" << " " << $2<< " " <<"paren_open" << " " << $3<< " " <<"Expression"<< " " <<"OComma"<< " " <<"paren_close" << " " << $6 << endl ;}
+		| ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE{
+$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+$$ = $1;
+$$->setType($4->getType());
+/* $$->Add($1); */
+/* $$->Add($2); */
+/* $$->Add($3); */
+/* $$->Add($4); */
+/* $$->Add($5); */
+//$$->Add($6); // type conversion
+// TODO : do type checking here
+}
 		| CompType BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"CompType"<< " " <<"block_open" << " " << $2<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $4 << endl ;}
+$$->Add($4); // TODO : array / slice assignment (variadic example)
+}
 		| PrimaryExprNoParen SQ_PIPE_OPEN BracedKeyValList SQ_PIPE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"PrimaryExprNoParen"<< " " <<"sq_pipe_open" << " " << $2<< " " <<"BracedKeyValList"<< " " <<"sq_pipe_close" << " " << $4 << endl ;}
-		| FunctionLiteral{$$ = $1;}
+$$->Add($4); // TODO : figure out what this does
+}
+		| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
 		| GeneratorLiteral{$$ = $1;}
 		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall 
             // get type of function return type here
@@ -781,17 +856,23 @@ $$->Add($1);
 $$->Add($2);}
 
 ;
-OtherType  : // TODO : array types, create array type
-SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
+OtherType  : 
+SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{
+if($2->count != 0) {
+    $$ = new Node("OtherType", new ArrayType($4->getType(), atoi($2->content.c_str())) );
+} else {
+    // TODO : slice Type
+}
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"square_open" << " " << $1<< " " <<"OExpression"<< " " <<"square_close" << " " << $3<< " " <<"TypeName" << endl ;}
-		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", $4->getType());
+		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new ArrayType($4->getType(), 0, true));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"square_open" << " " << $1<< " " <<"variadic" << " " << $2<< " " <<"square_close" << " " << $3<< " " <<"TypeName" << endl ;}
+$$->Add($4);
+}
 		| StructType{$$ = $1;}
 		| InterfaceType{$$ = $1;}
 
@@ -985,27 +1066,41 @@ $$->Add("");}
 ;
 OSimpleStatement  :
 /* Empty Rule */ {$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| SimpleStatement{$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"SimpleStatement" << endl ;}
+$$->Add("");}		| SimpleStatement{$$ = $1;}
 
 ;
 SimpleStatement  :
-Expression{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"Expression" << endl ;}
+Expression{$$ = $1; }
 		| ExpressionList ASSGN_OP ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"ExpressionList"<< " " <<"assgn_op" << " " << $2<< " " <<"ExpressionList" << endl ;}
+$$->Add($3);
+$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $3, curr));
+}
 		| ExpressionList DECL ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);inferListType($1, $3);}
-		| Expression INC{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
+$$->Add($3);inferListType($1, $3);
+$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $3, curr));
+}
+		| Expression INC{$$ = new Node("SimpleStatement", $1->getType());
 $$->Add($1);
-$$->Add($2);cout <<"Expression"<< " " <<"inc" << " " << $2 << endl ;}
+$$->Add($2);
+$$->instr_list = $1->instr_list;
+$$->instr_list.push_back(generateUnaryInstruction(INC_OP, $1, curr));
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 		| Expression DEC{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"Expression"<< " " <<"dec" << " " << $2 << endl ;}
+$$->Add($2);
+$$->instr_list = $1->instr_list;
+$$->instr_list.push_back(generateUnaryInstruction(DEC_OP, $1, curr));
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+}
 
 ;
 CompoundStatement  :
@@ -1025,9 +1120,9 @@ $$->Add($3);
 $$->Add($5);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $5 << endl ;}
 
 ;
-StatementList  :
+StatementList  : // TODO  : this is also beginning of a scope, unhandled
 Statement{$$ = new Node("Statement", new BasicType("NOTYPE")); $$->Add($1);}
-		| StatementList STMTEND Statement{$$ = $1; $$->incrementCount($3); }
+		| StatementList STMTEND Statement{$$ = $1; $$->incrementCount($3); $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list); }
 
 ;
 Statement  :
@@ -1045,12 +1140,15 @@ SimpleStatement{$$ = $1;}
 		| LabelName COLON Statement{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"LabelName"<< " " <<"colon" << " " << $2<< " " <<"Statement" << endl ;}
+$$->Add($3);
+$$->instr_list.push_back(generateLabelInstruction($1->content)); // TODO : check contents
+}
 		| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"fallthrough" << " " << $1 << endl ;}
+$$->Add($1); //$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
+} 
 		| BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"break" << " " << $1<< " " <<"ONewName" << endl ;}
+$$->Add($2);}
 		| CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"continue" << " " << $1<< " " <<"ONewName" << endl ;}
@@ -1075,7 +1173,25 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"if" << " " << $1<< " " <<"IfHeader"<< " " <<"LoopBody"<< " " <<"ElseIfList"<< " " <<"Else" << endl ;}
+$$->Add($5);
+$$->instr_list = $2->instr_list;
+for(int i=0; i< $4->count; ++i)
+    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i]->children[2]->instr_list);
+Instruction* branch_goto = generateUnconditionalGoto(curr);
+$$->instr_list.push_back(branch_goto);
+string s = (char *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
+string s1 = $2->getType()->GetRepresentation(); 
+$$->instr_list.push_back(generateLabelInstruction(s1 ));
+$$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
+for(int i=0; i< $4->count; ++i){
+    $$->instr_list.push_back(generateLabelInstruction($4->children[i]->getType()->GetRepresentation()));
+    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i]->children[3]->instr_list);
+    $$->instr_list.push_back(branch_goto);
+}
+$$->instr_list.push_back(generateLabelInstruction(s));
+if($5->count > 0)
+    $$->instr_list = mergeInstructions($$->instr_list, $5->children[1]->instr_list);
+}
 
 ;
 ElseIf  :
@@ -1083,7 +1199,7 @@ ELSE IF IfHeader LoopBody{$$ = new Node("ElseIf", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"else" << " " << $1<< " " <<"if" << " " << $2<< " " <<"IfHeader"<< " " <<"LoopBody" << endl ;}
+$$->Add($4);}
 
 ;
 ElseIfList  :
@@ -1095,34 +1211,50 @@ Else  :
 /* Empty Rule */ {$$ = new Node("Else", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| ELSE CompoundStatement{$$ = new Node("Else", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"else" << " " << $1<< " " <<"CompoundStatement" << endl ;}
+$$->Add($2);
+$$->instr_list.push_back(generateGotoInstruction($2, curr));
+$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+}
 
 ;
 LoopBody  :
 BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("LoopBody", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $3 << endl ;}
+$$->Add($3);$$->instr_list = $2->instr_list;}
 
 ;
 IfHeader  :
-OSimpleStatement{$$ = $1;}
-		| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("NOTYPE"));
+OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
+$$->Add($1);
+$$->instr_list = $1->instr_list; 
+$$->instr_list.push_back(generateGotoInstruction($1, curr));
+$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+}
+		| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"OSimpleStatement"<< " " <<"stmtend" << " " << $2<< " " <<"OSimpleStatement" << endl ;}
+$$->Add($3);
+$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list); 
+$$->instr_list.push_back(generateGotoInstruction($3, curr));
+$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+}
 
 ;
 ForStatement  :
 FOR ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"for" << " " << $1<< " " <<"ForBody" << endl ;}
+$$->Add($2);
+$$->instr_list = $2->instr_list;
+}
 
 ;
 ForBody  :
 ForHeader LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"ForHeader"<< " " <<"LoopBody" << endl ;}
+$$->Add($2);
+
+}
 
 ;
 ForHeader  :

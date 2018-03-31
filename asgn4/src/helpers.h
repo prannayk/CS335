@@ -2,10 +2,11 @@
 #include <vector>
 #include <iostream>
 #include "Node.h"
+#include <ctime>
 #include "Type.h"
 #include <algorithm>
 #include <string>
-#include "block.h"
+#include "enums.h"
 
 using namespace std;
 
@@ -29,4 +30,15 @@ extern vector<string> getNames(Node * list);
 extern vector<Type*> getTypes(Node * list);
 extern vector<string> getNameList(Node * list);
 extern vector<Type*> repeatType(Node * TypeName, int count);
-extern string generateInstruction(OpCode op, Node * n1, Node * n2, ST* curr); 
+extern vector<Instruction*> generateInstructionBIN(OpCode op, Node * n1, Node * n2, ST* curr); 
+extern Node* fixNodeForExpression(Node *ptr, ST* curr);
+extern void pushInstruction(Instruction* instr);
+extern void pushInstructionList(vector<Instruction*> instr_list);
+extern vector<Instruction*> mergeInstructions(vector<Instruction*>, vector<Instruction*>);
+extern string getTemp(Node *);
+extern vector<Instruction*> generateInstructionsAssignment(Node * target, Node * source, ST* curr);
+extern Instruction* generateGotoInstruction(Node *n1, ST* curr);
+extern Instruction* generateUnconditionalGoto(ST* curr);
+extern Instruction* generateLabelInstruction(string s);
+
+extern Instruction* generateUnaryInstruction(OpCode, Node*, ST*);

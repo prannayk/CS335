@@ -1,8 +1,6 @@
 #pragma once
 
 #include "enums.h"
-#include "Node.h"
-
 #include <map>
 #include <string.h>
 #include <vector>

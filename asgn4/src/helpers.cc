@@ -6,8 +6,20 @@ extern void
 inferListType(Node * target, Node * source){
     for(int i = 0; i< target->children.size() ; ++i){
         target->children[i]->setType(source->children[i]->getType());
-        cout<<"Inferred Type : "<<target->children[i]->getType()<<endl;
     }
+}
+
+extern vector<Instruction*>
+generateInstructionsAssignment(Node * target, Node * source, ST* curr){
+    vector<Instruction*> i_list;
+    Instruction * instr;
+    for(int i=0;i<target->children.size(); ++i ){
+        STEntry * arg1 = curr->getVar(target->children[i]->tmp);
+        STEntry *arg2 = curr->getVar(source->children[i]->tmp);
+        instr = new Instruction(ASG, arg1, arg2,target->children[i]->addrMode, source->children[i]->addrMode, target->children[i]->getType(), source->children[i]->getType() );
+        i_list.push_back(instr);
+    }
+    return i_list;
 }
 
 extern vector<Type*>
@@ -102,13 +114,109 @@ extern vector<Type*> getTypes(Node * list){
     return typeList;
 }
 
-extern string generateInstruction(OpCode op, Node * n1, Node * n2, ST *curr){
-    STEntry * arg1 = curr->getVar(n1->tmp);
-    STEntry * arg2 = curr->getVar(n2->tmp);
-    string str = "tmp"; // TODO : replace with random string
-    STEntry * arg3 = curr->getVar(str);
+extern Node* fixNodeForExpression(Node* ptr, ST* curr){
+    if(ptr->matched == "Name"){
+        if(curr->getVar(ptr->content) != NULL)
+            ptr->setType(curr->getVar(ptr->content)->type); 
+        else 
+            ptr->setType(new BasicType("NOTYPE")) ;
+        ptr->addrMode = REGISTER;
+    } else  if(ptr->matched == "Literal") {
+        ptr->addrMode = CONSTANT_VAL;
+    }        
+    return ptr;
+}
+
+extern vector<Instruction*> generateInstructionBIN(OpCode op, Node * n1, Node * n2, ST *curr){
+    n1 = fixNodeForExpression(n1,curr);
+    n2 = fixNodeForExpression(n2,curr);
+    void * arg1, *arg2;
+    if(n1->matched != "Literal")   arg1 = (void*)curr->getVar(n1->tmp);
+    else {
+        int *i = new int;
+        *i = atoi(n1->tmp.c_str());
+        arg1 = (void*)i;
+    }
+    if(n2->matched != "Literal") arg2 = curr->getVar(n2->tmp);
+    else {
+        int *i = new int;
+        *i = atoi(n1->tmp.c_str());
+        arg2 = (void*)i;
+    }
+    string st = "temp";
+    string str = st + to_string(clock()); 
+    curr->addEntry(str, n1->getType(), false);
+    STEntry * arg3;
+    if (!(arg3 = curr->getVar(str))){
+        cout << "STE creation failed" << endl;
+        exit(1);
+    }
     if (n1->getType() != n2->getType()) cout << "Error : types mismatch" << endl;
-    Instruction * instr = new Instruction(op, arg3, arg2, arg1, REGISTER, n1->addrMode, n2->addrMode, n1->getType(), n2->getType(), n1->getType() );
-    instructionList.push_back(instr); // TODO: replace with real list of instruction 
-    return str;
+    Instruction * instr;
+    instr = new Instruction(op, arg3, arg2, arg1, REGISTER, n1->addrMode, n2->addrMode, n1->getType(), n2->getType(), n1->getType() );
+    vector<Instruction*> i_list; i_list = mergeInstructions(i_list, n1->instr_list);
+    i_list = mergeInstructions(i_list, n2->instr_list);
+    i_list.push_back(instr);
+    i_list[0]->printInstruction();
+    cout<<"asdfasd"<<endl;
+    cout<< i_list.size();
+    return i_list;
+}
+
+extern Instruction* generateGotoInstruction(Node *n1, ST* curr){
+   STEntry * arg1 = curr->getVar(n1->tmp);
+   if(arg1 == NULL) { curr->addEntry(n1->tmp, new BasicType("NOTYPE"), false);
+        arg1 = curr->getVar(n1->tmp);
+   }
+   string s = "label";
+   s = s + to_string(clock());
+   char* branch = new char; size_t len = s.copy(branch, s.length()); branch[len] = '\0';
+   int * i = new int;
+   *i = 1;
+   Instruction * instr;
+   instr = new Instruction(GOTOEQ, (void*)branch, (void*)arg1, (void*)i, CONSTANT_VAL, REGISTER, CONSTANT_VAL, new BasicType(s), n1->getType(), new BasicType("int"));
+   return instr;
+}
+
+extern Instruction* generateUnconditionalGoto(ST* curr){
+    string s = "label";
+    s = s + to_string(clock());
+    char* branch = new char; size_t len = s.copy(branch, s.length()); branch[len] = '\0';
+    cout<<(void*)(new BasicType(s))<<endl;
+    Instruction* instr;
+    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
+    return instr;
+}
+
+extern vector<Instruction*> mergeInstructions(vector<Instruction*> first,  vector<Instruction*> second){
+    for(int i=0;i<second.size();++i)    first.push_back(second[i]);
+    return first;
+}
+
+extern void pushInstructionList(vector<Instruction*> instr_list){
+    for(int i=0; i<instr_list.size(); ++i)  pushInstruction(instr_list[i]);
+}
+
+extern void pushInstruction(Instruction * instr){
+    instructionList.push_back(instr);
+}
+
+extern string getTemp(Node * ptr){
+    string s;
+    return s = (char *)ptr->instr_list[ptr->instr_list.size() - 1]->getV1();
+}
+
+extern Instruction* generateUnaryInstruction(OpCode op, Node * source, ST* curr){
+    string st = "temp";
+    string str = st + to_string(clock()); 
+    curr->addEntry(str, source->getType(), false);
+    STEntry * target = curr->getVar(str);
+    STEntry * src = curr->getVar(source->tmp);
+    Instruction* instr = new Instruction(op, target, src, REGISTER, source->addrMode, source->getType(), source->getType());
+    return instr;
+}
+
+extern Instruction* generateLabelInstruction(string s){
+    char* branch = new char; size_t len = s.copy(branch, s.length()); branch[len] = '\0';
+    return new Instruction(LABEL_ST, branch, CONSTANT_VAL, new BasicType(s));
 }
