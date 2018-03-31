@@ -93,9 +93,14 @@ class STEntry
 
 class ST {
    public:
+    
+     static map<string, StructDefinitionType*> structDefs;
+
      int depth;
 
      map<string, STEntry*> table;
+     map<string, string> structs;
+
      vector<ST*> children;
 
      ST* parent;
@@ -104,8 +109,10 @@ class ST {
  
      ST(int aDepth, ST* aParent);
      void addEntry(string aName, Type* aType, bool aConstant);
+     void addStructEntry(string aName, string structName);
      void addChild(ST* aChild);
      STEntry* getVar(string a);
+     STEntry* getStructVar(string aName, string memberName);
      
      bool checkEntry(string a);
      void resetNextUseInfo(int a);

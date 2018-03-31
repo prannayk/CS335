@@ -48,18 +48,19 @@ class FuncType : public Type
     FuncType(Type* aReturnType, vector<Type*> aParamTypes);
 };
 
-class StructType : public Type
+class StructDefinitionType : public Type
 {
-  private:
-    map<string, Type*> fields;
-    string randomSuffix;
 
   public:
+    map<string, Type*> fields;
+    string randomSuffix;
+    string name;
+
     map<string, Type*> GetFields() const;
-    string Hoist(string aStructVariableName, string aFieldName) const;
+    string Hoist(string aStructVariableName, string aFieldName, string aSuffix) const;
     Type* GetTypeFor(string aFieldName);
-    StructType(map<string, Type*> aFields);
-    StructType(vector<string> fieldNames, vector<Type*> fieldTypes);
+    StructDefinitionType(string aName, map<string, Type*> aFields);
+    StructDefinitionType(string aName, vector<string> fieldNames, vector<Type*> fieldTypes);
 };
 
 class CompoundType : public Type

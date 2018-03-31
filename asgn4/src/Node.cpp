@@ -81,6 +81,8 @@ Node::incrementCount(Node *nNode){
 // }
 //
 
+
+
 STEntry::STEntry(string aName, Type* aType) {
   name = aName;
   type = aType;
@@ -92,6 +94,8 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
   constant = aConstant;
 }
 
+map<string, StructDefinitionType*> ST::structDefs;
+
  ST::ST(int aDepth, ST* aParent) {
    depth = aDepth;
    parent = aParent;
@@ -102,6 +106,19 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
    STEntry* t = new STEntry(aName, aType, aConstant);
    table[aName] = t;
  }
+
+void
+ST::addStructEntry(string aName, string structName) {
+  StructDefinitionType* t = ST::structDefs[structName];
+  map<string, Type*>::iterator iter;
+  string temp;
+  for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++ ) {
+    temp = aName + t->randomSuffix + iter->first;
+    addEntry(temp, iter->second, 0);
+  }
+  structs[aName] = structName;
+
+}
  
  void
  ST::addChild(ST* aChild) {
@@ -123,6 +140,13 @@ ST::resetNextUseInfo(int a) {
     (*(iter->second)).setLive(false);
     (*(iter->second)).setNextUse(a);
   }
+}
+
+STEntry*
+ST::getStructVar(string aName, string memberName) {
+  StructDefinitionType* t = ST::structDefs[structs[aName]];
+  string temp = aName + t->randomSuffix + memberName;
+  return getVar(temp);
 }
 
 STEntry*

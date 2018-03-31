@@ -112,17 +112,20 @@ FuncType::GetParamTypes() const
     return this->paramTypes;
 }
 
-StructType::StructType(map<string, Type*> aFields)
+StructDefinitionType::StructDefinitionType(string aName, map<string, Type*> aFields)
   : fields(aFields)
   , randomSuffix(to_string(clock()))
 {
+    name = aName;
     this->representation = structRepr(this->fields);
 }
 
-StructType::StructType(vector<string> fieldNames, vector<Type*> fieldTypes)
+StructDefinitionType::StructDefinitionType(string aName, vector<string> fieldNames, vector<Type*> fieldTypes)
   : fields()
   , randomSuffix(to_string(clock()))
 {
+  
+    name = aName;
     vector<string>::iterator ni;
     vector<Type*>::iterator ti;
     for (ni = fieldNames.begin(), ti = fieldTypes.begin();
@@ -134,15 +137,15 @@ StructType::StructType(vector<string> fieldNames, vector<Type*> fieldTypes)
 }
 
 Type*
-StructType::GetTypeFor(string aFieldName)
+StructDefinitionType::GetTypeFor(string aFieldName)
 {
     return this->fields[aFieldName];
 }
 
 string
-StructType::Hoist(string aStructVariableName, string aFieldName) const
+StructDefinitionType::Hoist(string aStructVariableName, string aFieldName, string aSuffix) const
 {
-    return aStructVariableName + "_" + aFieldName + "_" + this->randomSuffix;
+    return aStructVariableName + "_" + aFieldName + "_" + aSuffix;
 }
 
 CompoundType::CompoundType(vector<Type*> aParamTypes)
