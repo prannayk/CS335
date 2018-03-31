@@ -1,11 +1,11 @@
 #pragma once
 
+#include <ctime>
 #include <iostream>
 #include <map>
 #include <string.h>
-#include <vector>
-#include <ctime>
 #include <typeinfo>
+#include <vector>
 
 using namespace std;
 
@@ -64,9 +64,22 @@ class StructType : public Type
 
 class CompoundType : public Type
 {
-    private :
-        vector<Type*> typeList;
-    public:
-        vector<Type*> GetTypeList() const;
-        CompoundType(vector<Type*> aParamTypes);
+  private:
+    vector<Type*> typeList;
+
+  public:
+    vector<Type*> GetTypeList() const;
+    CompoundType(vector<Type*> aParamTypes);
+};
+
+class ArrayType : public Type
+{
+  private:
+    Type* arrayType;
+    int size;
+
+  public:
+    int GetSize() const;
+    Type* GetArrayType() const;
+    ArrayType(Type* aArrayType, int aSize);
 };
