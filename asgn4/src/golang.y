@@ -375,7 +375,9 @@ VarDeclaration  :
 DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);inferListType($1, $3); // TODO : Add symbol table entry creation here
+$$->Add($3);
+inferListType($1, $3); // : Add symbol table entry creation here
+populateST($1, $1, curr);
 }
 | DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -394,7 +396,9 @@ ConstDeclaration  :
 DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);inferListType($1, $3); // TODO: Add symboltable entry creation here
+$$->Add($3);
+inferListType($1, $3); // : Add symboltable entry creation here
+populateST($1, $1, curr, 1);
 }
 		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -429,7 +433,7 @@ $$->Add($5);
 $$->Add($6);
 vector<string> fieldNames = getNames($4);
 vector<Type*> typeList = getTypes($4);
-$$->setType(new StructType(fieldNames, typeList));
+$$->setType(new StructDefinitionType("placeholder", fieldNames, typeList));
 }
 		| STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("StructType", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
@@ -438,7 +442,7 @@ $$->Add($3);
 $$->Add($4);
 vector <string> fieldNames;
 vector<Type*> typeList;
-$$->setType(new StructType(fieldNames, typeList));
+$$->setType(new StructDefinitionType("placeholder", fieldNames, typeList));
 }
 
 ;

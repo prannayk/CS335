@@ -49,9 +49,9 @@ createParamList(Node * list){
 extern void printST(ST* root) {
   
   cout << string(root->depth * 8, ' ') << "Variables in this scope: " << endl;
-  vector<STEntry*>::iterator it;
-  for (it = root->entries.begin(); it != root->entries.end(); it++) {
-    cout << string(root->depth * 8, ' ') <<  (*it)->name << " of type " << (*it)->type->GetRepresentation() << endl;
+  map<string, STEntry*>::iterator it;
+  for (it = root->table.begin(); it != root->table.end(); it++) {
+    cout << string(root->depth * 8, ' ') <<  (it->second)->name << " of type " << (it->second)->type->GetRepresentation() << endl;
   }
   
   cout << string(root->depth, ' ') << "Calling recursively: " << endl;

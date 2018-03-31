@@ -81,6 +81,8 @@ Node::incrementCount(Node *nNode){
 // }
 //
 
+
+
 STEntry::STEntry(string aName, Type* aType) {
   name = aName;
   type = aType;
@@ -92,6 +94,8 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
   constant = aConstant;
 }
 
+map<string, StructDefinitionType*> ST::structDefs;
+
  ST::ST(int aDepth, ST* aParent) {
    depth = aDepth;
    parent = aParent;
@@ -100,22 +104,58 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
  void
  ST::addEntry(string aName, Type* aType, bool aConstant) {
    STEntry* t = new STEntry(aName, aType, aConstant);
-   entries.push_back(t);
+   table[aName] = t;
  }
+
+void
+ST::addStructEntry(string aName, string structName) {
+  StructDefinitionType* t = ST::structDefs[structName];
+  map<string, Type*>::iterator iter;
+  string temp;
+  for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++ ) {
+    temp = aName + t->randomSuffix + iter->first;
+    addEntry(temp, iter->second, 0);
+  }
+  structs[aName] = structName;
+
+}
  
  void
  ST::addChild(ST* aChild) {
    children.push_back(aChild);
  }
 
+bool
+ST::checkEntry(string a) {
+  if (getVar(a) == NULL) {
+    return true;
+  }
+  return false;
+}
+
+void
+ST::resetNextUseInfo(int a) {
+  map<string, STEntry*>::iterator iter;
+  for (iter = table.begin(); iter != table.end(); iter++) {
+    (*(iter->second)).setLive(false);
+    (*(iter->second)).setNextUse(a);
+  }
+}
+
+STEntry*
+ST::getStructVar(string aName, string memberName) {
+  StructDefinitionType* t = ST::structDefs[structs[aName]];
+  string temp = aName + t->randomSuffix + memberName;
+  return getVar(temp);
+}
+
 STEntry*
 ST::getVar(string a) {
-  vector<STEntry*>::iterator it;
-  for (it = entries.begin(); it != entries.end(); it++) {
-    if (a.compare((*it)->name) == 0) {
-      return *it;
-    }
+
+  if (table.count(a)) {
+    return table[a];
   }
+
   if (depth == 0) {
     return nullptr;
   }
