@@ -95,6 +95,7 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant) {
 }
 
 map<string, StructDefinitionType*> ST::structDefs;
+map<string, FuncType*> ST::funcDefs;
 
  ST::ST(int aDepth, ST* aParent) {
    depth = aDepth;

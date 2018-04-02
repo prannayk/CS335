@@ -937,15 +937,39 @@ FUNC OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("FunctionDeclara
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;}
+$$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
 
+// Do cool functype stuff
+if (($3->children).size() == 5) {
+  vector<Type*> paramTypes = createParamList($3->children[2]->children[0]);
+  FuncType* t = new FuncType($3->children[4]->getType(), paramTypes);
+  ST::funcDefs[($3->children[0])->matched] = t;
+} else {
+  vector<Type*> paramTypes = createParamList($3->children[5]->children[0]);
+  FuncType* t = new FuncType($3->children[7]->getType(), paramTypes);
+  ST::funcDefs[($3->children[3])->matched] = t;
+}
+
+}
 ;
 GeneratorDeclaration  :
 GEN OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;}
+$$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
+
+// Do cool functype stuff
+if (($3->children).size() == 5) {
+  vector<Type*> paramTypes = createParamList($3->children[2]->children[0]);
+  FuncType* t = new FuncType($3->children[4]->getType(), paramTypes, true);
+  ST::funcDefs[($3->children[0])->matched] = t;
+} else {
+  vector<Type*> paramTypes = createParamList($3->children[5]->children[0]);
+  FuncType* t = new FuncType($3->children[7]->getType(), paramTypes, true);
+  ST::funcDefs[($3->children[3])->matched] = t;
+}
+}
 
 ;
 FunctionHeader  :
@@ -954,7 +978,11 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"id" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $4<< " " <<"FunctionResult" << endl ;}
+$$->Add($5);
+
+
+cout <<"noticeme" <<"id" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $4<< " " <<"FunctionResult" << endl ;}
+
 		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
 $$->Add($1);
 $$->Add($2);
@@ -1505,6 +1533,7 @@ int main(int argc, char** argv) {
         } while (!feof(yyin));
     cout << "Printing ST" << endl;
     printST(root);
+    cout << "There are " << (ST::funcDefs.size()) << " many functions" << endl;
     cout << "fin" << endl;
     return 0;
 }

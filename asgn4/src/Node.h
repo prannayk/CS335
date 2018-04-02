@@ -222,6 +222,7 @@ class ST {
    public:
     
      static map<string, StructDefinitionType*> structDefs;
+     static map<string, FuncType*> funcDefs;
 
      int depth;
 
