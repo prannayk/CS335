@@ -373,11 +373,13 @@ $$->Add($3);cout <<"type" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <
 
 ;
 VarDeclaration  :
-DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
+DeclarationNameList ASSGN_OP { setRValueMode(true, curr); } ExpressionList {
+setRValueMode(false, curr);
+$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-inferListType($1, $3); // : Add symbol table entry creation here
+$$->Add($4);
+inferListType($1, $4); // : Add symbol table entry creation here
 populateST($1, $1, curr);
 }
 | DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
@@ -385,27 +387,33 @@ $$->Add($1);
 $$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
 populateST($1, $2, curr);
 }
-| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
+| DeclarationNameList TypeName ASSGN_OP { setRValueMode(true, curr); } ExpressionList{
+setRValueMode(false, curr);
+$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;
+$$->Add($5);
 populateST($1, $2, curr);}
 
 ;
 ConstDeclaration  :
-DeclarationNameList ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
+DeclarationNameList ASSGN_OP { setRValueMode(true, curr); } ExpressionList{
+setRValueMode(false, curr);
+$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-inferListType($1, $3); // : Add symboltable entry creation here
+$$->Add($4);
+inferListType($1, $4); // : Add symboltable entry creation here
 populateST($1, $1, curr, 1);
 }
-		| DeclarationNameList TypeName ASSGN_OP ExpressionList{$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
+| DeclarationNameList TypeName ASSGN_OP { setRValueMode (true, curr); } ExpressionList{
+setRValueMode(false, curr);
+$$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"DeclarationNameList"<< " " <<"TypeName"<< " " <<"assgn_op" << " " << $3<< " " <<"ExpressionList" << endl ;
+$$->Add($5);
 populateST($1, $2, curr, 1);}
 
 ;
@@ -1066,19 +1074,23 @@ $$->Add("");}		| SimpleStatement{$$ = $1;}
 ;
 SimpleStatement  :
 Expression{$$ = $1; }
-		| ExpressionList ASSGN_OP ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
+| ExpressionList ASSGN_OP { setRValueMode(true, curr); } ExpressionList {
+    setRValueMode(false, curr);
+$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
-$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $3, curr));
+$$->Add($4);
+$$->instr_list = mergeInstructions($1->instr_list, $4->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
-		| ExpressionList DECL ExpressionList{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
+| ExpressionList DECL { setRValueMode(true, curr); } ExpressionList{
+    setRValueMode(false, curr);
+$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);inferListType($1, $3);
-$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
-$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $3, curr));
+$$->Add($4);inferListType($1, $4);
+$$->instr_list = mergeInstructions($1->instr_list, $4->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
 		| Expression INC{$$ = new Node("SimpleStatement", $1->getType());
 $$->Add($1);
@@ -1151,12 +1163,17 @@ $$->Add($2);cout <<"continue" << " " << $1<< " " <<"ONewName" << endl ;}
 		| GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"goto" << " " << $1<< " " <<"NewName" << endl ;}
-		| RETURN OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+| RETURN { setRValueMode(true, curr); } OExpressionList{
+setRValueMode(false, curr);
+$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"return" << " " << $1<< " " <<"OExpressionList" << endl ;}
-		| YIELD OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+$$->Add($3);
+}
+| YIELD { setRValueMode(true, curr); } OExpressionList{
+setRValueMode(false, curr);
+$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"yield" << " " << $1<< " " <<"OExpressionList" << endl ;}
+$$->Add($3);cout <<"yield" << " " << $1<< " " <<"OExpressionList" << endl ;}
 
 ;
 LabelName  :
@@ -1265,29 +1282,39 @@ $$->Add($5);cout <<"OSimpleStatement"<< " " <<"stmtend" << " " << $2<< " " <<"OS
 
 ;
 RangeStatement  :
-ExpressionList ASSGN_OP RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
+ExpressionList ASSGN_OP RANGE { setRValueMode(true, curr); } Expression{
+setRValueMode(false, curr);
+$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"ExpressionList"<< " " <<"assgn_op" << " " << $2<< " " <<"range" << " " << $3<< " " <<"Expression" << endl ;}
-		| ExpressionList DECL RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
+$$->Add($5);
+}
+| ExpressionList DECL RANGE { setRValueMode(true, curr); } Expression{
+setRValueMode(false, curr);
+$$ = new Node("RangeStatement", new BasicType("NOTYPE"), $1->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"ExpressionList"<< " " <<"decl" << " " << $2<< " " <<"range" << " " << $3<< " " <<"Expression" << endl ;}
-		| RANGE Expression{$$ = new Node("RangeStatement", new BasicType("NOTYPE"), 0);
+$$->Add($5);
+}
+| RANGE { setRValueMode(true, curr); } Expression {
+setRValueMode(false, curr);
+$$ = new Node("RangeStatement", new BasicType("NOTYPE"), 0);
 $$->Add($1);
-$$->Add($2);cout <<"range" << " " << $1<< " " <<"Expression" << endl ;}
-
+$$->Add($3);
+}
 ;
 SwitchStatement  :
-SWITCH IfHeader BLOCK_OPEN CaseBlockList BLOCK_CLOSE{$$ = new Node("SwitchStatement", new BasicType("NOTYPE"), $4->count);
+SWITCH IfHeader BLOCK_OPEN { setRValueMode(true, curr); } CaseBlockList BLOCK_CLOSE{
+setRValueMode(false, curr);
+$$ = new Node("SwitchStatement", new BasicType("NOTYPE"), $5->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);
-$$->Add($5);cout <<"switch" << " " << $1<< " " <<"IfHeader"<< " " <<"block_open" << " " << $3<< " " <<"CaseBlockList"<< " " <<"block_close" << " " << $5 << endl ;}
-
+$$->Add($5);
+$$->Add($6);
+}
 ;
 CaseBlockList  :
 /* Empty Rule */ {$$ = new Node("CaseBlockList", new BasicType("NOTYPE"), 0);
@@ -1295,16 +1322,20 @@ $$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);}
 
 ;
 CaseBlock  :
-Case CompoundStatement STMTEND {$$ = new Node("CaseBlock", new BasicType("NOTYPE"));
+Case CompoundStatement STMTEND {
+$$ = new Node("CaseBlock", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2)->Add($3);cout <<"Case"<< " " <<"CompoundStatement" << $3 << endl ;}
+$$->Add($2)->Add($3);
+}
 
 ;
 Case  :
-CASE ExpressionOrTypeList COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
+CASE ExpressionOrTypeList COLON{
+$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);
-$$->Add($3);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"colon" << " " << $3 << endl ;}
+$$->Add($3);
+$$->Add($3);
+}
 		| CASE ExpressionOrTypeList ASSGN_OP Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);

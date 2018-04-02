@@ -224,6 +224,8 @@ class ST {
      static map<string, StructDefinitionType*> structDefs;
      static map<string, FuncType*> funcDefs;
 
+     bool rValueMode = false;
+
      int depth;
 
      map<string, STEntry*> table;

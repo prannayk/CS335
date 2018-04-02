@@ -334,3 +334,15 @@ genInstructionBinWrapper(OpCode op,
     source->addrMode = REGISTER;
     source->setType(first->getType());
 }
+
+extern bool
+isRValueMode(ST* aST)
+{
+    return aST->rValueMode;
+}
+
+extern void
+setRValueMode(bool aRValueMode, ST* aST)
+{
+    aST->rValueMode = aRValueMode;
+}
