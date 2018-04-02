@@ -45,3 +45,5 @@ extern Instruction* generateUnconditionalGoto(string , ST*);
 extern Instruction* generateLabelInstruction(string s);
 extern void genInstructionBinWrapper(OpCode op, Node * source, Node * first, Node* second, ST* curr);
 extern Instruction* generateUnaryInstruction(OpCode, Node*, ST*);
+extern void setRValueMode(bool, ST* aST);
+extern bool isRValueMode(ST* aST);
