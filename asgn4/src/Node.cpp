@@ -305,3 +305,21 @@ Instruction::Instruction(OpCode aOp)
 void Instruction::printInstruction(){
     cout<< op << " " <<  v1AddMode << " " << v1Type->GetRepresentation();
 }
+
+bool
+ST::checkEntryFunc(string a) {
+  if (getFunc(a) == NULL) {
+    return true;
+  }
+  return false;
+}
+
+FuncType*
+ST::getFunc(string a) {
+
+  if (funcDefs.count(a)) {
+    return funcDefs[a];
+  }
+  return nullptr; 
+}
+

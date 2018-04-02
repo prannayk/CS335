@@ -8,7 +8,7 @@ func main(ix, int y, int z) {
     var t func (x int,y int) (int, int, int)
     var t gen (x int,y int) (int, float, *int)
 	var t,i,z int
-
+    z = 1 + t;
 	for i=0; i<100; i=i+1 {
 		t = t+i
 	}
@@ -21,7 +21,9 @@ func main(ix, int y, int z) {
         for ; i<100; i++ {
 	}
 	if t != 50*99  {
-           panic(t)
         }
+}
+func dhish(x int){
+main(1,1,1)
 }
 
