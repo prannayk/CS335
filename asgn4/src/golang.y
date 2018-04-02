@@ -904,9 +904,10 @@ $$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"Funct
 
 // Do cool functype stuff
 if (($3->children).size() == 5) {
-  vector<Type*> paramTypes = createParamList($3->children[2]->children[0]);
+  vector<Type*> paramTypes = createParamList($3->children[2]);
   FuncType* t = new FuncType($3->children[4]->getType(), paramTypes);
   ST::funcDefs[($3->children[0])->matched] = t;
+
 } else {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
@@ -921,9 +922,8 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
 
-// Do cool functype stuff
 if (($3->children).size() == 5) {
-  vector<Type*> paramTypes = createParamList($3->children[2]->children[0]);
+  vector<Type*> paramTypes = createParamList($3->children[2]);
   FuncType* t = new FuncType($3->children[4]->getType(), paramTypes, true);
   ST::funcDefs[($3->children[0])->matched] = t;
 } else {
@@ -1022,9 +1022,7 @@ OArgumentTypeListOComma  :
 $$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), 0);
 }
         | ArgumentTypeList OComma {
-$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), $1->count, $1->flag);
-$$->Add($1);
-}
+$$ = $1;}
 
 ;
 ArgumentTypeList  :
@@ -1143,22 +1141,64 @@ $$->Add($2);
 $$->Add($3);
 $$->instr_list.push_back(generateLabelInstruction($1->content)); 
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
+string s = "label";
+s = s + to_string(clock());
+label_map[$1->content] = s;
+if(instr_map.count($1->content)){
+    char * branch = new char;
+    size_t len = $1->content.copy(branch, label_map[$1->content].length());
+    branch[len] = '\0';
+    instr_map[$1->content]->setV1(branch);
+    instr_map.erase($1->content);
 }
-		| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+}
+
+| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("FallThrough"));
 $$->Add($1); //$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
 } 
-		| BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+| BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);}
-		| CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+$$->Add($2);
+if($2->count  == 1){
+    Instruction * instr = generateUnconditionalGoto(curr);
+    if(!label_map.count($2->content))
+        instr_map[$2->content] = instr;
+    else {
+        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
+        ((char*)instr->getV1())[len] = '\0';
+    }
+}
+}
+| CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"continue" << " " << $1<< " " <<"ONewName" << endl ;}
-		| GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
+$$->Add($2);
+if($2->count  == 1){
+    Instruction * instr = generateUnconditionalGoto(curr);
+    if(!label_map.count($2->content))
+        instr_map[$2->content] = instr;
+    else {
+        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
+        ((char*)instr->getV1())[len] = '\0';
+    }
+}
+}
+| GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"goto" << " " << $1<< " " <<"NewName" << endl ;}
+$$->Add($2);
+if($2->count  == 1){
+    Instruction * instr = generateUnconditionalGoto(curr);
+    if(!label_map.count($2->content))
+        instr_map[$2->content] = instr;
+    else {
+        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
+        ((char*)instr->getV1())[len] = '\0';
+    }
+}
+}
 		| RETURN OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"return" << " " << $1<< " " <<"OExpressionList" << endl ;}
+$$->Add($2);
+}
 		| YIELD OExpressionList{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"yield" << " " << $1<< " " <<"OExpressionList" << endl ;}
@@ -1254,12 +1294,35 @@ ForBody  :
 ForHeader LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-
+if(($1->matched == "ForHeader")){
+    string s1 = "label" + to_string(clock());
+    string s2 = "label" + to_string(clock());
+    $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
+    $$->instr_list.push_back(generateLabelInstruction(s1));
+    $$->instr_list = mergeInstructions($$->instr_list, $1->children[1]->instr_list);
+    $$->instr_list.push_back(generateGotoInstruction($1->children[1],s2  ,curr, false));
+    $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
+    $$->instr_list = mergeInstructions($$->instr_list, $1->children[2]->instr_list);
+    $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
+    $$->instr_list.push_back(generateLabelInstruction(s2));
+} else if ($1->matched == "RangeStatement"){ 
+    // TODO : handle range expression Milind
+} else {
+    string s1 = "label" + to_string(clock());
+    string s2 = "label" + to_string(clock());
+    $$->instr_list.push_back(generateLabelInstruction(s1));
+    $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
+    $$->instr_list.push_back(generateGotoInstruction($1->children[0],s2  ,curr, false));
+    $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
+    $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
+    $$->instr_list.push_back(generateLabelInstruction(s2));
+    
+}
 }
 
 ;
 ForHeader  :
-OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("ForHeader", new BasicType("NOTYPE"));
+OSimpleStatement STMTEND OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("ForHeader", new BasicType("NOTYPE"), 3);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);

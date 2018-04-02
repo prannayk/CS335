@@ -1,6 +1,8 @@
 #include "helpers.h"
 
 vector<Instruction*> instructionList;
+map<string, Instruction*> instr_map;
+map<string, string> label_map;
 
 extern void
 inferListType(Node* target, Node* source)
@@ -172,11 +174,11 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     void *arg1, *arg2;
     if (n1->matched != "Literal")
         arg1 = (void*)curr->getVar(n1->tmp);
-    else {
+    else if(n1->getType()->GetRepresentation() == "int") {
         int* i = new int;
         *i = atoi(n1->tmp.c_str());
         arg1 = (void*)i;
-    } else if(n1->getType()->GetRepresentation() == "BOOL") {
+    } else if(n1->getType()->GetRepresentation() == "bool") {
         bool *i = new bool;
         *i = n1->tmp == "true"; // checking true or not
         arg1 = (void*)i;
@@ -218,6 +220,35 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     cout << i_list.size();
     return i_list;
 }
+extern Instruction*
+generateGotoInstruction(Node* n1, string label,  ST* curr, bool cond= true)
+{
+    STEntry* arg1 = curr->getVar(n1->tmp);
+    if (arg1 == NULL) {
+        curr->addEntry(n1->tmp, new BasicType("NOTYPE"), false);
+        arg1 = curr->getVar(n1->tmp);
+    }
+    char* branch = new char;
+    size_t len = label.copy(branch, label.length());
+    branch[len] = '\0';
+    int* i = new int;
+    *i = 1;
+    Instruction* instr;
+    OpCode op;
+    if(cond)    op = GOTOEQ;
+    else op = GOTONEQ;
+    instr = new Instruction(GOTOEQ,
+                            (void*)branch,
+                            (void*)arg1,
+                            (void*)i,
+                            CONSTANT_VAL,
+                            REGISTER,
+                            CONSTANT_VAL,
+                            new BasicType(label),
+                            n1->getType(),
+                            new BasicType("int"));
+    return instr;
+}
 
 extern Instruction*
 generateGotoInstruction(Node* n1, ST* curr)
@@ -248,6 +279,18 @@ generateGotoInstruction(Node* n1, ST* curr)
     return instr;
 }
 
+extern Instruction*
+generateUnconditionalGoto(string label, ST* curr)
+{
+    string s = label;
+    char* branch = new char;
+    size_t len = s.copy(branch, s.length());
+    branch[len] = '\0';
+    cout << (void*)(new BasicType(s)) << endl;
+    Instruction* instr;
+    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
+    return instr;
+}
 extern Instruction*
 generateUnconditionalGoto(ST* curr)
 {

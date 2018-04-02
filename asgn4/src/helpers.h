@@ -19,7 +19,8 @@ struct myLoc {
 extern vector<Instruction*> instructionList;
 
 extern myLoc *global_loc;
-
+extern map<string, Instruction*> instr_map;
+extern map<string, string> label_map;
 extern void inferListType(Node* target, Node* source);
 extern vector<Type*> createParamList(Node * list);
 
@@ -38,7 +39,9 @@ extern vector<Instruction*> mergeInstructions(vector<Instruction*>, vector<Instr
 extern string getTemp(Node *);
 extern vector<Instruction*> generateInstructionsAssignment(Node * target, Node * source, ST* curr);
 extern Instruction* generateGotoInstruction(Node *n1, ST* curr);
+extern Instruction* generateGotoInstruction(Node *, string,  ST*, bool);
 extern Instruction* generateUnconditionalGoto(ST* curr);
+extern Instruction* generateUnconditionalGoto(string , ST*);
 extern Instruction* generateLabelInstruction(string s);
 extern void genInstructionBinWrapper(OpCode op, Node * source, Node * first, Node* second, ST* curr);
 extern Instruction* generateUnaryInstruction(OpCode, Node*, ST*);
