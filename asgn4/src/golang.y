@@ -6,6 +6,7 @@
 #include <string.h>
 #include "helpers.h"
 #include "Type.h"
+#include <typeinfo>
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -568,154 +569,116 @@ Expression STAR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(MUL_OPER, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(MUL_OPER, $$, $1, $3, curr);
 }
+
 		| Expression DIV Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(DIV_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(DIV_OP, $$, $1, $3, curr);
 }
 		| Expression MOD Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(MOD_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(MOD_OP, $$, $1, $3, curr);
 }
 		| Expression LS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(SL_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(SL_OP, $$, $1, $3, curr);
 }
 		| Expression RS Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(SR_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(SR_OP, $$, $1, $3, curr);
 }
 		| Expression AMPERSAND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(BAND_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(BAND_OP, $$, $1, $3, curr);
 }
 		| Expression NOT_AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(NAND_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(NAND_OP, $$, $1, $3, curr);
 }
 		| Expression ADD Expression{$$ = new Node("Expression", $1->getType());
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(ADD_OPER, $1, $3, curr);
-cout<<"hello"<<endl;
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(ADD_OPER, $$, $1, $3, curr);
 }
 		| Expression SUB Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(SUB_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(SUB_OP, $$, $1, $3, curr);
 }
 		| Expression BIT_OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(BOR_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(BOR_OP, $$, $1, $3, curr);
 }
 		| Expression CARET Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(NOT_OPER, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(NOT_OPER, $$, $1, $3, curr);
 }
 		| Expression AND Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(AND_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(AND_OP, $$, $1, $3, curr);
 }
 		| Expression OR Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(OR_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(OR_OP, $$, $1, $3, curr);
 }
 		| Expression EQ Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(EQ_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(EQ_OP, $$, $1, $3, curr);
 }
 		| Expression NE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(NEQ_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(NEQ_OP, $$, $1, $3, curr);
 }
 		| Expression GE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(GEQ_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(GEQ_OP, $$, $1, $3, curr);
 }
 		| Expression GT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(GT_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(GT_OP, $$, $1, $3, curr);
 }
 		| Expression LE Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(LEQ_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(LEQ_OP, $$, $1, $3, curr);
 }
 		| Expression LT Expression{$$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = generateInstructionBIN(LT_OP, $1, $3, curr);
-$$->tmp = getTemp($$);
-$$->addrMode = REGISTER;
+genInstructionBinWrapper(LT_OP, $$, $1, $3, curr);
 }
 		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); $$->tmp = $$->content; }
 
@@ -773,8 +736,8 @@ $$->Add($3);
 PrimaryExprNoParen  :
 Name{$$ = $1;
 $$->addrMode = REGISTER;}
-		| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
-		| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
+| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -784,7 +747,7 @@ s = s + s1 ;
 s = $1->getType()->GetRepresentation() + s;
 $$->setType(new BasicType(s));
 }
-		| PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+| PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -917,19 +880,19 @@ OLiteral  :
 ;
 Literal  :
 RAW_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1); $$->setType(new BasicType("STR")); $$->content = $1;}
+$$->Add($1); $$->setType(new BasicType("str")); $$->content = $1;}
 		| INTER_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BYTE")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("byte")); $$->content = $1;}
 		| DECIMAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("INT")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("int")); $$->content = $1;}
 		| OCTAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("INT")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("octal")); $$->content = $1;}
 		| HEX_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("HEX")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("hex")); $$->content = $1;}
 		| TRUE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BOOL")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;}
 		| FALSE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("BOOL")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;}
 
 ;
 FunctionDeclaration  :
@@ -1173,7 +1136,8 @@ SimpleStatement{$$ = $1;}
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list.push_back(generateLabelInstruction($1->content)); // TODO : check contents
+$$->instr_list.push_back(generateLabelInstruction($1->content)); 
+$$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 }
 		| FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1); //$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
@@ -1498,22 +1462,36 @@ PseudoCall  :
 PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), 0);
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
-		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
-$$->Add($1);
-$$->Add($2);
 $$->Add($3);
-$$->Add($4);
-$$->Add($5);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"ExpressionOrTypeList"<< " " <<"OComma"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
+if(curr->checkEntryFunc($1->content))
+$$->setType(curr->getFunc($1->content));
+$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
+cout<<"Here"<<endl;
+if($$->type_child.size())  cout << "Error : expecting " << $$->type_child.size()  <<" arguments, 0 provided!"<<endl;
+$$->setType(((FuncType*)$$->getType())->GetReturnType());
+}
+| PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);cout <<"PrimaryExpr"<< " " <<"paren_open" << " " << $2<< " " <<"ExpressionOrTypeList"<< " " <<"variadic" << " " << $4<< " " <<"OComma"<< " " <<"paren_close" << " " << $6 << endl ;}
-
-;
+if(!curr->checkEntryFunc($1->content)) $$->setType(curr->getFunc($1->content));
+$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
+if($3->count != $$->type_child.size()) cout << "Unexpected number of arguments" << endl;
+}
+| PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
+$$->Add($1);
+$$->Add($2);
+$$->Add($3);
+$$->Add($4);
+$$->Add($5);
+$$->Add($6);
+if(curr->checkEntryFunc($1->content)) $$->setType(curr->getFunc($1->content));
+$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
+if($$->type_child[$$->type_child.size() - 1]->GetTypeClass() != 1) cout << "Variadic only work with basic types" << endl ; // TODO : extend this to compound types, struct types etc
+if((($3->count + 1) != $$->type_child.size()) || ((BasicType*)($$->type_child[$$->type_child.size() - 1]))->variadic)   cout<<"Error invalid function call, unknown number of types" << endl;
+};
 
 %%
 

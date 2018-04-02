@@ -14,6 +14,7 @@ structRepr(map<string, Type*> fields)
 
 Type::Type()
   : representation("")
+  , type(0)
 {}
 
 string
@@ -22,6 +23,12 @@ Type::GetRepresentation() const
     return this->representation;
 }
 
+int
+Type::GetTypeClass() const
+{
+    return this->type;
+}
+    
 bool
 Type::operator==(const Type& rhs)
 {
@@ -38,6 +45,7 @@ BasicType::BasicType(string aName)
   , pointer(false)
 {
     this->representation = aName;
+    this->type = 1;
 }
 
 BasicType::BasicType(string aName, bool flag)
@@ -47,6 +55,7 @@ BasicType::BasicType(string aName, bool flag)
   , pointer(false)
 {
     this->representation = aName;
+    this->type = 1;
 }
 
 BasicType::BasicType(string aName, bool aFlag, bool aPointer)
@@ -57,6 +66,7 @@ BasicType::BasicType(string aName, bool aFlag, bool aPointer)
 {
     string star = "*";
     this->representation = star + aName;
+    this->type = 1;
 }
 
 string
@@ -82,6 +92,7 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
         }
     }
     this->representation += ") " + returnType->GetRepresentation();
+    this->type = 2;
 }
 
 FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
@@ -98,6 +109,7 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
         }
     }
     this->representation += ") " + returnType->GetRepresentation();
+    this->type = 2;
 }
 
 Type*
@@ -118,6 +130,7 @@ StructDefinitionType::StructDefinitionType(string aName, map<string, Type*> aFie
 {
     name = aName;
     this->representation = structRepr(this->fields);
+    this->type = 3;
 }
 
 StructDefinitionType::StructDefinitionType(string aName, vector<string> fieldNames, vector<Type*> fieldTypes)
@@ -134,6 +147,7 @@ StructDefinitionType::StructDefinitionType(string aName, vector<string> fieldNam
         this->fields[*ni] = *ti;
     }
     this->representation = structRepr(this->fields);
+    this->type = 3;
 }
 
 Type*
@@ -175,6 +189,7 @@ ArrayType::ArrayType(Type* aArrayType, int aSize)
 {
     this->representation =
       "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
+    this->type = 4;
 }
 
 ArrayType::ArrayType(Type* aArrayType, int aSize, bool flag)
@@ -184,6 +199,7 @@ ArrayType::ArrayType(Type* aArrayType, int aSize, bool flag)
 {
     this->representation =
       "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
+    this->type = 4;
 }
 
 int

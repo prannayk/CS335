@@ -13,21 +13,22 @@ class Type
 {
   protected:
     string representation;
-
+    int type;
   public:
     Type();
     string GetRepresentation() const;
     bool operator==(const Type& rhs);
+    int GetTypeClass() const;
 };
 
 class BasicType : public Type
 {
   private:
     string name;
-    bool variadic;
-    bool pointer;
 
   public:
+    bool variadic;
+    bool pointer;
     string GetName() const;
     BasicType(string aName);
     BasicType(string aName, bool flag);

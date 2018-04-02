@@ -240,9 +240,11 @@ class ST {
      void addStructEntry(string aName, string structName);
      void addChild(ST* aChild);
      STEntry* getVar(string a);
+     static FuncType* getFunc(string a);
      STEntry* getStructVar(string aName, string memberName);
      
      bool checkEntry(string a);
+     static bool checkEntryFunc(string a);
      void resetNextUseInfo(int a);
 
     ST* getParentScope() const { return parent; }

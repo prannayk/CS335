@@ -40,5 +40,5 @@ extern vector<Instruction*> generateInstructionsAssignment(Node * target, Node *
 extern Instruction* generateGotoInstruction(Node *n1, ST* curr);
 extern Instruction* generateUnconditionalGoto(ST* curr);
 extern Instruction* generateLabelInstruction(string s);
-
+extern void genInstructionBinWrapper(OpCode op, Node * source, Node * first, Node* second, ST* curr);
 extern Instruction* generateUnaryInstruction(OpCode, Node*, ST*);

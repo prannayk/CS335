@@ -13,6 +13,8 @@ inferListType(Node* target, Node* source)
 extern vector<Instruction*>
 generateInstructionsAssignment(Node* target, Node* source, ST* curr)
 {
+    target = fixNodeForExpression(target, curr);
+    source = fixNodeForExpression(source, curr);
     vector<Instruction*> i_list;
     Instruction* instr;
     for (int i = 0; i < target->children.size(); ++i) {
@@ -171,9 +173,13 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     void *arg1, *arg2;
     if (n1->matched != "Literal")
         arg1 = (void*)curr->getVar(n1->tmp);
-    else {
+    else if (n1->getType()->GetRepresentation() == "INT") {
         int* i = new int;
         *i = atoi(n1->tmp.c_str());
+        arg1 = (void*)i;
+    } else if (n1->getType()->GetRepresentation() == "BOOL") {
+        bool* i = new bool;
+        *i = n1->tmp == "true"; // checking true or not
         arg1 = (void*)i;
     }
     if (n2->matched != "Literal")
@@ -191,8 +197,12 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
         cout << "STE creation failed" << endl;
         exit(1);
     }
-    if (n1->getType() != n2->getType())
-        cout << "Error : types mismatch" << endl;
+    if (!((*n1->getType()) == (*n2->getType()))) {
+        cout << "Error : types mismatch"
+             << " ";
+        cout << n1->getType()->GetRepresentation() << " ";
+        cout << n2->getType()->GetRepresentation() << endl;
+    }
     Instruction* instr;
     instr = new Instruction(op,
                             arg3,
@@ -310,4 +320,17 @@ generateLabelInstruction(string s)
     size_t len = s.copy(branch, s.length());
     branch[len] = '\0';
     return new Instruction(LABEL_ST, branch, CONSTANT_VAL, new BasicType(s));
+}
+
+extern void
+genInstructionBinWrapper(OpCode op,
+                         Node* source,
+                         Node* first,
+                         Node* second,
+                         ST* curr)
+{
+    source->instr_list = generateInstructionBIN(op, first, second, curr);
+    source->tmp = getTemp(source);
+    source->addrMode = REGISTER;
+    source->setType(first->getType());
 }
