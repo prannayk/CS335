@@ -908,9 +908,8 @@ if (($3->children).size() == 5) {
   FuncType* t = new FuncType($3->children[4]->getType(), paramTypes);
   ST::funcDefs[($3->children[0])->matched] = t;
 } else {
-  vector<Type*> paramTypes = createParamList($3->children[5]->children[0]);
-  FuncType* t = new FuncType($3->children[7]->getType(), paramTypes);
-  ST::funcDefs[($3->children[3])->matched] = t;
+  // Throw error!
+  cout << "Warning: unexpected function declaration.";
 }
 
 }
@@ -928,9 +927,8 @@ if (($3->children).size() == 5) {
   FuncType* t = new FuncType($3->children[4]->getType(), paramTypes, true);
   ST::funcDefs[($3->children[0])->matched] = t;
 } else {
-  vector<Type*> paramTypes = createParamList($3->children[5]->children[0]);
-  FuncType* t = new FuncType($3->children[7]->getType(), paramTypes, true);
-  ST::funcDefs[($3->children[3])->matched] = t;
+  // Throw error!
+  cout << "Warning: unexpected function declaration.";
 }
 }
 
@@ -946,16 +944,16 @@ $$->Add($5);
 
 cout <<"noticeme" <<"id" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $4<< " " <<"FunctionResult" << endl ;}
 
-		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);
-$$->Add($5);
-$$->Add($6);
-$$->Add($7);
-$$->Add($8);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $3<< " " <<"id" << " " << $4<< " " <<"paren_open" << " " << $5<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $7<< " " <<"FunctionResult" << endl ;}
-
+		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
+$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
+$$->Add($4); // ID
+$$->Add($5); // (
+$2->children[0]->children.insert($2->children[0]->children.end(), $6->children[0]->children.begin(), $6->children[0]->children.end());
+$2->children[0]->count = $2->count + $6->count;
+$$->Add($2); // Fixed up argument list
+$$->Add($7); // )
+$$->Add($8); // FunctionResult
+}
 ;
 ConvType  :
 FunctionType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
@@ -1020,15 +1018,18 @@ $$->Add($1);cout <<"CompoundStatement" << endl ;}
 
 ;
 OArgumentTypeListOComma  :
-/* Empty Rule */ {$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| ArgumentTypeList OComma{$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), $1->count, $1->flag);
+%empty {
+$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), 0);
+}
+        | ArgumentTypeList OComma {
+$$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), $1->count, $1->flag);
 $$->Add($1);
-$$->Add($2);cout <<"ArgumentTypeList"<< " " <<"OComma" << endl ;}
+}
 
 ;
 ArgumentTypeList  :
-ArgumentType{$$ = new Node("ArgumentType", $1->getType()); $$->Add($1);}
-		| ArgumentTypeList COMMA ArgumentType{$$ = $1 ; $$->incrementCount($3);}
+ArgumentType {$$ = new Node("ArgumentType", $1->getType()); $$->Add($1);}
+        |       ArgumentTypeList COMMA ArgumentType{$$ = $1 ; $$->incrementCount($3);}
 
 ;
 ArgumentType  :
@@ -1054,10 +1055,14 @@ TypeName{$$ = $1;}
 
 ;
 OComma  :
-COMMA{$$ = new Node("OComma", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"comma" << " " << $1 << endl ;}
-		| /* Empty Rule */ {$$ = new Node("OComma", new BasicType("NOTYPE"), 0);
-$$->Add("");}
+COMMA {
+$$ = new Node("OComma", new BasicType("NOTYPE"));
+$$->Add($1);
+}
+        | %empty {
+$$ = new Node("OComma", new BasicType("NOTYPE"), 0);
+$$->Add(",");
+}
 ;
 OSimpleStatement  :
 /* Empty Rule */ {$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"), 0);
