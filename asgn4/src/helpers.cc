@@ -163,6 +163,8 @@ fixNodeForExpression(Node* ptr, ST* curr)
         ptr->addrMode = REGISTER;
     } else if (ptr->matched == "Literal") {
         ptr->addrMode = CONSTANT_VAL;
+    } else if (ptr->matched == "Expression") {
+        // TODO: implement this @Prannay
     }
     return ptr;
 }
@@ -335,7 +337,23 @@ extern string
 getTemp(Node* ptr)
 {
     string s;
-    return s = (char*)ptr->instr_list[ptr->instr_list.size() - 1]->getV1();
+    // XXXmilindl: This is either a symbol table entry, not a char*
+    // I've rewritten it here, but I am not sure of it.
+    if (ptr->instr_list.size() == 0) {
+        cout << "Instruction list size is 0, cannot have temp variables"
+             << endl;
+        exit(1);
+    }
+
+    if (ptr->instr_list[ptr->instr_list.size() - 1]->getV1AddMode() !=
+        REGISTER) {
+        cout << "Addressing mode is not REGISTER, cannot have temp variables"
+             << endl;
+        exit(1);
+    }
+    STEntry* e =
+      (STEntry*)(ptr->instr_list[ptr->instr_list.size() - 1]->getV1());
+    return e->name;
 }
 
 extern Instruction*
