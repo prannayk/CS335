@@ -47,3 +47,5 @@ extern void genInstructionBinWrapper(OpCode op, Node * source, Node * first, Nod
 extern Instruction* generateUnaryInstruction(OpCode, Node*, ST*);
 extern void setRValueMode(bool, ST* aST);
 extern bool isRValueMode(ST* aST);
+extern vector<Instruction*> generateInstructionReadArray(Node* , Node*, Node*, ST*);
+extern void generateCall(Node* source, Node* fn, vector<Node*> args, ST*);

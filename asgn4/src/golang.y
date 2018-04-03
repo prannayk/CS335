@@ -257,7 +257,14 @@ ST* curr = root;
 %%
 StartSymbol  :
 SourceFile{$$ = new Node("StartSymbol", new BasicType("NOTYPE"));
-$$->Add($1);$$->PrintJS();cout <<"SourceFile" << endl ;}
+$$->Add($1);$$->PrintJS();cout <<"SourceFile" << endl ;
+cout << "Printing instructions" << endl;
+for (auto i: instructionList) {
+    i->printInstruction();
+    cout << endl;
+  }
+
+}
 
 ;
 SourceFile  :
@@ -465,7 +472,7 @@ NewNameList TypeName OLiteral{$$ = new Node("StructDeclaration", new BasicType("
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->str_child = getNameList($1); 
+$$->str_child = getNameList($1);
 $$->type_child = repeatType($2, $$->str_child.size());
 if ($3->getType() != new BasicType("NOTYPE"))
     $$->content = $3->content;
@@ -699,7 +706,8 @@ $$->Add("");}		| Expression{$$ = $1;}
 UnaryExpr  :
 STAR UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"star" << " " << $1<< " " <<"UnaryExpr" << endl ;}
+$$->Add($2);
+}
 		| AMPERSAND UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"ampersand" << " " << $1<< " " <<"UnaryExpr" << endl ;}
@@ -743,8 +751,12 @@ $$->Add($3);
 ;
 PrimaryExprNoParen  :
 Name{$$ = $1;
-$$->addrMode = REGISTER;}
-| Literal{$$ = $1;$$->setType($1->getType());$$->addrMode = CONSTANT_VAL;}
+$$->addrMode = REGISTER;
+}
+| Literal{
+$$ = $1;$$->setType($1->getType());
+$$->addrMode = CONSTANT_VAL;
+}
 | PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -760,8 +772,8 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5); 
-$$->setType(new BasicType("NOTYPE")); // TODO : do after function call 
+$$->Add($5);
+$$->setType(new BasicType("NOTYPE")); // TODO : do after function call
 }
 		| PrimaryExpr DOT PAREN_OPEN TYPE PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")); // for type switching, does not need to be done
 $$->Add($1);
@@ -769,12 +781,13 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"Warning : Unimplemented runtime feature being used!" << endl;
-}  
+}
 		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4); // TODO : handle array access  
+$$->Add($4); // TODO : handle array access
+generateInstructionReadArray($$, $1, $3, curr);
 }
 		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
 $$->Add($1);
@@ -818,7 +831,7 @@ $$->Add($4); // TODO : figure out what this does
 }
 		| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
 		| GeneratorLiteral{$$ = $1;}
-		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall 
+		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall
             // get type of function return type here
 
 ;
@@ -831,7 +844,7 @@ $$->Add($1);
 $$->Add($2);}
 
 ;
-OtherType  : 
+OtherType  :
 SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{
 if($2->count != 0) {
     $$ = new Node("OtherType", new ArrayType($4->getType(), atoi($2->content.c_str())) );
@@ -861,13 +874,13 @@ ID{$$ = $1;}
 
 ;
 ONewName  :
-/* Empty Rule */ {$$ = new Node("Empty New Name", new BasicType("NOTYPE"), 0); $$->Add("");}		
+/* Empty Rule */ {$$ = new Node("Empty New Name", new BasicType("NOTYPE"), 0); $$->Add("");}
 | NewName{$$ = $1;}
 
 ;
 Name  :
 ID %prec NotParen{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));
-$$->content = $1; 
+$$->content = $1;
 }
 
 ;
@@ -882,7 +895,7 @@ OExpressionList  :
 
 ;
 OLiteral  :
-/* Empty Rule */ {$$ = new Node("Empty Literal", new BasicType("NOTYPE"), 0);}		
+/* Empty Rule */ {$$ = new Node("Empty Literal", new BasicType("NOTYPE"), 0);}
 | Literal{$$ = $1; $$->setType($1->getType());}
 
 ;
@@ -910,15 +923,19 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
 
-// Do cool functype stuff
+// TODO: move this stuff out into a midrule after function header
+// This will make recursive functions a Thing
+
 if (($3->children).size() == 5) {
   vector<Type*> paramTypes = createParamList($3->children[2]);
   FuncType* t = new FuncType($3->children[4]->getType(), paramTypes);
   ST::funcDefs[($3->children[0])->matched] = t;
+  cout << "Adding function " << ($3->children[0])->matched << endl;
 
 } else {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
+  exit(1);
 }
 
 }
@@ -983,7 +1000,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6); 
+$$->Add($6);
 vector<Type*> paramTypes = createParamList($4->children[0]);
 $$->setType(new FuncType($6->getType(), paramTypes));
 }
@@ -1022,9 +1039,11 @@ FunctionType{$$ = $1;}
 ;
 FunctionBody  :
 CompoundStatement{$$ = new Node("FunctionBody", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"CompoundStatement" << endl ;}
-
+$$->Add($1);
+$$->instr_list = $1->instr_list;
+}
 ;
+
 OArgumentTypeListOComma  :
 %empty {
 $$ = new Node("OArgumentTypeListOComma", new BasicType("NOTYPE"), 0);
@@ -1042,7 +1061,7 @@ ArgumentType  :
 NameOrType{$$ = $1; $$->count = 1;
 //    $$ = new Node() TODO : handle this somehow
 }
-		| ID NameOrType{$$ = new Node("ArgumentType", $2->getType()); $$->count = 2; 
+		| ID NameOrType{$$ = new Node("ArgumentType", $2->getType()); $$->count = 2;
 $$->Add($1);
 $$->Add($2);$$->content = $1; }
 		| ID VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
@@ -1123,16 +1142,22 @@ BLOCK_OPEN {
 StatementList {
   // This is where stuff ends
   curr = curr->parent;
-} 
-BLOCK_CLOSE{$$ = new Node("CompoundStatement", new BasicType("NOTYPE"), $3->count);
+}
+BLOCK_CLOSE{
+$$ = new Node("CompoundStatement", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($3);
-$$->Add($5);cout <<"block_open" << " " << $1<< " " <<"StatementList"<< " " <<"block_close" << " " << $5 << endl ;}
+$$->Add($5);
+}
 
 ;
 StatementList  : // TODO  : this is also beginning of a scope, unhandled
 Statement{$$ = new Node("Statement", new BasicType("NOTYPE")); $$->Add($1);}
-		| StatementList STMTEND Statement{$$ = $1; $$->incrementCount($3); $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list); }
+		| StatementList STMTEND Statement{
+$$ = $1;
+$$->incrementCount($3);
+$$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
+}
 
 ;
 Statement  :
@@ -1151,7 +1176,7 @@ SimpleStatement{$$ = $1;}
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list.push_back(generateLabelInstruction($1->content)); 
+$$->instr_list.push_back(generateLabelInstruction($1->content));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 string s = "label";
 s = s + to_string(clock());
@@ -1167,7 +1192,7 @@ if(instr_map.count($1->content)){
 
 | FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("FallThrough"));
 $$->Add($1); //$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
-} 
+}
 | BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -1237,7 +1262,7 @@ for(int i=0; i< $4->count; ++i)
 Instruction* branch_goto = generateUnconditionalGoto(curr);
 $$->instr_list.push_back(branch_goto);
 string s = (char *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
-string s1 = $2->getType()->GetRepresentation(); 
+string s1 = $2->getType()->GetRepresentation();
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 for(int i=0; i< $4->count; ++i){
@@ -1284,7 +1309,7 @@ $$->Add($3);$$->instr_list = $2->instr_list;}
 IfHeader  :
 OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
 $$->Add($1);
-$$->instr_list = $1->instr_list; 
+$$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($1, curr));
 $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 }
@@ -1292,7 +1317,7 @@ $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1(
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list); 
+$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
 $$->instr_list.push_back(generateGotoInstruction($3, curr));
 $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 }
@@ -1321,7 +1346,7 @@ if(($1->matched == "ForHeader")){
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[2]->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
-} else if ($1->matched == "RangeStatement"){ 
+} else if ($1->matched == "RangeStatement"){
     // TODO : handle range expression Milind
 } else {
     string s1 = "label" + to_string(clock());
@@ -1332,7 +1357,7 @@ if(($1->matched == "ForHeader")){
     $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
-    
+
 }
 }
 
@@ -1561,12 +1586,17 @@ PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NO
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-if(curr->checkEntryFunc($1->content))
-$$->setType(curr->getFunc($1->content));
+if(!curr->checkEntryFunc($1->content)) {
+  $$->setType(curr->getFunc($1->content));
+} else {
+  cout << "Error: cannot find function " << $1->content << endl;
+  exit(1);
+}
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-cout<<"Here"<<endl;
 if($$->type_child.size())  cout << "Error : expecting " << $$->type_child.size()  <<" arguments, 0 provided!"<<endl;
 $$->setType(((FuncType*)$$->getType())->GetReturnType());
+vector<Node*> emptyVector;
+generateCall($$, $1, emptyVector, curr);
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
@@ -1574,9 +1604,15 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-if(!curr->checkEntryFunc($1->content)) $$->setType(curr->getFunc($1->content));
+if(!curr->checkEntryFunc($1->content)) {
+  $$->setType(curr->getFunc($1->content));
+} else {
+  cout << "Error: cannot find function " << $1->content << endl;
+  exit(1);
+}
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
 if($3->count != $$->type_child.size()) cout << "Unexpected number of arguments" << endl;
+ generateCall($$, $1, $3->children, curr);
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
 $$->Add($1);
@@ -1585,10 +1621,23 @@ $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);
-if(curr->checkEntryFunc($1->content)) $$->setType(curr->getFunc($1->content));
+if(!curr->checkEntryFunc($1->content)) {
+  $$->setType(curr->getFunc($1->content));
+} else {
+  cout << "Error: cannot find function " << $1->content << endl;
+  exit(1);
+}
+
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-if($$->type_child[$$->type_child.size() - 1]->GetTypeClass() != 1) cout << "Variadic only work with basic types" << endl ; // TODO : extend this to compound types, struct types etc
-if((($3->count + 1) != $$->type_child.size()) || ((BasicType*)($$->type_child[$$->type_child.size() - 1]))->variadic)   cout<<"Error invalid function call, unknown number of types" << endl;
+
+if($$->type_child[$$->type_child.size() - 1]->GetTypeClass() != 1) {
+    cout << "Variadic only work with basic types" << endl ; // TODO : extend this to compound types, struct types etc
+  }
+
+if((($3->count + 1) != $$->type_child.size())
+|| ((BasicType*)($$->type_child[$$->type_child.size() - 1]))->variadic)   {
+    cout<<"Error invalid function call, unknown number of types" << endl;
+  }
 };
 
 %%
@@ -1596,7 +1645,7 @@ if((($3->count + 1) != $$->type_child.size()) || ((BasicType*)($$->type_child[$$
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
-        return new BasicType("int"); // assuming INT 
+        return new BasicType("int"); // assuming INT
     else
         return new BasicType("NOTYPE"); // empty statement have no type
 }
@@ -1619,4 +1668,3 @@ void yyerror(const char *s) {
 	cout<< "Error on line : "<<global_loc->line << ":" << global_loc->col2 << " to " << global_loc->line << ":" << global_loc->col1 << endl;
     exit(-1);
 }
-

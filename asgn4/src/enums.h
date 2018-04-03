@@ -51,7 +51,8 @@ enum OpCode
     DEC_OP,
     // Unary control flow/special operations
     GOTO_OP = 250,
-    CALL_OP,
+    CALL,
+    PARAM,
     // function start and end operation
     FUNC_ST,
     FUNC_ET,
@@ -70,6 +71,7 @@ enum AddressingMode
 {
     REGISTER = 0,
     CONSTANT_VAL = 1,
+    STRING = 2,
     NONE_MODE,
 };
 

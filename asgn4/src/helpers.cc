@@ -170,6 +170,101 @@ fixNodeForExpression(Node* ptr, ST* curr)
 }
 
 extern vector<Instruction*>
+generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
+{
+    n1 = fixNodeForExpression(n1, curr);
+    n2 = fixNodeForExpression(n2, curr);
+    return source->instr_list;
+}
+
+extern void
+generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
+{
+    if (fn->matched != "Name") {
+        cout << "Cannot deal with anything but the simplest of functions."
+             << endl;
+        exit(1);
+    }
+
+    if ((curr->checkEntryFunc(fn->content))) {
+        cout << "Cannot deal with function not in function table yet" << endl;
+        exit(1);
+    }
+
+    // This function call has no arguments, so just call and store.
+    vector<Instruction*> pre_i_list;
+    vector<Instruction*> i_list;
+    for (auto n : args) {
+        n = fixNodeForExpression(n, curr);
+        if (n->matched == "Literal") {
+            void* p;
+            if (n->getType()->GetRepresentation() == "int") {
+                long* i = new long;
+                *i = atol(n->tmp.c_str());
+                p = i;
+            } else if (n->getType()->GetRepresentation() == "bool") {
+                int* i = new int;
+                *i = "true" == n->tmp;
+                p = i;
+            } else {
+                cout << "Literal other than bool or int" << endl;
+                exit(1);
+            }
+            i_list.push_back(
+              new Instruction(PARAM, p, CONSTANT_VAL, n->getType()));
+        } else if (n->matched == "Name") {
+            STEntry* s;
+            if (curr->checkEntry(n->content)) {
+                cout << "Cannot find Name" << endl;
+                exit(1);
+            } else {
+                s = curr->getVar(n->content);
+            }
+
+            i_list.push_back(
+              new Instruction(PARAM, (void*)s, REGISTER, n->getType()));
+        } else {
+            // matched value is something complex, so we need a pre-list.
+            STEntry* s;
+            if (curr->checkEntry(n->tmp)) {
+                cout << "Cannot find Temp" << endl;
+                exit(1);
+            } else {
+                s = curr->getVar(n->tmp);
+            }
+            pre_i_list = mergeInstructions(pre_i_list, n->instr_list);
+            i_list.push_back(
+              new Instruction(PARAM, (void*)s, REGISTER, n->getType()));
+        }
+    }
+    string st = "temp";
+    string str = st + to_string(clock());
+    curr->addEntry(str, ((FuncType*)source->getType())->GetReturnType(), false);
+    STEntry* arg3;
+    if (!(arg3 = curr->getVar(str))) {
+        cout << "STE creation failed" << endl;
+        exit(1);
+    }
+
+    Instruction* instr;
+    // TODOmilindl: Change codegen to switch it around as well, since it is more
+    // uniform this way, to have it with the STE before the function name.
+    instr = new Instruction(CALL,
+                            arg3,
+                            (char*)fn->content.c_str(),
+                            REGISTER,
+                            CONSTANT_VAL,
+                            fn->getType(),
+                            new BasicType(fn->content));
+    i_list.push_back(instr);
+
+    source->instr_list = mergeInstructions(pre_i_list, i_list);
+    source->tmp = getTemp(source);
+    source->addrMode = REGISTER;
+    source->setType(arg3->getType());
+}
+
+extern vector<Instruction*>
 generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
 {
     n1 = fixNodeForExpression(n1, curr);
@@ -177,12 +272,12 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     void *arg1, *arg2;
     if (n1->matched != "Literal")
         arg1 = (void*)curr->getVar(n1->tmp);
-    else if(n1->getType()->GetRepresentation() == "int") {
+    else if (n1->getType()->GetRepresentation() == "int") {
         int* i = new int;
         *i = atoi(n1->tmp.c_str());
         arg1 = (void*)i;
-    } else if(n1->getType()->GetRepresentation() == "bool") {
-        bool *i = new bool;
+    } else if (n1->getType()->GetRepresentation() == "bool") {
+        bool* i = new bool;
         *i = n1->tmp == "true"; // checking true or not
         arg1 = (void*)i;
     }
@@ -227,8 +322,9 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     cout << i_list.size();
     return i_list;
 }
+
 extern Instruction*
-generateGotoInstruction(Node* n1, string label,  ST* curr, bool cond= true)
+generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
 {
     STEntry* arg1 = curr->getVar(n1->tmp);
     if (arg1 == NULL) {
@@ -242,8 +338,10 @@ generateGotoInstruction(Node* n1, string label,  ST* curr, bool cond= true)
     *i = 1;
     Instruction* instr;
     OpCode op;
-    if(cond)    op = GOTOEQ;
-    else op = GOTONEQ;
+    if (cond)
+        op = GOTOEQ;
+    else
+        op = GOTONEQ;
     instr = new Instruction(GOTOEQ,
                             (void*)branch,
                             (void*)arg1,
