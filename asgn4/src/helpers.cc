@@ -289,19 +289,23 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     if (n1->matched != "Literal")
         arg1 = (void*)curr->getVar(n1->tmp);
     else if (n1->getType()->GetRepresentation() == "int") {
-        int* i = new int;
-        *i = atoi(n1->tmp.c_str());
+        long* i = new long;
+        *i = atol(n1->tmp.c_str());
         arg1 = (void*)i;
     } else if (n1->getType()->GetRepresentation() == "bool") {
         bool* i = new bool;
         *i = n1->tmp == "true"; // checking true or not
         arg1 = (void*)i;
     }
-    if (n2->matched != "Literal")
+    if (n2->matched != "Literal") {
         arg2 = curr->getVar(n2->tmp);
-    else {
-        int* i = new int;
-        *i = atoi(n1->tmp.c_str());
+    } else if (n2->getType()->GetRepresentation() == "int") {
+        long* i = new long;
+        *i = atol(n2->tmp.c_str());
+        arg2 = (void*)i;
+    } else if (n2->getType()->GetRepresentation() == "bool") {
+        bool* i = new bool;
+        *i = n2->tmp == "true"; // checking true or not
         arg2 = (void*)i;
     }
     string st = "temp";
