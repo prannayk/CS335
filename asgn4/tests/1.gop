@@ -3,26 +3,21 @@
 package main
 
 func main(ix, int y, int z) {
-	var t,i,z,fg,adaf,gdsf,gsdfsdf int
 	var t,i,z int
-    var t func (x int,y int) (int, int, int)
-    var t gen (x int,y int) (int, float, *int)
-	var t,i,z int
-    z = 1 + t;
-	for k:=0; i<100; i=i+1 {
-		t = t+i
-	}
-        for ;i<100; {
-	}
-        for i<100 {
-	}
-        for i:=1; i<100; {
-	}
-        for ; i<100; i++ {
-        var yolo int
-	}
-	if t != 50*99  {
+    var x,y int = -5,6
+    labelyo:    for i<100 {
+	    for t < 100 {
+            if(z == 0) { 
+                goto labelyo 
+                } else if t==0 {
+                    var x int
+                    x = 1
+                 } else if {
+                    var abf int
+                    abv = 3
+                 }
         }
+    }
 }
 func dhish(){
 main(1,1,1)

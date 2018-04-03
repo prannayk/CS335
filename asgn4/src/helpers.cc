@@ -369,9 +369,16 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     i_list = mergeInstructions(i_list, n2->instr_list);
     i_list.push_back(instr);
     i_list[0]->printInstruction();
-    cout << "asdfasd" << endl;
     cout << i_list.size();
     return i_list;
+}
+
+extern char*
+getCharFromString(string s){
+    char string[s.length() +1];
+    strcpy(string, s.c_str());
+    char * ret = &string[0];
+    return ret;
 }
 
 extern Instruction*
@@ -384,9 +391,8 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
         curr->addEntry(n1->tmp, new BasicType("GOTO"), false);
         arg1 = curr->getVar(n1->tmp);
     }
-    char* branch = new char;
-    size_t len = label.copy(branch, label.length());
-    branch[len] = '\0';
+    char branch[label.length()];
+    strcpy(branch, label.c_str());
     int* i = new int;
     *i = 1;
     Instruction* instr;
@@ -396,7 +402,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
     else
         op = GOTONEQ;
     instr = new Instruction(GOTOEQ,
-                            (void*)branch,
+                            (void*)&branch,
                             (void*)arg1,
                             (void*)i,
                             CONSTANT_VAL,
@@ -418,9 +424,7 @@ generateGotoInstruction(Node* n1, ST* curr)
     }
     string s = "label";
     s = s + to_string(clock());
-    char* branch = new char;
-    size_t len = s.copy(branch, s.length());
-    branch[len] = '\0';
+    char* branch = getCharFromString(s);
     int* i = new int;
     *i = 1;
     Instruction* instr;
@@ -441,12 +445,10 @@ extern Instruction*
 generateUnconditionalGoto(string label, ST* curr)
 {
     string s = label;
-    char* branch = new char;
-    size_t len = s.copy(branch, s.length());
-    branch[len] = '\0';
-    cout << (void*)(new BasicType(s)) << endl;
+    char branch[s.length()] ;
+    strcpy(branch, s.c_str());
     Instruction* instr;
-    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
+    instr = new Instruction(GOTO_OP, &branch, CONSTANT_VAL, new BasicType(s));
     return instr;
 }
 extern Instruction*
@@ -454,10 +456,7 @@ generateUnconditionalGoto(ST* curr)
 {
     string s = "label";
     s = s + to_string(clock());
-    char* branch = new char;
-    size_t len = s.copy(branch, s.length());
-    branch[len] = '\0';
-    cout << (void*)(new BasicType(s)) << endl;
+    char* branch = getCharFromString(s);
     Instruction* instr;
     instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
     return instr;
@@ -528,10 +527,9 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
 extern Instruction*
 generateLabelInstruction(string s)
 {
-    char* branch = new char;
-    size_t len = s.copy(branch, s.length());
-    branch[len] = '\0';
-    return new Instruction(LABEL_ST, branch, CONSTANT_VAL, new BasicType(s));
+    char branch[s.length()+1]; 
+    strcpy(branch, s.c_str());
+    return new Instruction(LABEL_ST, &branch, CONSTANT_VAL, new BasicType(s));
 }
 
 extern void

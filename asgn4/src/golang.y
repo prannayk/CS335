@@ -805,14 +805,15 @@ $$->Add($3);
 $$->Add($4); // TODO : handle array access
 generateInstructionReadArray($$, $1, $3, curr);
 }
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
+| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->Add($6);}
-		| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")); // TODO : slices
+$$->Add($6);
+}
+| PrimaryExpr SQUARE_OPEN OExpression COLON OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")); // TODO : slices
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -962,9 +963,7 @@ if (($3->children).size() == 5) {
   cout << "Warning: unexpected function declaration.";
   exit(1);
 }
-char * name = new char;
-size_t len = $3->children[0]->matched.copy(name, $3->children[0]->matched.length());
-name[len] = '\0';
+char * name = getCharFromString($3->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
@@ -986,9 +985,7 @@ if (($3->children).size() == 5) {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
 }
-char * name = new char;
-size_t len = $3->children[0]->matched.copy(name, $3->children[0]->matched.length());
-name[len] = '\0';
+char * name = getCharFromString($3->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
@@ -1172,6 +1169,7 @@ $$->addrMode = REGISTER;
 CompoundStatement  :
 BLOCK_OPEN {
   // This is when a new scope starts
+  cout << "yolo" << endl;
   ST* t = new ST(curr->depth + 1, curr);
   curr->addChild(t);
   curr = t;
@@ -1222,9 +1220,7 @@ string s = "label";
 s = s + to_string(clock());
 label_map[$1->content] = s;
 if(instr_map.count($1->content)){
-    char * branch = new char;
-    size_t len = $1->content.copy(branch, label_map[$1->content].length());
-    branch[len] = '\0';
+    char * branch = getCharFromString($1->content);
     instr_map[$1->content]->setV1(branch);
     instr_map.erase($1->content);
 }
@@ -1298,14 +1294,12 @@ NewName{$$ = $1;}
 ;
 IfStatement  :
 IF IfHeader LoopBody ElseIfList Else{$$ = new Node("IfStatement", new BasicType("NOTYPE"), $3->count);
-$$->Add($1);
-$$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->instr_list = $2->instr_list;
 for(int i=0; i< $4->count; ++i)
-    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i]->children[2]->instr_list);
+    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i+1]->children[2]->instr_list); // weird bug here, must be indexed as 1 for some reason
 Instruction* branch_goto = generateUnconditionalGoto(curr);
 $$->instr_list.push_back(branch_goto);
 string s = (char *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
@@ -1313,8 +1307,8 @@ string s1 = $2->getType()->GetRepresentation();
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 for(int i=0; i< $4->count; ++i){
-    $$->instr_list.push_back(generateLabelInstruction($4->children[i]->getType()->GetRepresentation()));
-    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i]->children[3]->instr_list);
+    $$->instr_list.push_back(generateLabelInstruction($4->children[i+1]->getType()->GetRepresentation()));
+    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i+1]->children[3]->instr_list);
     $$->instr_list.push_back(branch_goto);
 }
 $$->instr_list.push_back(generateLabelInstruction(s));
@@ -1341,13 +1335,14 @@ Else  :
 $$->Add("");}		| ELSE CompoundStatement{$$ = new Node("Else", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
+//$$->instr_list = $2->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($2, curr));
 $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 }
 
 ;
 LoopBody  :
-CompoundStatement {$$ = new Node("LoopBody", new BasicType("NOTYPE"), $1->count);
+CompoundStatement {cout << "yolo" << endl; $$ = new Node("LoopBody", new BasicType("NOTYPE"), $1->count);
 $$->Add($1);$$->instr_list = $1->instr_list;}
 
 ;
@@ -1357,8 +1352,9 @@ $$->Add($1);
 $$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($1, curr));
 $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+cout << "Yolo" << endl;
 }
-		| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
+| OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);

@@ -90,4 +90,6 @@ extern Type* getScopeReturnType(ST* aST);
 extern void generateReturn(Node* source, Node* retVal, ST* curr);
 extern void generateYield(Node* source, Node* retVal, ST* curr);
 extern void* correctPointer(Node * ptr, ST* curr);
+extern char*
+getCharFromString(string s);
 
