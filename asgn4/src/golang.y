@@ -914,11 +914,13 @@ ExpressionList  :
 // All expressionsLists finally end up as expressions!
 $$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
+$$->instr_list = mergeInstructions($$->instr_list, $1->instr_list);
 cout << "Count = " << $1->count << endl;
 }
         | ExpressionList COMMA Expression {
 $$ = $1;
 $$->incrementCount($3);
+$$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 }
 
 ;
