@@ -338,68 +338,30 @@ CommonDeclaration{$$ = $1;}
 
 ;
 CommonDeclaration  :
-          VAR VarDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$ = $2;
+          VAR VarDeclaration{$$ = $2;
 }
         | VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);
-$$->Add($5);
 $$ = $3;
 }
         | VAR PAREN_OPEN PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
 // TODO: somehow denote the uselessness of this branch
 }
         |CONST ConstDeclaration{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
 $$ = $2;
 }
         |CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);
-$$->Add($5);
 $$ = $3;
 }
        |CONST PAREN_OPEN PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
 // TODO: Somehow denote this is useless
 }
 		| TYPE TypeDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
 $$ = $2;
 }
 		| TYPE PAREN_OPEN TypeDeclarationList Ostmtend PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);
-$$->Add($5);
 $$ = $3;
 }
 		| TYPE PAREN_OPEN PAREN_CLOSE{
-$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
 // TODO: Somehow denote this is useless
 }
 
@@ -413,10 +375,11 @@ $$->Add($2);
 $$->Add($4);
 inferListType($1, $4); // : Add symbol table entry creation here
 populateST($1, $1, curr);
+$$->instr_list = mergeInstructions($4->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
 | DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"DeclarationNameList"<< " " <<"TypeName" << endl;
+$$->Add($2);
 populateST($1, $2, curr);
 }
 | DeclarationNameList TypeName ASSGN_OP { setRValueMode(true, curr); } ExpressionList{
@@ -426,7 +389,11 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($5);
-populateST($1, $2, curr);}
+populateST($1, $2, curr);
+$$->type_child = repeatType($2, $1->children.size());
+checkListType($$->type_child, $5);
+$$->instr_list = mergeInstructions($5->instr_list, generateInstructionsAssignment($1, $5, curr));
+}
 
 ;
 ConstDeclaration  :
@@ -436,8 +403,9 @@ $$ = new Node("ConstDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($4);
-inferListType($1, $4); // : Add symboltable entry creation here
-populateST($1, $1, curr, 1);
+inferListType($1, $4); // : Add symbol table entry creation here
+populateST($1, $1, curr);
+$$->instr_list = mergeInstructions($4->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
 | DeclarationNameList TypeName ASSGN_OP { setRValueMode (true, curr); } ExpressionList{
 setRValueMode(false, curr);
@@ -446,7 +414,11 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($5);
-populateST($1, $2, curr, 1);}
+populateST($1, $2, curr);
+$$->type_child = repeatType($2, $1->children.size());
+checkListType($$->type_child, $5);
+$$->instr_list = mergeInstructions($5->instr_list, generateInstructionsAssignment($1, $5, curr));
+}
 
 ;
 DeclarationNameList  :
@@ -455,7 +427,7 @@ DeclarationName{$$ = new Node("Declaration Name List", new BasicType("NOTYPE"));
 
 ;
 DeclarationName  :
-ID{$$ = new Node("Declaration Name", new BasicType("NOTYPE")); $$->Add($1);}
+ID{$$ = new Node("Declaration Name", new BasicType("NOTYPE")); $$->tmp = $1; $$->Add($1);}
 
 ;
 PointerType  :
@@ -732,21 +704,40 @@ UnaryExpr  :
 STAR UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
+$$->instr_list = $2->instr_list; // TODO : handle memory operation
 }
 		| AMPERSAND UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);cout <<"ampersand" << " " << $1<< " " <<"UnaryExpr" << endl ;}
 		| ADD UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"add" << " " << $1<< " " <<"UnaryExpr" << endl ;}
+$$->Add($2);
+$$->instr_list = $2->instr_list;
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+$$->setType($2->getType());
+}
 		| SUB UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"sub" << " " << $1<< " " <<"UnaryExpr" << endl ;}
+$$->Add($2);
+$$->instr_list = $2->instr_list;
+$$->instr_list.push_back(generateUnaryInstruction(NEG, $2, curr));
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+$$->setType($2->getType());
+
+
+}
 		| NOT_OP UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"not_op" << " " << $1<< " " <<"UnaryExpr" << endl ;}
+$$->Add($2);
+$$->instr_list = $2->instr_list;
+$$->instr_list.push_back(generateUnaryInstruction(LNOT, $2, curr));
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+$$->setType($2->getType());
+}
 		| PrimaryExpr{$$ = $1;$$->setType($1->getType());}
-
 ;
 PrimaryExpr  :
 PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());}
@@ -936,19 +927,19 @@ OLiteral  :
 ;
 Literal  :
 RAW_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1); $$->setType(new BasicType("str")); $$->content = $1;}
+$$->Add($1); $$->setType(new BasicType("str")); $$->content = $1; $$->tmp = $1;}
 		| INTER_STRING{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("byte")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("byte")); $$->content = $1;$$->tmp = $1;}
 		| DECIMAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("int")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("int")); $$->content = $1;$$->tmp = $1;}
 		| OCTAL_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("octal")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("octal")); $$->content = $1;$$->tmp = $1;}
 		| HEX_LIT{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("hex")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("hex")); $$->content = $1;$$->tmp = $1;}
 		| TRUE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;$$->tmp = $1;}
 		| FALSE{$$ = new Node("Literal", new BasicType("NOTYPE"));
-$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;}
+$$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;$$->tmp = $1;}
 
 ;
 FunctionDeclaration  :
@@ -956,8 +947,7 @@ FUNC OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("FunctionDeclara
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"func" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
-
+$$->Add($4);
 // TODO: move this stuff out into a midrule after function header
 // This will make recursive functions a Thing
 
@@ -972,6 +962,12 @@ if (($3->children).size() == 5) {
   cout << "Warning: unexpected function declaration.";
   exit(1);
 }
+char * name = new char;
+size_t len = $3->children[0]->matched.copy(name, $3->children[0]->matched.length());
+name[len] = '\0';
+$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
+$$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
+$$->instr_list.push_back(new Instruction(  FUNC_ET));
 
 }
 ;
@@ -990,6 +986,12 @@ if (($3->children).size() == 5) {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
 }
+char * name = new char;
+size_t len = $3->children[0]->matched.copy(name, $3->children[0]->matched.length());
+name[len] = '\0';
+$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
+$$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
+$$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
 
 ;
@@ -1094,7 +1096,6 @@ ArgumentType {$$ = new Node("ArgumentType", $1->getType()); $$->Add($1);}
 ;
 ArgumentType  :
 NameOrType{$$ = $1; $$->count = 1;
-//    $$ = new Node() TODO : handle this somehow
 }
 		| ID NameOrType{$$ = new Node("ArgumentType", $2->getType()); $$->count = 2;
 $$->Add($1);
@@ -1103,7 +1104,7 @@ $$->Add($2);$$->content = $1; }
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
 		| VARIADIC TypeName{$$ = new Node("ArgumentType", $2->getType(), 1, true); $$->count = 2;
-$$->Add($1); // TODO : handling this is unclear
+$$->Add($1); 
 $$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
 		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
 $$->Add($1);cout <<"variadic" << " " << $1 << endl ; // TODO: handle this, since it opens possibility of no types being defined for the entire list
@@ -1243,7 +1244,9 @@ if($2->count  == 1){
         size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
         ((char*)instr->getV1())[len] = '\0';
     }
+    $$->instr_list.push_back(instr);
 }
+
 }
 | CONTINUE ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -1256,6 +1259,7 @@ if($2->count  == 1){
         size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
         ((char*)instr->getV1())[len] = '\0';
     }
+    $$->instr_list.push_back(instr);
 }
 }
 | GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
@@ -1269,6 +1273,7 @@ if($2->count  == 1){
         size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
         ((char*)instr->getV1())[len] = '\0';
     }
+    $$->instr_list.push_back(instr);
 }
 }
 | RETURN { setRValueMode(true, curr); } OExpressionList{
@@ -1282,7 +1287,9 @@ generateReturn($$, $3, curr);
 setRValueMode(false, curr);
 $$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($3);cout <<"yield" << " " << $1<< " " <<"OExpressionList" << endl ;}
+$$->Add($3);
+generateYield($$, $3, curr);
+}
 
 ;
 LabelName  :
@@ -1340,10 +1347,8 @@ $$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1(
 
 ;
 LoopBody  :
-BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("LoopBody", new BasicType("NOTYPE"), $2->count);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);$$->instr_list = $2->instr_list;}
+CompoundStatement {$$ = new Node("LoopBody", new BasicType("NOTYPE"), $1->count);
+$$->Add($1);$$->instr_list = $1->instr_list;}
 
 ;
 IfHeader  :
@@ -1531,21 +1536,17 @@ $$->Add($3);cout <<"interface" << " " << $1<< " " <<"block_open" << " " << $2<< 
 
 ;
 FunctionLiteral  :
-FunctionLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("FunctionLiteral", new BasicType("NOTYPE"));
+FunctionLiteralDeclaration CompoundStatement{$$ = new Node("FunctionLiteral", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-$$->Add($4);
 $$->setType($1->getType());
 }
 
 ;
 GeneratorLiteral  :
-GeneratorLiteralDeclaration BLOCK_OPEN StatementList BLOCK_CLOSE{$$ = new Node("GeneratorLiteral", new BasicType("NOTYPE"));
+GeneratorLiteralDeclaration CompoundStatement {$$ = new Node("GeneratorLiteral", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-$$->Add($4);
 $$->setType($1->getType());
 }
 

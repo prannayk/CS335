@@ -81,9 +81,13 @@ extern bool
 isRValueMode(ST* aST);
 extern vector<Instruction*>
 generateInstructionReadArray(Node*, Node*, Node*, ST*);
+extern void 
+checkListType(vector<Type*> source, Node * target);
 extern void
 generateCall(Node* source, Node* fn, vector<Node*> args, ST*);
 extern void setScopeReturnType(Type* aReturnType, ST* aST);
 extern Type* getScopeReturnType(ST* aST);
 extern void generateReturn(Node* source, Node* retVal, ST* curr);
 extern void generateYield(Node* source, Node* retVal, ST* curr);
+extern void* correctPointer(Node * ptr, ST* curr);
+

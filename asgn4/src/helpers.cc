@@ -12,6 +12,37 @@ inferListType(Node* target, Node* source)
     }
 }
 
+extern void 
+checkListType(vector<Type*> source, Node * target)
+{
+    if(source.size() != target->children.size())  {
+        cout << "Number of variables different from assignments" << endl;
+        exit(1);
+    }
+    for(int i = 0; i < source.size(); ++i ){
+        if(!(*(target->children[i]->getType()) == *(source[i]))){
+            cout << "Types mismatch : " << target->children[i]->getType()->GetRepresentation() <<
+                " and " << source[i]->GetRepresentation()<<endl;
+        }
+    }
+}
+
+extern void* correctPointer(Node * ptr, ST* curr){
+    void * arg1;
+    if (ptr->matched != "Literal")
+        arg1 = (void*)curr->getVar(ptr->tmp);
+    else if (ptr->getType()->GetRepresentation() == "int") {
+        long* i = new long;
+        *i = atol(ptr->tmp.c_str());
+        arg1 = (void*)i;
+    } else if (ptr->getType()->GetRepresentation() == "bool") {
+        bool* i = new bool;
+        *i = ptr->tmp == "true"; // checking true or not
+        arg1 = (void*)i;
+    }
+    return arg1;
+}
+
 extern vector<Instruction*>
 generateInstructionsAssignment(Node* target, Node* source, ST* curr)
 {
@@ -20,8 +51,8 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
     vector<Instruction*> i_list;
     Instruction* instr;
     for (int i = 0; i < target->children.size(); ++i) {
-        STEntry* arg1 = curr->getVar(target->children[i]->tmp);
-        STEntry* arg2 = curr->getVar(source->children[i]->tmp);
+        void* arg1 = correctPointer(target->children[i],curr);
+        void* arg2 = correctPointer(source->children[i],curr);
         instr = new Instruction(ASG,
                                 arg1,
                                 arg2,
@@ -482,8 +513,8 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
     string st = "temp";
     string str = st + to_string(clock());
     curr->addEntry(str, source->getType(), false);
-    STEntry* target = curr->getVar(str);
-    STEntry* src = curr->getVar(source->tmp);
+    void* target = curr->getVar(str);
+    void* src = correctPointer(source,curr);
     Instruction* instr = new Instruction(op,
                                          target,
                                          src,
