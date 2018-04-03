@@ -505,3 +505,102 @@ setRValueMode(bool aRValueMode, ST* aST)
 {
     aST->rValueMode = aRValueMode;
 }
+
+extern void
+setScopeReturnType(Type* aReturnType, ST* aST)
+{
+    aST->scopeReturnType = aReturnType;
+}
+
+extern Type*
+getScopeReturnType(ST* aST)
+{
+    if (aST->scopeReturnType == nullptr && aST->parent != nullptr) {
+        return getScopeReturnType(aST->parent);
+    }
+    if (aST->scopeReturnType == nullptr) {
+        cout << "Cannot find return type for function" << endl;
+        exit(1);
+    }
+    return aST->scopeReturnType;
+}
+
+void
+generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
+{
+    if (retVal->count == 0) {
+        long* i = new long;
+        *i = 0;
+        source->instr_list.push_back(
+          new Instruction(op, i, CONSTANT_VAL, new BasicType("int")));
+    } else if (retVal->count == 1 && getScopeReturnType(curr) == nullptr) {
+        cout << "Trying to return something when return type is void" << endl;
+        exit(1);
+    } else if (retVal->count == 1 &&
+               retVal->children[0]->matched == "Literal") {
+        if (retVal->children[0]->getType()->GetRepresentation() == "int") {
+            long* i = new long;
+            *i = atol(retVal->children[0]->content.c_str());
+            if (*(new BasicType("int")) != *(getScopeReturnType(curr))) {
+                cout << "Return type mismatch" << endl;
+                exit(1);
+            }
+            source->instr_list.push_back(
+              new Instruction(op, i, CONSTANT_VAL, new BasicType("int")));
+        } else if (retVal->children[0]->getType()->GetRepresentation() ==
+                   "bool") {
+            long* i = new long;
+            *i = retVal->children[0]->content == "true";
+            if (*(new BasicType("bool")) != *(getScopeReturnType(curr))) {
+                cout << "Return type mismatch" << endl;
+                exit(1);
+            }
+            source->instr_list.push_back(
+              new Instruction(op, i, CONSTANT_VAL, new BasicType("bool")));
+        }
+    } else if (retVal->count == 1 && retVal->children[0]->matched == "Name") {
+        STEntry* s;
+        if (curr->checkEntry(retVal->children[0]->tmp)) {
+            cout << "Can't find variable to return" << endl;
+            exit(1);
+        }
+        s = curr->getVar(retVal->children[0]->tmp);
+        if (*(s->getType()) != *(getScopeReturnType(curr))) {
+            cout << "Return type mismatch" << endl;
+            exit(1);
+        }
+        source->instr_list.push_back(
+          new Instruction(op, s, REGISTER, getScopeReturnType(curr)));
+    } else if (retVal->count == 1 &&
+               retVal->children[0]->matched == "Expression") {
+        string tmp = getTemp(retVal->children[0]);
+        STEntry* s;
+        if (curr->checkEntry(tmp)) {
+            cout << "Can't find variable to return" << endl;
+            exit(1);
+        }
+        s = curr->getVar(tmp);
+        if (*(s->getType()) != *(getScopeReturnType(curr))) {
+            cout << "Return type mismatch" << endl;
+            exit(1);
+        }
+        source->instr_list =
+          mergeInstructions(source->instr_list, retVal->instr_list);
+        source->instr_list.push_back(
+          new Instruction(op, s, REGISTER, getScopeReturnType(curr)));
+    } else {
+        cout << "Can return only one thing" << endl;
+        exit(1);
+    }
+}
+
+extern void
+generateReturn(Node* source, Node* retVal, ST* curr)
+{
+    generateFunctionEnder(source, retVal, curr, RET);
+}
+extern void
+generateYield(Node* source, Node* retVal, ST* curr)
+{
+    generateFunctionEnder(source, retVal, curr, YLD);
+}

@@ -959,17 +959,16 @@ if (($3->children).size() == 5) {
 
 ;
 FunctionHeader  :
-ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
+ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
+$$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-
-
-cout <<"noticeme" <<"id" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $4<< " " <<"FunctionResult" << endl ;}
-
-		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
+setScopeReturnType($5->getType(), curr);
+}
+| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
 $$->Add($4); // ID
 $$->Add($5); // (
@@ -978,6 +977,7 @@ $2->children[0]->count = $2->count + $6->count;
 $$->Add($2); // Fixed up argument list
 $$->Add($7); // )
 $$->Add($8); // FunctionResult
+setScopeReturnType($8->getType(), curr);
 }
 ;
 ConvType  :
@@ -1237,6 +1237,7 @@ setRValueMode(false, curr);
 $$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($3);
+generateReturn($$, $3, curr);
 }
 | YIELD { setRValueMode(true, curr); } OExpressionList{
 setRValueMode(false, curr);

@@ -18,6 +18,7 @@ class Type
     Type();
     string GetRepresentation() const;
     bool operator==(const Type& rhs);
+    bool operator!=(const Type& rhs);
     int GetTypeClass() const;
 };
 

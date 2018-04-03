@@ -225,12 +225,12 @@ class ST {
      static map<string, FuncType*> funcDefs;
 
      bool rValueMode = false;
+     Type* scopeReturnType = nullptr;
 
      int depth;
 
      map<string, STEntry*> table;
      map<string, string> structs;
-
      vector<ST*> children;
 
      ST* parent;

@@ -28,7 +28,7 @@ Type::GetTypeClass() const
 {
     return this->type;
 }
-    
+
 bool
 Type::operator==(const Type& rhs)
 {
@@ -36,6 +36,12 @@ Type::operator==(const Type& rhs)
         return false;
     }
     return this->GetRepresentation() == rhs.GetRepresentation();
+}
+
+bool
+Type::operator!=(const Type& rhs)
+{
+    return !(*this == rhs);
 }
 
 BasicType::BasicType(string aName)
@@ -124,7 +130,8 @@ FuncType::GetParamTypes() const
     return this->paramTypes;
 }
 
-StructDefinitionType::StructDefinitionType(string aName, map<string, Type*> aFields)
+StructDefinitionType::StructDefinitionType(string aName,
+                                           map<string, Type*> aFields)
   : fields(aFields)
   , randomSuffix(to_string(clock()))
 {
@@ -133,11 +140,13 @@ StructDefinitionType::StructDefinitionType(string aName, map<string, Type*> aFie
     this->type = 3;
 }
 
-StructDefinitionType::StructDefinitionType(string aName, vector<string> fieldNames, vector<Type*> fieldTypes)
+StructDefinitionType::StructDefinitionType(string aName,
+                                           vector<string> fieldNames,
+                                           vector<Type*> fieldTypes)
   : fields()
   , randomSuffix(to_string(clock()))
 {
-  
+
     name = aName;
     vector<string>::iterator ni;
     vector<Type*>::iterator ti;
@@ -157,7 +166,9 @@ StructDefinitionType::GetTypeFor(string aFieldName)
 }
 
 string
-StructDefinitionType::Hoist(string aStructVariableName, string aFieldName, string aSuffix) const
+StructDefinitionType::Hoist(string aStructVariableName,
+                            string aFieldName,
+                            string aSuffix) const
 {
     return aStructVariableName + "_" + aFieldName + "_" + aSuffix;
 }

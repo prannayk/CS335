@@ -60,6 +60,7 @@ enum OpCode
     // Nullary operations
     RET = 300,
     LABEL_ST,
+    YLD,
     // print
     PRINTINT = 400,
     // null instruction as default
