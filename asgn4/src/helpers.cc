@@ -69,7 +69,8 @@ createParamList(Node* list)
 extern void
 printST(ST* root)
 {
-
+    static int i = 0;
+    cout << "Entering scope : " << ++i << endl;
     cout << string(root->depth * 8, ' ') << "Variables in this scope: " << endl;
     map<string, STEntry*>::iterator it;
     for (it = root->table.begin(); it != root->table.end(); it++) {
@@ -89,8 +90,10 @@ populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
+        cout << "normal call : " << endl;
         cout << declNameList->children[i]->children[0]->matched << " : "
              << TypeName->type << endl;
+        cout << "Loc : " << global_loc->col1 << endl;
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        TypeName->type,
                        constant);
@@ -101,6 +104,19 @@ extern void
 populateST(Node* declNameList, Node* TypeName, ST* curr)
 {
     populateST(declNameList, TypeName, curr, 0);
+}
+
+extern void
+populateSTInfer(Node* declNameList, ST* curr)
+{
+    vector<string>::iterator it;
+    for (int i = 0; i < declNameList->children.size(); ++i) {
+        cout << "infer : " ; 
+        cout << declNameList->children[i]->children[0]->matched << " : "
+             << declNameList->children[i]->getType() << endl;
+        curr->addEntry(declNameList->children[i]->children[0]->matched,
+                       declNameList->children[i]->getType(), false);
+    }
 }
 
 extern vector<string>
@@ -305,8 +321,8 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     Instruction* instr;
     instr = new Instruction(op,
                             arg3,
-                            arg2,
                             arg1,
+                            arg2,
                             REGISTER,
                             n1->addrMode,
                             n2->addrMode,
@@ -328,7 +344,9 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
 {
     STEntry* arg1 = curr->getVar(n1->tmp);
     if (arg1 == NULL) {
-        curr->addEntry(n1->tmp, new BasicType("NOTYPE"), false);
+        string s = "label" + to_string(clock());
+        n1->tmp = s;
+        curr->addEntry(n1->tmp, new BasicType("GOTO"), false);
         arg1 = curr->getVar(n1->tmp);
     }
     char* branch = new char;

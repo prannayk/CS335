@@ -74,6 +74,8 @@ genInstructionBinWrapper(OpCode op,
 extern Instruction*
 generateUnaryInstruction(OpCode, Node*, ST*);
 extern void
+populateSTInfer(Node* declNameList, ST* curr);
+extern void
 setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);

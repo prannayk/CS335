@@ -1144,6 +1144,7 @@ $$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($4);inferListType($1, $4);
+populateSTInfer($1, curr);
 $$->instr_list = mergeInstructions($1->instr_list, $4->instr_list);
 $$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
