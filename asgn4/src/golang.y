@@ -338,45 +338,70 @@ CommonDeclaration{$$ = $1;}
 
 ;
 CommonDeclaration  :
-VAR VarDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+          VAR VarDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"var" << " " << $1<< " " <<"VarDeclaration" << endl ;}
-		| VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($2);
+$$ = $2;
+}
+        | VAR PAREN_OPEN VarDeclarationList Ostmtend PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"var" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"VarDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| VAR PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($5);
+$$ = $3;
+}
+        | VAR PAREN_OPEN PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"var" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
-		| CONST ConstDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($3);
+// TODO: somehow denote the uselessness of this branch
+}
+        |CONST ConstDeclaration{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"const" << " " << $1<< " " <<"ConstDeclaration" << endl ;}
-		| CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($2);
+$$ = $2;
+}
+        |CONST PAREN_OPEN ConstDeclarationList Ostmtend PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"const" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"ConstDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| CONST PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($5);
+$$ = $3;
+}
+       |CONST PAREN_OPEN PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"const" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
+$$->Add($3);
+// TODO: Somehow denote this is useless
+}
 		| TYPE TypeDeclaration{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"type" << " " << $1<< " " <<"TypeDeclaration" << endl ;}
-		| TYPE PAREN_OPEN TypeDeclarationList Ostmtend PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($2);
+$$ = $2;
+}
+		| TYPE PAREN_OPEN TypeDeclarationList Ostmtend PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"type" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"TypeDeclarationList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
-		| TYPE PAREN_OPEN PAREN_CLOSE{$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
+$$->Add($5);
+$$ = $3;
+}
+		| TYPE PAREN_OPEN PAREN_CLOSE{
+$$ = new Node("CommonDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"type" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
+$$->Add($3);
+// TODO: Somehow denote this is useless
+}
 
 ;
 VarDeclaration  :
@@ -885,8 +910,16 @@ $$->content = $1;
 
 ;
 ExpressionList  :
-Expression{$$ = new Node("Expression", new BasicType("NOTYPE")); $$->Add($1);}
-		| ExpressionList COMMA Expression{$$ = $1; $$->incrementCount($3);}
+         Expression {
+// All expressionsLists finally end up as expressions!
+$$ = new Node("Expression", new BasicType("NOTYPE"));
+$$->Add($1);
+cout << "Count = " << $1->count << endl;
+}
+        | ExpressionList COMMA Expression {
+$$ = $1;
+$$->incrementCount($3);
+}
 
 ;
 OExpressionList  :
@@ -1095,7 +1128,7 @@ $$->Add("");}		| SimpleStatement{$$ = $1;}
 
 ;
 SimpleStatement  :
-Expression{$$ = $1; }
+Expression{ $$ = $1; }
 | ExpressionList ASSGN_OP { setRValueMode(true, curr); } ExpressionList {
     setRValueMode(false, curr);
 $$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
@@ -1148,6 +1181,9 @@ $$ = new Node("CompoundStatement", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
 $$->Add($3);
 $$->Add($5);
+// In all fairness, scoping is done by the STable, no need to deal with that here
+// the add steps above are now redundant
+$$ = $3;
 }
 
 ;

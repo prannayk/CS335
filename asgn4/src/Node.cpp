@@ -20,8 +20,7 @@ Node::Node(string aMatched, Type* aType)
   , children()
   , count(1)
   , flag(false)
-{
-}
+{}
 
 Node::Node(string aMatched, Type* aType, int aCount)
   : matched(aMatched)
@@ -29,8 +28,7 @@ Node::Node(string aMatched, Type* aType, int aCount)
   , children()
   , count(aCount)
   , flag(false)
-{
-}
+{}
 
 Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
   : matched(aMatched)
@@ -38,9 +36,7 @@ Node::Node(string aMatched, Type* aType, int aCount, bool aFlag)
   , children()
   , count(aCount)
   , flag(aFlag)
-{
-}
-
+{}
 
 void
 Node::Print()
@@ -62,12 +58,12 @@ Node::PrintJS()
     cerr << "][0];";
 }
 
-void 
-Node::incrementCount(Node *nNode){
+void
+Node::incrementCount(Node* nNode)
+{
     this->children.push_back(nNode);
     count++;
 }
-
 
 // int
 // main()
@@ -81,89 +77,97 @@ Node::incrementCount(Node *nNode){
 // }
 //
 
-
-
-STEntry::STEntry(string aName, Type* aType) {
-  name = aName;
-  type = aType;
+STEntry::STEntry(string aName, Type* aType)
+{
+    name = aName;
+    type = aType;
 }
 
-STEntry::STEntry(string aName, Type* aType, bool aConstant) {
-  name = aName;
-  type = aType;
-  constant = aConstant;
+STEntry::STEntry(string aName, Type* aType, bool aConstant)
+{
+    name = aName;
+    type = aType;
+    constant = aConstant;
 }
 
 map<string, StructDefinitionType*> ST::structDefs;
 map<string, FuncType*> ST::funcDefs;
 
- ST::ST(int aDepth, ST* aParent) {
-   depth = aDepth;
-   parent = aParent;
- }
- 
- void
- ST::addEntry(string aName, Type* aType, bool aConstant) {
-   STEntry* t = new STEntry(aName, aType, aConstant);
-   table[aName] = t;
- }
+ST::ST(int aDepth, ST* aParent)
+{
+    depth = aDepth;
+    parent = aParent;
+}
 
 void
-ST::addStructEntry(string aName, string structName) {
-  StructDefinitionType* t = ST::structDefs[structName];
-  map<string, Type*>::iterator iter;
-  string temp;
-  for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++ ) {
-    temp = aName + t->randomSuffix + iter->first;
-    addEntry(temp, iter->second, 0);
-  }
-  structs[aName] = structName;
-
+ST::addEntry(string aName, Type* aType, bool aConstant)
+{
+    STEntry* t = new STEntry(aName, aType, aConstant);
+    table[aName] = t;
 }
- 
- void
- ST::addChild(ST* aChild) {
-   children.push_back(aChild);
- }
+
+void
+ST::addStructEntry(string aName, string structName)
+{
+    StructDefinitionType* t = ST::structDefs[structName];
+    map<string, Type*>::iterator iter;
+    string temp;
+    for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
+        temp = aName + t->randomSuffix + iter->first;
+        addEntry(temp, iter->second, 0);
+    }
+    structs[aName] = structName;
+}
+
+void
+ST::addChild(ST* aChild)
+{
+    children.push_back(aChild);
+}
 
 bool
-ST::checkEntry(string a) {
-  if (getVar(a) == NULL) {
-    return true;
-  }
-  return false;
+ST::checkEntry(string a)
+{
+    if (getVar(a) == NULL) {
+        return true;
+    }
+    return false;
 }
 
 void
-ST::resetNextUseInfo(int a) {
-  map<string, STEntry*>::iterator iter;
-  for (iter = table.begin(); iter != table.end(); iter++) {
-    (*(iter->second)).setLive(false);
-    (*(iter->second)).setNextUse(a);
-  }
+ST::resetNextUseInfo(int a)
+{
+    map<string, STEntry*>::iterator iter;
+    for (iter = table.begin(); iter != table.end(); iter++) {
+        (*(iter->second)).setLive(false);
+        (*(iter->second)).setNextUse(a);
+    }
 }
 
 STEntry*
-ST::getStructVar(string aName, string memberName) {
-  StructDefinitionType* t = ST::structDefs[structs[aName]];
-  string temp = aName + t->randomSuffix + memberName;
-  return getVar(temp);
+ST::getStructVar(string aName, string memberName)
+{
+    StructDefinitionType* t = ST::structDefs[structs[aName]];
+    string temp = aName + t->randomSuffix + memberName;
+    return getVar(temp);
 }
 
 STEntry*
-ST::getVar(string a) {
+ST::getVar(string a)
+{
 
-  if (table.count(a)) {
-    return table[a];
-  }
+    if (table.count(a)) {
+        return table[a];
+    }
 
-  if (depth == 0) {
-    return nullptr;
-  }
-  return parent->getVar(a);
+    if (depth == 0) {
+        return nullptr;
+    }
+    return parent->getVar(a);
 }
 
-void addToSymbolTable();
+void
+addToSymbolTable();
 
 Instruction::Instruction(OpCode aOp,
                          void* aV1,
@@ -219,9 +223,12 @@ Instruction::Instruction(OpCode aOp,
     v3Type = aV3Type;
 }
 
-Instruction::Instruction(OpCode aOp, void* aV1, void* aV2,
-                         AddressingMode aV1AddMode, AddressingMode aV2AddMode,
-                         Type* aV1Type, 
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         void* aV2,
+                         AddressingMode aV1AddMode,
+                         AddressingMode aV2AddMode,
+                         Type* aV1Type,
                          Type* aV2Type)
 {
     op = aOp;
@@ -240,7 +247,8 @@ Instruction::Instruction(OpCode aOp,
                          AddressingMode aV2AddMode,
                          Type* aV1Type,
                          Type* aV2Type,
-                         int aV1num, int aV2num)
+                         int aV1num,
+                         int aV2num)
 {
     op = aOp;
     numOps = 2;
@@ -259,7 +267,7 @@ Instruction::Instruction(OpCode aOp,
                          AddressingMode aV1AddMode,
                          AddressingMode aV2AddMode,
                          Type* aV1Type,
-                         Type* aV2Type, 
+                         Type* aV2Type,
                          int aV2num)
 {
     op = aOp;
@@ -273,7 +281,9 @@ Instruction::Instruction(OpCode aOp,
     v2num = aV2num;
 }
 
-Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         AddressingMode aV1AddMode,
                          Type* aV1Type)
 {
     op = aOp;
@@ -283,8 +293,11 @@ Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
     v1Type = aV1Type;
 }
 
-Instruction::Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode,
-                         Type* aV1Type, int numV1)
+Instruction::Instruction(OpCode aOp,
+                         void* aV1,
+                         AddressingMode aV1AddMode,
+                         Type* aV1Type,
+                         int numV1)
 {
     op = aOp;
     numOps = 1;
@@ -302,24 +315,36 @@ Instruction::Instruction(OpCode aOp)
     v1Type = new BasicType("NOTYPE");
 }
 
-void Instruction::printInstruction(){
-    cout<< op << " " <<  v1AddMode << " " << v1Type->GetRepresentation();
+void
+Instruction::printInstruction()
+{
+    // cout << op << " " << v1AddMode << " " << v1Type->GetRepresentation();
+    string op1 =
+      v1AddMode == REGISTER ? ((STEntry*)v1)->getName() : to_string(*(long*)v1);
+    string op2 =
+      v2AddMode == REGISTER ? ((STEntry*)v2)->getName() : to_string(*(long*)v2);
+    string op3 =
+      v3AddMode == REGISTER ? ((STEntry*)v3)->getName() : to_string(*(long*)v3);
+    cout << op << " " << op1 << "(" << v1Type->GetRepresentation() << ") "
+         << op2 << "(" << v2Type->GetRepresentation() << ") " << op3 << "("
+         << v3Type->GetRepresentation() << ")" << endl;
 }
 
 bool
-ST::checkEntryFunc(string a) {
-  if (getFunc(a) == NULL) {
-    return true;
-  }
-  return false;
+ST::checkEntryFunc(string a)
+{
+    if (getFunc(a) == NULL) {
+        return true;
+    }
+    return false;
 }
 
 FuncType*
-ST::getFunc(string a) {
+ST::getFunc(string a)
+{
 
-  if (funcDefs.count(a)) {
-    return funcDefs[a];
-  }
-  return nullptr; 
+    if (funcDefs.count(a)) {
+        return funcDefs[a];
+    }
+    return nullptr;
 }
-
