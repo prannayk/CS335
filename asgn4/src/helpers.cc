@@ -373,12 +373,11 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     return i_list;
 }
 
-extern char*
+extern string*
 getCharFromString(string s){
-    char string[s.length() +1];
-    strcpy(string, s.c_str());
-    char * ret = &string[0];
-    return ret;
+    string * str = new string;
+    *str = s;
+    return str;
 }
 
 extern Instruction*
@@ -424,7 +423,7 @@ generateGotoInstruction(Node* n1, ST* curr)
     }
     string s = "label";
     s = s + to_string(clock());
-    char* branch = getCharFromString(s);
+    string* branch = getCharFromString(s);
     int* i = new int;
     *i = 1;
     Instruction* instr;
@@ -456,7 +455,7 @@ generateUnconditionalGoto(ST* curr)
 {
     string s = "label";
     s = s + to_string(clock());
-    char* branch = getCharFromString(s);
+    string* branch = getCharFromString(s);
     Instruction* instr;
     instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
     return instr;
@@ -527,9 +526,9 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
 extern Instruction*
 generateLabelInstruction(string s)
 {
-    char branch[s.length()+1]; 
-    strcpy(branch, s.c_str());
-    return new Instruction(LABEL_ST, &branch, CONSTANT_VAL, new BasicType(s));
+    string * str = new string;
+    *str = s;
+    return new Instruction(LABEL_ST, str, CONSTANT_VAL, new BasicType(s));
 }
 
 extern void

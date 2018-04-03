@@ -963,7 +963,7 @@ if (($3->children).size() == 5) {
   cout << "Warning: unexpected function declaration.";
   exit(1);
 }
-char * name = getCharFromString($3->children[0]->matched);
+string * name = getCharFromString($3->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
@@ -985,7 +985,7 @@ if (($3->children).size() == 5) {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
 }
-char * name = getCharFromString($3->children[0]->matched);
+string * name = getCharFromString($3->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
@@ -1220,7 +1220,7 @@ string s = "label";
 s = s + to_string(clock());
 label_map[$1->content] = s;
 if(instr_map.count($1->content)){
-    char * branch = getCharFromString($1->content);
+    string * branch = getCharFromString($1->content);
     instr_map[$1->content]->setV1(branch);
     instr_map.erase($1->content);
 }
@@ -1237,8 +1237,7 @@ if($2->count  == 1){
     if(!label_map.count($2->content))
         instr_map[$2->content] = instr;
     else {
-        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
-        ((char*)instr->getV1())[len] = '\0';
+        *((string*)instr->getV1()) = $2->content;
     }
     $$->instr_list.push_back(instr);
 }
@@ -1252,8 +1251,7 @@ if($2->count  == 1){
     if(!label_map.count($2->content))
         instr_map[$2->content] = instr;
     else {
-        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
-        ((char*)instr->getV1())[len] = '\0';
+        *((string*)instr->getV1()) = $2->content;
     }
     $$->instr_list.push_back(instr);
 }
@@ -1266,8 +1264,7 @@ if($2->count  == 1){
     if(!label_map.count($2->content))
         instr_map[$2->content] = instr;
     else {
-        size_t len = $2->content.copy((char*)instr->getV1(), $2->content.length());
-        ((char*)instr->getV1())[len] = '\0';
+        *((string*)instr->getV1()) = $2->content;
     }
     $$->instr_list.push_back(instr);
 }
@@ -1302,7 +1299,7 @@ for(int i=0; i< $4->count; ++i)
     $$->instr_list = mergeInstructions($$->instr_list,$4->children[i+1]->children[2]->instr_list); // weird bug here, must be indexed as 1 for some reason
 Instruction* branch_goto = generateUnconditionalGoto(curr);
 $$->instr_list.push_back(branch_goto);
-string s = (char *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
+string s = *(string *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
 string s1 = $2->getType()->GetRepresentation();
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
@@ -1337,7 +1334,7 @@ $$->Add($1);
 $$->Add($2);
 //$$->instr_list = $2->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($2, curr));
-$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+$$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 }
 
 ;
@@ -1351,7 +1348,7 @@ OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
 $$->Add($1);
 $$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($1, curr));
-$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+$$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 cout << "Yolo" << endl;
 }
 | OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
@@ -1360,7 +1357,7 @@ $$->Add($2);
 $$->Add($3);
 $$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
 $$->instr_list.push_back(generateGotoInstruction($3, curr));
-$$->setType(new BasicType((char*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+$$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
 }
 
 ;
@@ -1695,7 +1692,7 @@ int main(int argc, char** argv) {
         } while (!feof(yyin));
     cout << "Printing ST" << endl;
     printST(root);
-    cout << "There are " << (ST::funcDefs.size()) << " many functions" << endl;
+    cout << "Number of functions declared :  " << (ST::funcDefs.size()) << endl;
     cout << "fin" << endl;
     return 0;
 }
