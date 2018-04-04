@@ -3,6 +3,7 @@
 vector<Instruction*> instructionList;
 map<string, Instruction*> instr_map;
 map<string, string> label_map;
+char* filename;
 
 extern void
 inferListType(Node* target, Node* source)
@@ -12,23 +13,27 @@ inferListType(Node* target, Node* source)
     }
 }
 
-extern void 
-checkListType(vector<Type*> source, Node * target)
+extern void
+checkListType(vector<Type*> source, Node* target)
 {
-    if(source.size() != target->children.size())  {
-        cout << "Number of variables different from assignments" << endl;
-        exit(1);
+    if (source.size() != target->children.size()) {
+        semanticError("Number of variables different from assignments");
+        return;
     }
-    for(int i = 0; i < source.size(); ++i ){
-        if(!(*(target->children[i]->getType()) == *(source[i]))){
-            cout << "Types mismatch : " << target->children[i]->getType()->GetRepresentation() <<
-                " and " << source[i]->GetRepresentation()<<endl;
+    for (int i = 0; i < source.size(); ++i) {
+        if (!(*(target->children[i]->getType()) == *(source[i]))) {
+            semanticError("Types mismatch : " +
+                          target->children[i]->getType()->GetRepresentation() +
+                          +" and " + source[i]->GetRepresentation());
+            return;
         }
     }
 }
 
-extern void* correctPointer(Node * ptr, ST* curr){
-    void * arg1;
+extern void*
+correctPointer(Node* ptr, ST* curr)
+{
+    void* arg1;
     if (ptr->matched != "Literal")
         arg1 = (void*)curr->getVar(ptr->tmp);
     else if (ptr->getType()->GetRepresentation() == "int") {
@@ -51,8 +56,8 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
     vector<Instruction*> i_list;
     Instruction* instr;
     for (int i = 0; i < target->children.size(); ++i) {
-        void* arg1 = correctPointer(target->children[i],curr);
-        void* arg2 = correctPointer(source->children[i],curr);
+        void* arg1 = correctPointer(target->children[i], curr);
+        void* arg2 = correctPointer(source->children[i], curr);
         instr = new Instruction(ASG,
                                 arg1,
                                 arg2,
@@ -154,11 +159,12 @@ populateSTInfer(Node* declNameList, ST* curr)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
-        cout << "infer : " ; 
+        cout << "infer : ";
         cout << declNameList->children[i]->children[0]->matched << " : "
              << declNameList->children[i]->getType() << endl;
         curr->addEntry(declNameList->children[i]->children[0]->matched,
-                       declNameList->children[i]->getType(), false);
+                       declNameList->children[i]->getType(),
+                       false);
     }
 }
 
@@ -253,14 +259,16 @@ extern void
 generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
 {
     if (fn->matched != "Name") {
-        cout << "Cannot deal with anything but the simplest of functions."
-             << endl;
-        exit(1);
+        semanticError(
+          "Cannot deal with anything but the simplest of functions.");
+        return;
+        // exit(1);
     }
 
     if ((curr->checkEntryFunc(fn->content))) {
-        cout << "Cannot deal with function not in function table yet" << endl;
-        exit(1);
+        semanticError("Cannot deal with function not in function table yet");
+        return;
+        // exit(1);
     }
 
     // This function call has no arguments, so just call and store.
@@ -279,16 +287,16 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
                 *i = "true" == n->tmp;
                 p = i;
             } else {
-                cout << "Literal other than bool or int" << endl;
-                exit(1);
+                semanticError("Literal other than bool or int");
+                return;
             }
             i_list.push_back(
               new Instruction(PARAM, p, CONSTANT_VAL, n->getType()));
         } else if (n->matched == "Name") {
             STEntry* s;
             if (curr->checkEntry(n->content)) {
-                cout << "Cannot find Name" << endl;
-                exit(1);
+                semanticError("Cannot find Name");
+                return;
             } else {
                 s = curr->getVar(n->content);
             }
@@ -299,8 +307,8 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
             // matched value is something complex, so we need a pre-list.
             STEntry* s;
             if (curr->checkEntry(n->tmp)) {
-                cout << "Cannot find Temp" << endl;
-                exit(1);
+                semanticError("Cannot find Temp");
+                return;
             } else {
                 s = curr->getVar(n->tmp);
             }
@@ -314,8 +322,8 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
     curr->addEntry(str, ((FuncType*)source->getType())->GetReturnType(), false);
     STEntry* arg3;
     if (!(arg3 = curr->getVar(str))) {
-        cout << "STE creation failed" << endl;
-        exit(1);
+        semanticError("STE creation failed");
+        return;
     }
 
     Instruction* instr;
@@ -339,6 +347,7 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
 extern vector<Instruction*>
 generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
 {
+    vector<Instruction*> i_list;
     n1 = fixNodeForExpression(n1, curr);
     n2 = fixNodeForExpression(n2, curr);
     void *arg1, *arg2;
@@ -369,14 +378,14 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     curr->addEntry(str, n1->getType(), false);
     STEntry* arg3;
     if (!(arg3 = curr->getVar(str))) {
-        cout << "STE creation failed" << endl;
-        exit(1);
+        semanticError("STE creation failed");
+        return i_list;
     }
     if (!((*n1->getType()) == (*n2->getType()))) {
-        cout << "Error : types mismatch"
-             << " ";
-        cout << n1->getType()->GetRepresentation() << " ";
-        cout << n2->getType()->GetRepresentation() << endl;
+        semanticError("Error : types mismatch " +
+                      n1->getType()->GetRepresentation() + " " +
+                      n2->getType()->GetRepresentation());
+        return i_list;
     }
     Instruction* instr;
     instr = new Instruction(op,
@@ -389,18 +398,17 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
                             n1->getType(),
                             n2->getType(),
                             n1->getType());
-    vector<Instruction*> i_list;
     i_list = mergeInstructions(i_list, n1->instr_list);
     i_list = mergeInstructions(i_list, n2->instr_list);
     i_list.push_back(instr);
-    i_list[0]->printInstruction();
-    cout << i_list.size();
+    // i_list[0]->printInstruction();
     return i_list;
 }
 
 extern string*
-getCharFromString(string s){
-    string * str = new string;
+getCharFromString(string s)
+{
+    string* str = new string;
     *str = s;
     return str;
 }
@@ -469,7 +477,7 @@ extern Instruction*
 generateUnconditionalGoto(string label, ST* curr)
 {
     string s = label;
-    char branch[s.length()] ;
+    char branch[s.length()];
     strcpy(branch, s.c_str());
     Instruction* instr;
     instr = new Instruction(GOTO_OP, &branch, CONSTANT_VAL, new BasicType(s));
@@ -538,7 +546,7 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
     string str = st + to_string(clock());
     curr->addEntry(str, source->getType(), false);
     void* target = curr->getVar(str);
-    void* src = correctPointer(source,curr);
+    void* src = correctPointer(source, curr);
     Instruction* instr = new Instruction(op,
                                          target,
                                          src,
@@ -552,7 +560,7 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
 extern Instruction*
 generateLabelInstruction(string s)
 {
-    string * str = new string;
+    string* str = new string;
     *str = s;
     return new Instruction(LABEL_ST, str, CONSTANT_VAL, new BasicType(s));
 }
@@ -610,16 +618,16 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
         source->instr_list.push_back(
           new Instruction(op, i, CONSTANT_VAL, new BasicType("int")));
     } else if (retVal->count == 1 && getScopeReturnType(curr) == nullptr) {
-        cout << "Trying to return something when return type is void" << endl;
-        exit(1);
+        semanticError("Trying to return something when return type is void");
+        return;
     } else if (retVal->count == 1 &&
                retVal->children[0]->matched == "Literal") {
         if (retVal->children[0]->getType()->GetRepresentation() == "int") {
             long* i = new long;
             *i = atol(retVal->children[0]->content.c_str());
             if (*(new BasicType("int")) != *(getScopeReturnType(curr))) {
-                cout << "Return type mismatch" << endl;
-                exit(1);
+                semanticError("Return type mismatch");
+                return;
             }
             source->instr_list.push_back(
               new Instruction(op, i, CONSTANT_VAL, new BasicType("int")));
@@ -628,8 +636,8 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
             long* i = new long;
             *i = retVal->children[0]->content == "true";
             if (*(new BasicType("bool")) != *(getScopeReturnType(curr))) {
-                cout << "Return type mismatch" << endl;
-                exit(1);
+                semanticError("Return type mismatch");
+                return;
             }
             source->instr_list.push_back(
               new Instruction(op, i, CONSTANT_VAL, new BasicType("bool")));
@@ -637,13 +645,13 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
     } else if (retVal->count == 1 && retVal->children[0]->matched == "Name") {
         STEntry* s;
         if (curr->checkEntry(retVal->children[0]->tmp)) {
-            cout << "Can't find variable to return" << endl;
-            exit(1);
+            semanticError("Can't find variable to return");
+            return;
         }
         s = curr->getVar(retVal->children[0]->tmp);
         if (*(s->getType()) != *(getScopeReturnType(curr))) {
-            cout << "Return type mismatch" << endl;
-            exit(1);
+            semanticError("Return type mismatch");
+            return;
         }
         source->instr_list.push_back(
           new Instruction(op, s, REGISTER, getScopeReturnType(curr)));
@@ -652,21 +660,21 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
         string tmp = getTemp(retVal->children[0]);
         STEntry* s;
         if (curr->checkEntry(tmp)) {
-            cout << "Can't find variable to return" << endl;
-            exit(1);
+            semanticError("Can't find variable to return");
+            return;
         }
         s = curr->getVar(tmp);
         if (*(s->getType()) != *(getScopeReturnType(curr))) {
-            cout << "Return type mismatch" << endl;
-            exit(1);
+            semanticError("Return type mismatch");
+            return;
         }
         source->instr_list =
           mergeInstructions(source->instr_list, retVal->instr_list);
         source->instr_list.push_back(
           new Instruction(op, s, REGISTER, getScopeReturnType(curr)));
     } else {
-        cout << "Can return only one thing" << endl;
-        exit(1);
+        semanticError("Can return only one thing");
+        return;
     }
 }
 
@@ -679,4 +687,37 @@ extern void
 generateYield(Node* source, Node* retVal, ST* curr)
 {
     generateFunctionEnder(source, retVal, curr, YLD);
+}
+
+void
+reportError(string aMessage, string precu)
+{
+    string sp;
+    ifstream f;
+    f.open(filename, ios::in);
+    int current_line = 0;
+    while (getline(f, sp)) {
+        if (current_line + 1 == global_loc->line) {
+            cout << precu << "" << filename << "(" << global_loc->line << ":"
+                 << global_loc->col1 << ")"
+                 << ": " << sp << endl;
+            break;
+        }
+        current_line++;
+    }
+    f.close();
+    cout << "\t" << aMessage << endl;
+}
+
+extern void
+syntaxError(string aMessage)
+{
+    reportError(aMessage, "\033[1;31mError: \033[0m");
+    exit(1);
+}
+
+extern void
+semanticError(string aMessage)
+{
+    reportError(aMessage, "\033[1;93mWarning: \033[0m");
 }

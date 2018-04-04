@@ -1688,7 +1688,9 @@ if(!curr->checkEntryFunc($1->content)) {
   exit(1);
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-if($3->count != $$->type_child.size()) cout << "Unexpected number of arguments" << endl;
+if($3->count != $$->type_child.size()) {
+  semanticError("Unexpected number of arguments");
+}
  generateCall($$, $1, $3->children, curr);
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
@@ -1718,19 +1720,6 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
-#define SYNTAXERROR(_fname, _ln, _coln, _line, _stmt)    \
-    REPORTERR(_fname, _ln, _coln, _line)                 \
-    cout << _stmt << endl;                               \
-    exit(1);                                             \
-
-#define SEMANTICERROR(_fname, _ln, _coln, _line, _stmt)  \
-    REPORTERR(_fname, _ln, _coln, _line)                 \
-    cout << _stmt << endl;
-
-#define REPORTERR(_fname, _ln, _coln, _line)                            \
-    cout << "\033[1;31mError: \033[0m" << _fname << "(" << _ln << ":" << _coln << ")" \
-    << ": " << _line << endl;                                           \
-
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -1739,7 +1728,6 @@ Type* TypeForSymbol(char* input){
         return new BasicType("NOTYPE"); // empty statement have no type
 }
 
-char* filename;
 int main(int argc, char** argv) {
     filename = argv[1];
     FILE* myfile = fopen(filename, "r");
@@ -1755,22 +1743,5 @@ int main(int argc, char** argv) {
 }
 
 void yyerror(const char *s) {
-    string sp = "";
-    string errstr(s);
-    if (filename) {
-        ifstream f;
-        f.open(filename, ios::in);
-        int current_line = 0;
-        while(getline(f,sp)) {
-            if(current_line + 1 == global_loc->line) {
-                if (errstr.find("syntax error") != string::npos) {
-                    SYNTAXERROR(filename, global_loc->line, global_loc->col2, sp, s);
-                } else {
-                    SEMANTICERROR(filename, global_loc->line, global_loc->col2, sp, s);
-                }
-                break;
-            }
-            current_line++;
-        }
-    }
+    syntaxError(s);
 }

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -16,7 +17,7 @@ struct myLoc
     int col1 = 0;
     int col2 = 0;
 };
-
+extern char* filename;
 extern vector<Instruction*> instructionList;
 
 extern myLoc* global_loc;
@@ -94,6 +95,6 @@ extern void generateYield(Node* source, Node* retVal, ST* curr);
 extern void* correctPointer(Node * ptr, ST* curr);
 extern string*
 getCharFromString(string s);
-
-extern vector<string>
-createNameList(Node* list);
+extern vector<string> createNameList(Node* list);
+extern void syntaxError(string aMessage);
+extern void semanticError(string aMessage);
