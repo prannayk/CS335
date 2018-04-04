@@ -102,7 +102,7 @@ getCharFromString(string s);
 extern void 
 backPatch(map<string, Instruction*> instr_map, string s);
 extern Instruction* 
-generateEqualityInstruction(Node * target, Node * source, ST* curr);
+generateEqualityInstruction(Node * target, Node * source, ST* curr, string s);
 
 extern vector<string> createNameList(Node* list);
 extern void syntaxError(string aMessage);

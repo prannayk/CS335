@@ -58,21 +58,24 @@ backPatch(map<string, Instruction*> instr_map, string s){
     *str = s;
     while(instr_map.count(s)){
         instr_map[s]->setV1(str);
+        instr_map.erase(s);
     }
 }
 
 extern Instruction* 
-generateEqualityInstruction(Node * target, Node * source, ST* curr){
+generateEqualityInstruction(Node * target, Node * source, ST* curr, string s){
     target = fixNodeForExpression(target, curr);
     source = fixNodeForExpression(source, curr);
+    string * str = new string;
+    * str = s;
     Instruction * instr;
     void* arg1 = correctPointer(target, curr);
     void* arg2 = correctPointer(source, curr);
-    instr = new Instruction(EQ_OP,
-                            arg2,
+    instr = new Instruction(GOTOEQ,
+                            str,
                             arg1,
                             arg2,
-                            target->addrMode,
+                            CONSTANT_VAL,
                             source->addrMode,
                             target->addrMode,
                             target->getType(),
@@ -172,10 +175,8 @@ populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
-        cout << "normal call : " << endl;
         cout << declNameList->children[i]->children[0]->matched << " : "
              << TypeName->type << endl;
-        cout << "Loc : " << global_loc->col1 << endl;
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        TypeName->type,
                        constant);

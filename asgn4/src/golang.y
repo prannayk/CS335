@@ -916,7 +916,6 @@ ExpressionList  :
 $$ = new Node("Expression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->instr_list = mergeInstructions($$->instr_list, $1->instr_list);
-cout << "Count = " << $1->count << endl;
 }
         | ExpressionList COMMA Expression {
 $$ = $1;
@@ -983,7 +982,7 @@ $$->Add($4);
 $$->Add($6);
 string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
-$$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($3->instr_list, $5->instr_list));
+$$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
 ;
@@ -1201,7 +1200,6 @@ $$->addrMode = REGISTER;
 CompoundStatement  :
 BLOCK_OPEN {
   // This is when a new scope starts but only if this is not from a for/if/function header
-  cout << "yolo" << endl;
   if (! ST::paramPush) {
     ST* t = new ST(curr->depth + 1, curr);
     curr->addChild(t);
@@ -1384,7 +1382,7 @@ $$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->get
 
 ;
 LoopBody  :
-CompoundStatement {$$ = $1; $$->printInstructionList();}
+CompoundStatement {$$ = $1; }
 
 ;
 IfHeader  :
@@ -1413,10 +1411,10 @@ FOR {ST::paramPush = true; ST::paramEntryStack.empty();
 cout << "done" << endl; } 
 ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);
-$$->instr_list = $2->instr_list;
-$$->tmp = $2->tmp;
-$$->content = $2->content;
+$$->Add($3);
+$$->instr_list = $3->instr_list;
+$$->tmp = $3->tmp;
+$$->content = $3->content;
 }
 
 ;
@@ -1446,7 +1444,7 @@ if(($1->matched == "ForHeader")){
     $$->instr_list = mergeInstructions($$->instr_list, $1->instr_list);
     $$->instr_list.push_back(generateGotoInstruction($1,s2  ,curr, false));
     $$->instr_list.push_back(generateLabelInstruction(*((string*)$1->instr_list[$1->instr_list.size() - 1]->getV1())));
-    $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
+    $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
 
@@ -1500,14 +1498,24 @@ $$->Add($5);
 $$->Add($6);
 $$->instr_list = $2->instr_list;
 vector<string> caseblock_label_list;
+string end = "label" + to_string(clock());
 for(int i=0; i<$5->count; ++i){
     string s = "label" + to_string(clock());
-    $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[0]->instr_list); // check the i+1
-    $$->instr_list.push_back(generateEqualityInstruction($2, $5->children[i+1]->children[0]));
-    $5->children[i+1]->children[0]->tmp = *((string*)$$->instr_list[$$->instr_list.size()-1].getV1()) ;
-    $$->instr_list.push_back($5->children[i+1]->children[0], s, curr);
     caseblock_label_list.push_back(s);
+    if($5->children[i+1]->children[0]->matched == "Default")
+        continue;
+    $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[0]->instr_list); // check the i+1
+    $$->instr_list.push_back(generateEqualityInstruction($2, $5->children[i+1]->children[0], curr, s));
 }
+for(int i=0; i<$5->count; ++i){
+    $$->instr_list.push_back(generateLabelInstruction(caseblock_label_list[i]));
+    $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[1]->instr_list);
+    if(($5->children[i+1]->children[1]->flag) && ($5->children[i+1]->children[0]->matched == "Default"))
+        $$->instr_list.push_back(generateUnconditionalGoto(caseblock_label_list[i+1], curr));
+    else
+        $$->instr_list.push_back(generateUnconditionalGoto(end,curr));
+}
+$$->instr_list.push_back(generateLabelInstruction(caseblock_label_list[caseblock_label_list.size()-1]));
 }
 ;
 CaseBlockList  :
@@ -1562,7 +1570,9 @@ $$->Add($2);
 ;
 ExpressionOrTypeList  :
 ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3); $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);}
-		| ExpressionOrType{$$ = $1;}
+		| ExpressionOrType{$$ = new Node("ExprTypeList", new BasicType("NOTYPE")); $$->instr_list = $1->instr_list;
+        $$->Add($1);
+        }
 ;
 InterfaceDeclaration  :
 NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
@@ -1768,7 +1778,6 @@ int main(int argc, char** argv) {
         yyparse();
     } while (!feof(yyin));
     cout << "Printing ST" << endl;
-    printST(root);
     cout << "Number of functions declared :  " << (ST::funcDefs.size()) << endl;
     cout << "fin" << endl;
     return 0;
