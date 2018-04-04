@@ -92,6 +92,9 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
 
 map<string, StructDefinitionType*> ST::structDefs;
 map<string, FuncType*> ST::funcDefs;
+vector<STEntry* > ST::paramEntryStack;
+bool ST::paramPush = false;
+
 
 ST::ST(int aDepth, ST* aParent)
 {

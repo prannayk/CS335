@@ -76,6 +76,8 @@ generateUnaryInstruction(OpCode, Node*, ST*);
 extern void
 populateSTInfer(Node* declNameList, ST* curr);
 extern void
+populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr);
+extern void
 setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);
@@ -93,3 +95,5 @@ extern void* correctPointer(Node * ptr, ST* curr);
 extern string*
 getCharFromString(string s);
 
+extern vector<string>
+createNameList(Node* list);

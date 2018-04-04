@@ -97,6 +97,18 @@ createParamList(Node* list)
     return paramTypes;
 }
 
+extern vector<string>
+createNameList(Node* list) {
+  vector<string> names;
+  if (list->children.size() == 0) {
+    return names;
+  }
+  for (int i = 0; i < list->count; i++) {
+      names.push_back(list->children[i]->content);
+  }
+  return names;
+}
+
 extern void
 printST(ST* root)
 {
@@ -148,6 +160,19 @@ populateSTInfer(Node* declNameList, ST* curr)
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        declNameList->children[i]->getType(), false);
     }
+}
+
+extern void
+populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr) {
+  if (names.size() != types.size()) {
+      cout << "Type List and Name List mismatch" << endl;
+      exit(1);
+  }
+  vector<string>::iterator itn;
+  vector<Type*>::iterator itt;
+  for (itn = names.begin(), itt = types.begin(); (itn != names.end()) && (itt != types.end()); itn++, itt++) {
+    curr->addEntry(*itn, *itt, false);
+  }
 }
 
 extern vector<string>
@@ -508,6 +533,7 @@ getTemp(Node* ptr)
 extern Instruction*
 generateUnaryInstruction(OpCode op, Node* source, ST* curr)
 {
+    source = fixNodeForExpression(source, curr);
     string st = "temp";
     string str = st + to_string(clock());
     curr->addEntry(str, source->getType(), false);

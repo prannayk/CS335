@@ -223,6 +223,8 @@ class ST {
     
      static map<string, StructDefinitionType*> structDefs;
      static map<string, FuncType*> funcDefs;
+     static vector<STEntry*> paramEntryStack;
+     static bool paramPush;
 
      bool rValueMode = false;
      Type* scopeReturnType = nullptr;
