@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include "helpers.h"
 #include "Type.h"
@@ -18,6 +19,7 @@ void yyerror(const char *s);
 #include "Node.h"
 ST* root = new ST(0, nullptr);
 ST* curr = root;
+
 
 %}
 
@@ -951,57 +953,77 @@ $$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;$$->tmp = $1;}
 
 ;
 FunctionDeclaration  :
-FUNC OGenericTypeList FunctionHeader 
-{
-    // add code for scoping 
-}
-FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($5);
-// TODO: move this stuff out into a midrule after function header
-// This will make recursive functions a Thing
+FUNC OGenericTypeList { ST::paramPush = true;
+ST* t = new ST(curr->depth + 1, curr);
+curr->addChild(t);
+curr = t;
+cout << "Done" << endl;
+} 
+FunctionHeader {
 
-if (($3->children).size() == 5) {
-  vector<Type*> paramTypes = createParamList($3->children[2]);
-  FuncType* t = new FuncType($3->children[4]->getType(), paramTypes);
-  ST::funcDefs[($3->children[0])->matched] = t;
-  cout << "Adding function " << ($3->children[0])->matched << endl;
-
+vector<Type*> paramTypes = createParamList($4->children[2]);
+vector<string> paramNames = createNameList($4->children[2]);
+populateSTTypeList(paramNames, paramTypes, curr);
+if (($4->children).size() == 5) {
+  FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
+  ST::funcDefs[($4->children[0])->matched] = t;
+  cout << "Adding function " << ($4->children[0])->matched << endl;
 } else {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
   exit(1);
 }
-string * name = getCharFromString($3->children[0]->matched);
+ST::paramPush = false;
+
+}
+FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $4->flag);
+$$->Add($1);
+$$->Add($2);
+$$->Add($4);
+$$->Add($6);
+string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($3->instr_list, $5->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
 ;
 GeneratorDeclaration  :
-GEN OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
+GEN OGenericTypeList { ST::paramPush = true;
+ST* t = new ST(curr->depth + 1, curr);
+curr->addChild(t);
+curr = t;
+cout << "Done" << endl;
+} 
+FunctionHeader {
 
-if (($3->children).size() == 5) {
-  vector<Type*> paramTypes = createParamList($3->children[2]);
-  FuncType* t = new FuncType($3->children[4]->getType(), paramTypes, true);
-  ST::funcDefs[($3->children[0])->matched] = t;
+vector<Type*> paramTypes = createParamList($4->children[2]);
+vector<string> paramNames = createNameList($4->children[2]);
+populateSTTypeList(paramNames, paramTypes, curr);
+if (($4->children).size() == 5) {
+  FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
+  ST::funcDefs[($4->children[0])->matched] = t;
+  cout << "Adding generator " << ($4->children[0])->matched << endl;
+
 } else {
   // Throw error!
-  cout << "Warning: unexpected function declaration.";
+  cout << "Warning: unexpected generator declaration.";
+  exit(1);
 }
-string * name = getCharFromString($3->children[0]->matched);
+ST::paramPush = false;
+
+}
+FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $4->flag);
+$$->Add($1);
+$$->Add($2);
+$$->Add($4);
+$$->Add($6);
+string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
-$$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
+$$->instr_list = mergeInstructions($2->instr_list, $4->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
-
 ;
+
 FunctionHeader  :
 ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
@@ -1111,7 +1133,7 @@ $$->Add($2);$$->content = $1; }
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
 		| VARIADIC TypeName{$$ = new Node("ArgumentType", $2->getType(), 1, true); $$->count = 2;
-$$->Add($1); 
+$$->Add($1);
 $$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
 		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
 $$->Add($1);cout <<"variadic" << " " << $1 << endl ; // TODO: handle this, since it opens possibility of no types being defined for the entire list
@@ -1178,11 +1200,13 @@ $$->addrMode = REGISTER;
 ;
 CompoundStatement  :
 BLOCK_OPEN {
-  // This is when a new scope starts
+  // This is when a new scope starts but only if this is not from a for/if/function header
   cout << "yolo" << endl;
-  ST* t = new ST(curr->depth + 1, curr);
-  curr->addChild(t);
-  curr = t;
+  if (! ST::paramPush) {
+    ST* t = new ST(curr->depth + 1, curr);
+    curr->addChild(t);
+    curr = t;
+  }
 }
 StatementList {
   // This is where stuff ends
@@ -1300,36 +1324,47 @@ NewName{$$ = $1;}
 
 ;
 IfStatement  :
-IF IfHeader LoopBody ElseIfList Else{$$ = new Node("IfStatement", new BasicType("NOTYPE"), $3->count);
-$$->Add($3);
-$$->Add($4);
+IF {ST::paramPush = true;
+ST* t = new ST(curr->depth + 1, curr);
+curr->addChild(t);
+curr = t;
+cout << "Done" << endl; } 
+IfHeader {ST::paramPush = false;} 
+LoopBody ElseIfList Else{$$ = new Node("IfStatement", new BasicType("NOTYPE"), $5->count);
 $$->Add($5);
-$$->instr_list = $2->instr_list;
-for(int i=0; i< $4->count; ++i)
-    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i+1]->children[2]->instr_list); // weird bug here, must be indexed as 1 for some reason
+$$->Add($6);
+$$->Add($7);
+$$->instr_list = $3->instr_list;
+for(int i=0; i< $6->count; ++i)
+    $$->instr_list = mergeInstructions($$->instr_list,$6->children[i+1]->children[2]->instr_list); // weird bug here, must be indexed as 1 for some reason
 Instruction* branch_goto = generateUnconditionalGoto(curr);
 $$->instr_list.push_back(branch_goto);
 string s = *(string *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
-string s1 = $2->getType()->GetRepresentation();
+string s1 = $3->getType()->GetRepresentation();
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
-$$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
-for(int i=0; i< $4->count; ++i){
-    $$->instr_list.push_back(generateLabelInstruction($4->children[i+1]->getType()->GetRepresentation()));
-    $$->instr_list = mergeInstructions($$->instr_list,$4->children[i+1]->children[3]->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, $5->instr_list);
+for(int i=0; i< $6->count; ++i){
+    $$->instr_list.push_back(generateLabelInstruction($6->children[i+1]->getType()->GetRepresentation()));
+    $$->instr_list = mergeInstructions($$->instr_list,$6->children[i+1]->children[3]->instr_list);
     $$->instr_list.push_back(branch_goto);
 }
 $$->instr_list.push_back(generateLabelInstruction(s));
-if($5->count > 0)
-    $$->instr_list = mergeInstructions($$->instr_list, $5->children[1]->instr_list);
+if($7->count > 0)
+    $$->instr_list = mergeInstructions($$->instr_list, $7->children[1]->instr_list);
 }
 
 ;
 ElseIf  :
-ELSE IF IfHeader LoopBody{$$ = new Node("ElseIf", new BasicType("NOTYPE"));
+ELSE IF {ST::paramPush = true;
+ST* t = new ST(curr->depth + 1, curr);
+curr->addChild(t);
+curr = t;
+cout << "Done" << endl; } 
+IfHeader {ST::paramPush = false;} LoopBody{$$ = new Node("ElseIf", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);
-$$->Add($4);}
+$$->Add($4);
+$$->Add($6);}
 
 ;
 ElseIfList  :
@@ -1371,7 +1406,12 @@ $$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->get
 
 ;
 ForStatement  :
-FOR ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
+FOR {ST::paramPush = true; ST::paramEntryStack.empty(); 
+    ST* t = new ST(curr->depth + 1, curr);
+    curr->addChild(t);
+    curr = t;
+cout << "done" << endl; } 
+ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->instr_list = $2->instr_list;
@@ -1381,9 +1421,9 @@ $$->content = $2->content;
 
 ;
 ForBody  :
-ForHeader LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
+ForHeader {ST::paramPush = false;} LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);
+$$->Add($3);
 if(($1->matched == "ForHeader")){
     string s1 = "forlabel" + to_string(clock());
     string s2 = "forlabel" + to_string(clock());
@@ -1393,7 +1433,7 @@ if(($1->matched == "ForHeader")){
     $$->instr_list.push_back(generateLabelInstruction(s1));
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[1]->instr_list);
     $$->instr_list.push_back(generateGotoInstruction($1->children[1],s2  ,curr, false));
-    $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
+    $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[2]->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
@@ -1680,7 +1720,9 @@ if(!curr->checkEntryFunc($1->content)) {
   exit(1);
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-if($3->count != $$->type_child.size()) cout << "Unexpected number of arguments" << endl;
+if($3->count != $$->type_child.size()) {
+  semanticError("Unexpected number of arguments");
+}
  generateCall($$, $1, $3->children, curr);
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
@@ -1710,7 +1752,6 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
-
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -1720,11 +1761,12 @@ Type* TypeForSymbol(char* input){
 }
 
 int main(int argc, char** argv) {
-	FILE *myfile = fopen(argv[1], "r");
-        yyin = myfile;
-        do {
-            yyparse();
-        } while (!feof(yyin));
+    filename = argv[1];
+    FILE* myfile = fopen(filename, "r");
+    yyin = myfile;
+    do {
+        yyparse();
+    } while (!feof(yyin));
     cout << "Printing ST" << endl;
     printST(root);
     cout << "Number of functions declared :  " << (ST::funcDefs.size()) << endl;
@@ -1733,7 +1775,5 @@ int main(int argc, char** argv) {
 }
 
 void yyerror(const char *s) {
-    printf("ParseError: %s\n", s);
-	cout<< "Error on line : "<<global_loc->line << ":" << global_loc->col2 << " to " << global_loc->line << ":" << global_loc->col1 << endl;
-    exit(-1);
+    syntaxError(s);
 }

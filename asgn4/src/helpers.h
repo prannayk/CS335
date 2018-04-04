@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <ctime>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -16,7 +17,7 @@ struct myLoc
     int col1 = 0;
     int col2 = 0;
 };
-
+extern char* filename;
 extern vector<Instruction*> instructionList;
 
 extern myLoc* global_loc;
@@ -80,6 +81,8 @@ generateUnaryInstruction(OpCode, Node*, ST*);
 extern void
 populateSTInfer(Node* declNameList, ST* curr);
 extern void
+populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr);
+extern void
 setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);
@@ -101,3 +104,6 @@ backPatch(map<string, Instruction*> instr_map, string s);
 extern Instruction* 
 generateEqualityInstruction(Node * target, Node * source, ST* curr);
 
+extern vector<string> createNameList(Node* list);
+extern void syntaxError(string aMessage);
+extern void semanticError(string aMessage);
