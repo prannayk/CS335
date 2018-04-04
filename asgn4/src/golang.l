@@ -16,8 +16,8 @@ int yycolumn = 1;
 myLoc *global_loc = new myLoc;
 /* extern "C" int yyparse(); */
 /* extern "C" void yyerror(const char*); */
-#define YY_USER_ACTION                                  		          \ 
-  ++ctr[yy_act];                        				                      \
+#define YY_USER_ACTION                                  		          \
+  ++ctr[yy_act];                        				                   \
   start_line = prev_yylineno; start_column = yycolumn;	                  \
   if (yylineno == prev_yylineno) yycolumn += yyleng;    	              \
   else {                                                                  \
