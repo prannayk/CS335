@@ -1222,11 +1222,12 @@ $$ = $3;
 
 ;
 StatementList  : // TODO  : this is also beginning of a scope, unhandled
-Statement{$$ = $1;}
+Statement{$$ = new Node("StatementList", new BasicType("NOTYPE")); $$->Add($1); $$->flag = $1->flag;}
 		| StatementList STMTEND Statement{
 $$ = $1;
 $$->incrementCount($3);
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
+if($3->flag)    $$->flag = $3->flag;
 }
 
 ;
@@ -1261,7 +1262,9 @@ backPatch(cont_map, $1->content);
 }
 
 | FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("FallThrough"));
-$$->Add($1); //$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
+$$->Add($1);
+$$->flag = 1;
+//$$->instr_list.push_back(generateFallThroughInstruction()); // TODO : handling unclear of all the following
 }
 | BREAK ONewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -1496,7 +1499,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($5);
 $$->Add($6);
-$$->instr_list = $2->instr_list;
+$$->instr_list = copyInstruction($2->instr_list,1);
 vector<string> caseblock_label_list;
 string end = "label" + to_string(clock());
 for(int i=0; i<$5->count; ++i){
@@ -1505,12 +1508,14 @@ for(int i=0; i<$5->count; ++i){
     if($5->children[i+1]->children[0]->matched == "Default")
         continue;
     $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[0]->instr_list); // check the i+1
-    $$->instr_list.push_back(generateEqualityInstruction($2, $5->children[i+1]->children[0], curr, s));
+    Node * ptr = $5->children[i+1]->children[0]->children[1];
+    for(int j=0; j<ptr->count; j++)
+        $$->instr_list.push_back(generateEqualityInstruction($2->children[0]->children[0], ptr->children[j], curr, s));
 }
 for(int i=0; i<$5->count; ++i){
     $$->instr_list.push_back(generateLabelInstruction(caseblock_label_list[i]));
     $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[1]->instr_list);
-    if(($5->children[i+1]->children[1]->flag) && ($5->children[i+1]->children[0]->matched == "Default"))
+    if(($5->children[i+1]->children[1]->flag) && !($5->children[i+1]->children[0]->matched == "Default"))
         $$->instr_list.push_back(generateUnconditionalGoto(caseblock_label_list[i+1], curr));
     else
         $$->instr_list.push_back(generateUnconditionalGoto(end,curr));
@@ -1537,11 +1542,10 @@ Case  :
 CASE ExpressionOrTypeList COLON{
 $$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($3);
+$$->Add($2);
 $$->Add($3);
 for(int i=0; i<$2->count;++i){
     $$->instr_list=mergeInstructions($$->instr_list, $2->children[i]->instr_list);
-$$->tmp = *((string *)$$->instr_list[$$->instr_list.size() - 1]->getV1());
 }
 }
 		| CASE ExpressionOrTypeList ASSGN_OP Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
@@ -1572,6 +1576,7 @@ ExpressionOrTypeList  :
 ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3); $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);}
 		| ExpressionOrType{$$ = new Node("ExprTypeList", new BasicType("NOTYPE")); $$->instr_list = $1->instr_list;
         $$->Add($1);
+        $$->count = 1;
         }
 ;
 InterfaceDeclaration  :

@@ -78,7 +78,7 @@ generateEqualityInstruction(Node * target, Node * source, ST* curr, string s){
                             CONSTANT_VAL,
                             source->addrMode,
                             target->addrMode,
-                            target->getType(),
+                            new BasicType("switchstmt"),
                             source->getType(),
                             target->getType()
             );
@@ -278,9 +278,19 @@ fixNodeForExpression(Node* ptr, ST* curr)
         ptr->addrMode = CONSTANT_VAL;
     } else if (ptr->matched == "Expression") {
         // TODO: implement this @Prannay
-        // TODO : I do not see the problem @Milindl
+    } else {
+        ptr->tmp = ptr->matched;
     }
     return ptr;
+}
+
+extern vector<Instruction*> 
+copyInstruction(vector<Instruction*> i_list, int offset ){
+    vector<Instruction*> new_list;
+    for(auto elem : i_list ){
+        new_list.push_back(elem);
+        if((offset++) >= i_list.size()) break;
+    }
 }
 
 extern vector<Instruction*>

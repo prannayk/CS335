@@ -16,6 +16,13 @@ func main(ix, int y, int z) {
                  } 
         }
     }
+    switch t {
+        case 1 : {x++}
+        case 1 : {
+            fallthrough
+        }
+        case 1 : {x++}
+    }
     var x int
 }
 func dhish(m int){
