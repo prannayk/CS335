@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <iostream>
+#include <fstream>
 #include <string.h>
 #include "helpers.h"
 #include "Type.h"
@@ -18,6 +19,7 @@ void yyerror(const char *s);
 #include "Node.h"
 ST* root = new ST(0, nullptr);
 ST* curr = root;
+
 
 %}
 
@@ -944,9 +946,9 @@ $$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;$$->tmp = $1;}
 
 ;
 FunctionDeclaration  :
-FUNC OGenericTypeList FunctionHeader 
+FUNC OGenericTypeList FunctionHeader
 {
-    // add code for scoping 
+    // add code for scoping
 }
 FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
 $$->Add($1);
@@ -1105,7 +1107,7 @@ $$->Add($2);$$->content = $1; }
 $$->Add($1);
 $$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
 		| VARIADIC TypeName{$$ = new Node("ArgumentType", $2->getType(), 1, true); $$->count = 2;
-$$->Add($1); 
+$$->Add($1);
 $$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
 		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
 $$->Add($1);cout <<"variadic" << " " << $1 << endl ; // TODO: handle this, since it opens possibility of no types being defined for the entire list
@@ -1679,6 +1681,18 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
+#define SYNTAXERROR(_fname, _ln, _coln, _line, _stmt)    \
+    REPORTERR(_fname, _ln, _coln, _line)                 \
+    cout << _stmt << endl;                               \
+    exit(1);                                             \
+
+#define SEMANTICERROR(_fname, _ln, _coln, _line, _stmt)  \
+    REPORTERR(_fname, _ln, _coln, _line)                 \
+    cout << _stmt << endl;
+
+#define REPORTERR(_fname, _ln, _coln, _line)                            \
+    cout << "\033[1;31mError: \033[0m" << _fname << "(" << _ln << ":" << _coln << ")" \
+    << ": " << _line << endl;                                           \
 
 Type* TypeForSymbol(char* input){
     // returns only INT for now
@@ -1688,12 +1702,14 @@ Type* TypeForSymbol(char* input){
         return new BasicType("NOTYPE"); // empty statement have no type
 }
 
+char* filename;
 int main(int argc, char** argv) {
-	FILE *myfile = fopen(argv[1], "r");
-        yyin = myfile;
-        do {
-            yyparse();
-        } while (!feof(yyin));
+    filename = argv[1];
+    FILE* myfile = fopen(filename, "r");
+    yyin = myfile;
+    do {
+        yyparse();
+    } while (!feof(yyin));
     cout << "Printing ST" << endl;
     printST(root);
     cout << "Number of functions declared :  " << (ST::funcDefs.size()) << endl;
@@ -1702,7 +1718,22 @@ int main(int argc, char** argv) {
 }
 
 void yyerror(const char *s) {
-    printf("ParseError: %s\n", s);
-	cout<< "Error on line : "<<global_loc->line << ":" << global_loc->col2 << " to " << global_loc->line << ":" << global_loc->col1 << endl;
-    exit(-1);
+    string sp = "";
+    string errstr(s);
+    if (filename) {
+        ifstream f;
+        f.open(filename, ios::in);
+        int current_line = 0;
+        while(getline(f,sp)) {
+            if(current_line + 1 == global_loc->line) {
+                if (errstr.find("syntax error") != string::npos) {
+                    SYNTAXERROR(filename, global_loc->line, global_loc->col2, sp, s);
+                } else {
+                    SEMANTICERROR(filename, global_loc->line, global_loc->col2, sp, s);
+                }
+                break;
+            }
+            current_line++;
+        }
+    }
 }
