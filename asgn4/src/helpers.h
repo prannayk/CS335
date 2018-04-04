@@ -20,8 +20,12 @@ struct myLoc
 extern vector<Instruction*> instructionList;
 
 extern myLoc* global_loc;
-extern map<string, Instruction*> instr_map;
-extern map<string, string> label_map;
+extern map<string, Instruction*> goto_map;
+extern map<string, Instruction*> cont_map;
+extern map<string, Instruction*> break_map;
+extern map<string, string> goto_label_map;
+extern map<string, string> cont_label_map;
+extern map<string, string> break_label_map;
 extern void
 inferListType(Node* target, Node* source);
 extern vector<Type*>
@@ -92,4 +96,8 @@ extern void generateYield(Node* source, Node* retVal, ST* curr);
 extern void* correctPointer(Node * ptr, ST* curr);
 extern string*
 getCharFromString(string s);
+extern void 
+backPatch(map<string, Instruction*> instr_map, string s);
+extern Instruction* 
+generateEqualityInstruction(Node * target, Node * source, ST* curr);
 

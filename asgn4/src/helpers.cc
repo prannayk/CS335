@@ -1,8 +1,12 @@
 #include "helpers.h"
 
 vector<Instruction*> instructionList;
-map<string, Instruction*> instr_map;
-map<string, string> label_map;
+map<string, Instruction*> goto_map;
+map<string, Instruction*> cont_map;
+map<string, Instruction*> break_map;
+map<string, string> goto_label_map;
+map<string, string> cont_label_map;
+map<string, string> break_label_map;
 
 extern void
 inferListType(Node* target, Node* source)
@@ -41,6 +45,36 @@ extern void* correctPointer(Node * ptr, ST* curr){
         arg1 = (void*)i;
     }
     return arg1;
+}
+
+extern void 
+backPatch(map<string, Instruction*> instr_map, string s){
+    string* str = new string;
+    *str = s;
+    while(instr_map.count(s)){
+        instr_map[s]->setV1(str);
+    }
+}
+
+extern Instruction* 
+generateEqualityInstruction(Node * target, Node * source, ST* curr){
+    target = fixNodeForExpression(target, curr);
+    source = fixNodeForExpression(source, curr);
+    Instruction * instr;
+    void* arg1 = correctPointer(target, curr);
+    void* arg2 = correctPointer(source, curr);
+    instr = new Instruction(EQ_OP,
+                            arg2,
+                            arg1,
+                            arg2,
+                            target->addrMode,
+                            source->addrMode,
+                            target->addrMode,
+                            target->getType(),
+                            source->getType(),
+                            target->getType()
+            );
+    return instr;
 }
 
 extern vector<Instruction*>
@@ -212,6 +246,7 @@ fixNodeForExpression(Node* ptr, ST* curr)
         ptr->addrMode = CONSTANT_VAL;
     } else if (ptr->matched == "Expression") {
         // TODO: implement this @Prannay
+        // TODO : I do not see the problem @Milindl
     }
     return ptr;
 }
@@ -390,8 +425,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
         curr->addEntry(n1->tmp, new BasicType("GOTO"), false);
         arg1 = curr->getVar(n1->tmp);
     }
-    char branch[label.length()];
-    strcpy(branch, label.c_str());
+    string* branch = getCharFromString(label);
     int* i = new int;
     *i = 1;
     Instruction* instr;
@@ -401,7 +435,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
     else
         op = GOTONEQ;
     instr = new Instruction(GOTOEQ,
-                            (void*)&branch,
+                            (void*)branch,
                             (void*)arg1,
                             (void*)i,
                             CONSTANT_VAL,
@@ -444,10 +478,9 @@ extern Instruction*
 generateUnconditionalGoto(string label, ST* curr)
 {
     string s = label;
-    char branch[s.length()] ;
-    strcpy(branch, s.c_str());
+    string* branch = getCharFromString(label) ;
     Instruction* instr;
-    instr = new Instruction(GOTO_OP, &branch, CONSTANT_VAL, new BasicType(s));
+    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
     return instr;
 }
 extern Instruction*
@@ -586,8 +619,8 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
     } else if (retVal->count == 1 && getScopeReturnType(curr) == nullptr) {
         cout << "Trying to return something when return type is void" << endl;
         exit(1);
-    } else if (retVal->count == 1 &&
-               retVal->children[0]->matched == "Literal") {
+    } else if ((retVal->count == 1) &&
+              !retVal->children[0]->matched.compare("Literal")) {
         if (retVal->children[0]->getType()->GetRepresentation() == "int") {
             long* i = new long;
             *i = atol(retVal->children[0]->content.c_str());

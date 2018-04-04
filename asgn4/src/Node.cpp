@@ -348,3 +348,9 @@ ST::getFunc(string a)
     }
     return nullptr;
 }
+
+void 
+Node::printInstructionList(){
+    // print here
+    int a = 3 + 5;
+}

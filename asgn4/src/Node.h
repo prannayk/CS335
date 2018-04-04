@@ -162,6 +162,7 @@ class Node
     void incrementCount(Node * nNode); // add a Node, make a list
     void setType(Type *aType){ type = aType; }
     Type* getType() { return this->type; }
+    void printInstructionList();
 
 };
 

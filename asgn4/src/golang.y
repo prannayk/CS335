@@ -268,17 +268,22 @@ for (auto i: instructionList) {
 
 ;
 SourceFile  :
-Package Imports DeclarationList{$$ = new Node("SourceFile", new BasicType("NOTYPE"));
+Package Imports DeclarationList{
+$$ = new Node("SourceFile", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Package"<< " " <<"Imports"<< " " <<"DeclarationList" << endl ;}
+$$->Add($3);
+$3->printInstructionList();
+}
 
 ;
 Package  :
-PACKAGE ID STMTEND{$$ = new Node("Package", new BasicType("NOTYPE"));
+PACKAGE ID STMTEND{
+$$ = new Node("Package", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"package" << " " << $1<< " " <<"id" << " " << $2<< " " <<"stmtend" << " " << $3 << endl ;}
+$$->Add($3);
+}
 
 ;
 Imports  :
@@ -328,7 +333,9 @@ $$->Add($1);cout <<"stmtend" << " " << $1 << endl ;}
 ;
 DeclarationList  :
 /* Empty Rule */ {$$ = new Node("DeclarationList", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| DeclarationList Declaration STMTEND{$$ = $1; $$->incrementCount($2);}
+$$->Add("");}		| DeclarationList Declaration STMTEND{$$ = $1; $$->incrementCount($2);
+$$->instr_list = mergeInstructions($$->instr_list, $2->instr_list);
+}
 
 ;
 Declaration  :
@@ -969,9 +976,8 @@ if (($3->children).size() == 5) {
 }
 string * name = getCharFromString($3->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
-$$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
+$$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($3->instr_list, $5->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
-
 }
 ;
 GeneratorDeclaration  :
@@ -1194,7 +1200,7 @@ $$ = $3;
 
 ;
 StatementList  : // TODO  : this is also beginning of a scope, unhandled
-Statement{$$ = new Node("Statement", new BasicType("NOTYPE")); $$->Add($1);}
+Statement{$$ = $1;}
 		| StatementList STMTEND Statement{
 $$ = $1;
 $$->incrementCount($3);
@@ -1222,12 +1228,14 @@ $$->instr_list.push_back(generateLabelInstruction($1->content));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 string s = "label";
 s = s + to_string(clock());
-label_map[$1->content] = s;
-if(instr_map.count($1->content)){
-    string * branch = getCharFromString($1->content);
-    instr_map[$1->content]->setV1(branch);
-    instr_map.erase($1->content);
+goto_label_map[$1->content] = s;
+if($3->matched == "ForStatement"){
+    break_label_map[$1->content] = $3->tmp;
+    cont_label_map[$1->content] = $3->content;
 }
+backPatch(goto_map, $1->content);
+backPatch(break_map, $1->content);
+backPatch(cont_map, $1->content);
 }
 
 | FALLTHROUGH{$$ = new Node("NonDeclarationStatement", new BasicType("FallThrough"));
@@ -1238,8 +1246,8 @@ $$->Add($1);
 $$->Add($2);
 if($2->count  == 1){
     Instruction * instr = generateUnconditionalGoto(curr);
-    if(!label_map.count($2->content))
-        instr_map[$2->content] = instr;
+    if(!break_label_map.count($2->content))
+        break_map[$2->content] = instr;
     else {
         *((string*)instr->getV1()) = $2->content;
     }
@@ -1252,8 +1260,8 @@ $$->Add($1);
 $$->Add($2);
 if($2->count  == 1){
     Instruction * instr = generateUnconditionalGoto(curr);
-    if(!label_map.count($2->content))
-        instr_map[$2->content] = instr;
+    if(!cont_label_map.count($2->content))
+        cont_map[$2->content] = instr;
     else {
         *((string*)instr->getV1()) = $2->content;
     }
@@ -1263,15 +1271,13 @@ if($2->count  == 1){
 | GOTO NewName{$$ = new Node("NonDeclarationStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-if($2->count  == 1){
     Instruction * instr = generateUnconditionalGoto(curr);
-    if(!label_map.count($2->content))
-        instr_map[$2->content] = instr;
+    if(!goto_label_map.count($2->content))
+        goto_map[$2->content] = instr;
     else {
         *((string*)instr->getV1()) = $2->content;
     }
     $$->instr_list.push_back(instr);
-}
 }
 | RETURN { setRValueMode(true, curr); } OExpressionList{
 setRValueMode(false, curr);
@@ -1343,8 +1349,7 @@ $$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->get
 
 ;
 LoopBody  :
-CompoundStatement {cout << "yolo" << endl; $$ = new Node("LoopBody", new BasicType("NOTYPE"), $1->count);
-$$->Add($1);$$->instr_list = $1->instr_list;}
+CompoundStatement {$$ = $1; $$->printInstructionList();}
 
 ;
 IfHeader  :
@@ -1353,7 +1358,7 @@ $$->Add($1);
 $$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateGotoInstruction($1, curr));
 $$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
-cout << "Yolo" << endl;
+$$->tmp = $$->getType()->GetRepresentation();
 }
 | OSimpleStatement STMTEND OSimpleStatement{$$ = new Node("IfHeader", new BasicType("label"));
 $$->Add($1);
@@ -1370,6 +1375,8 @@ FOR ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->instr_list = $2->instr_list;
+$$->tmp = $2->tmp;
+$$->content = $2->content;
 }
 
 ;
@@ -1378,8 +1385,10 @@ ForHeader LoopBody{$$ = new Node("ForBody", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 if(($1->matched == "ForHeader")){
-    string s1 = "label" + to_string(clock());
-    string s2 = "label" + to_string(clock());
+    string s1 = "forlabel" + to_string(clock());
+    string s2 = "forlabel" + to_string(clock());
+    $$->tmp = s2;
+    $$->content = s1;
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
     $$->instr_list.push_back(generateLabelInstruction(s1));
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[1]->instr_list);
@@ -1394,8 +1403,9 @@ if(($1->matched == "ForHeader")){
     string s1 = "label" + to_string(clock());
     string s2 = "label" + to_string(clock());
     $$->instr_list.push_back(generateLabelInstruction(s1));
-    $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
-    $$->instr_list.push_back(generateGotoInstruction($1->children[0],s2  ,curr, false));
+    $$->instr_list = mergeInstructions($$->instr_list, $1->instr_list);
+    $$->instr_list.push_back(generateGotoInstruction($1,s2  ,curr, false));
+    $$->instr_list.push_back(generateLabelInstruction(*((string*)$1->instr_list[$1->instr_list.size() - 1]->getV1())));
     $$->instr_list = mergeInstructions($$->instr_list,$2->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
@@ -1448,11 +1458,23 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($5);
 $$->Add($6);
+$$->instr_list = $2->instr_list;
+vector<string> caseblock_label_list;
+for(int i=0; i<$5->count; ++i){
+    string s = "label" + to_string(clock());
+    $$->instr_list = mergeInstructions($$->instr_list, $5->children[i+1]->children[0]->instr_list); // check the i+1
+    $$->instr_list.push_back(generateEqualityInstruction($2, $5->children[i+1]->children[0]));
+    $5->children[i+1]->children[0]->tmp = *((string*)$$->instr_list[$$->instr_list.size()-1].getV1()) ;
+    $$->instr_list.push_back($5->children[i+1]->children[0], s, curr);
+    caseblock_label_list.push_back(s);
+}
 }
 ;
 CaseBlockList  :
 /* Empty Rule */ {$$ = new Node("CaseBlockList", new BasicType("NOTYPE"), 0);
-$$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);}
+$$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);
+$$->instr_list = mergeInstructions($$->instr_list, $2->instr_list);
+}
 
 ;
 CaseBlock  :
@@ -1469,29 +1491,38 @@ $$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($3);
 $$->Add($3);
+for(int i=0; i<$2->count;++i){
+    $$->instr_list=mergeInstructions($$->instr_list, $2->children[i]->instr_list);
+$$->tmp = *((string *)$$->instr_list[$$->instr_list.size() - 1]->getV1());
+}
 }
 		| CASE ExpressionOrTypeList ASSGN_OP Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"assgn_op" << " " << $3<< " " <<"Expression"<< " " <<"colon" << " " << $5 << endl ;}
+$$->Add($5);
+cout << "Unimplemented" << endl;
+exit(1);
+}
 		| CASE ExpressionOrTypeList DECL Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"case" << " " << $1<< " " <<"ExpressionOrTypeList"<< " " <<"decl" << " " << $3<< " " <<"Expression"<< " " <<"colon" << " " << $5 << endl ;}
-		| DEFAULT COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
+$$->Add($5);
+cout << "Unimplemented" << endl;
+exit(1);
+}
+		| DEFAULT COLON{$$ = new Node("Default", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"default" << " " << $1<< " " <<"colon" << " " << $2 << endl ;}
+$$->Add($2);
+}
 
 ;
 ExpressionOrTypeList  :
-ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3);}
-		| ExpressionOrType{$$ = new Node("ExpressionOrTypeList", new BasicType("NOTYPE"));
-$$->Add($1);}
-
+ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3); $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);}
+		| ExpressionOrType{$$ = $1;}
 ;
 InterfaceDeclaration  :
 NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));

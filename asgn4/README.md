@@ -8,3 +8,5 @@ Unimplemented features :
 6. testing of instructions generated from backpatching : Abhibhav
 7. handling switch case [Prannay] : priority *one*
 8. Complete lifting and print instructions : Prannay + Milind
+9. Functions before declaration
+10. Error handling priority **0.5**
