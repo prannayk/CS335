@@ -980,27 +980,42 @@ $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
 ;
 GeneratorDeclaration  :
-GEN OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
-$$->Add($1);
-$$->Add($2);
-$$->Add($3);
-$$->Add($4);cout <<"gen" << " " << $1<< " " <<"OGenericTypeList"<< " " <<"FunctionHeader"<< " " <<"FunctionBody" << endl ;
+GEN OGenericTypeList { ST::paramPush = true;
+ST* t = new ST(curr->depth + 1, curr);
+curr->addChild(t);
+curr = t;
+cout << "Done" << endl;
+} 
+FunctionHeader {
 
-if (($3->children).size() == 5) {
-  vector<Type*> paramTypes = createParamList($3->children[2]);
-  FuncType* t = new FuncType($3->children[4]->getType(), paramTypes, true);
-  ST::funcDefs[($3->children[0])->matched] = t;
+vector<Type*> paramTypes = createParamList($4->children[2]);
+vector<string> paramNames = createNameList($4->children[2]);
+populateSTTypeList(paramNames, paramTypes, curr);
+if (($4->children).size() == 5) {
+  FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
+  ST::funcDefs[($4->children[0])->matched] = t;
+  cout << "Adding generator " << ($4->children[0])->matched << endl;
+
 } else {
   // Throw error!
-  cout << "Warning: unexpected function declaration.";
+  cout << "Warning: unexpected generator declaration.";
+  exit(1);
 }
-string * name = getCharFromString($3->children[0]->matched);
+ST::paramPush = false;
+
+}
+FunctionBody{$$ = new Node("GeneratorDeclaration", new BasicType("NOTYPE"), $2->count, $4->flag);
+$$->Add($1);
+$$->Add($2);
+$$->Add($4);
+$$->Add($6);
+string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
-$$->instr_list = mergeInstructions($2->instr_list, $3->instr_list);
+$$->instr_list = mergeInstructions($2->instr_list, $4->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
-
 ;
+
 FunctionHeader  :
 ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
