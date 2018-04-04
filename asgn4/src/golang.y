@@ -944,11 +944,15 @@ $$->Add($1);$$->setType(new BasicType("bool")); $$->content = $1;$$->tmp = $1;}
 
 ;
 FunctionDeclaration  :
-FUNC OGenericTypeList FunctionHeader FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
+FUNC OGenericTypeList FunctionHeader 
+{
+    // add code for scoping 
+}
+FunctionBody{$$ = new Node("FunctionDeclaration", new BasicType("NOTYPE"), $2->count, $3->flag);
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);
+$$->Add($5);
 // TODO: move this stuff out into a midrule after function header
 // This will make recursive functions a Thing
 
