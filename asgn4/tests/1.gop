@@ -2,10 +2,14 @@
 
 package main
 
-func main(ix, int y, int z) {
+func main(ix, int y, int z) int {
 	var t,i,z int
     var array [5] int
     array[0] = array[10]
+    var k,v int
+    for k,v = range array {
+        t++
+    }
     var x,y int = -5,6
     labelyo:    for i<100 {
 	    for t <= 100 {
@@ -16,26 +20,6 @@ func main(ix, int y, int z) {
                     var x int
                     x = 1
                  } 
-func printf() {
-
+        }
 }
-
-func main() int {
-    var i int = 6
-    for ;i<= 8 && i>= 6 && i!= 7; i++ {
-        if i>=0 {
-            printf()
-        }        else {
-            printf()
-        }
-    }
-    switch t {
-        case 1 : {x++}
-        case 1 : {
-            fallthrough
-        }
-        case 1 : {x++}
-    }
-    var x int
-    return 0
 }

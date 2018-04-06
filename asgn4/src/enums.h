@@ -50,6 +50,7 @@ enum OpCode
     LNOT,
     INC_OP,
     DEC_OP,
+    COPY_OP,
     // Unary control flow/special operations
     GOTO_OP = 250,
     CALL,

@@ -387,17 +387,16 @@ generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
     }
     instr = new Instruction(
       IELEM,
-      target,
-      arg2,
       arg1,
+      arg2,
+      target,
       n1->addrMode,
       n2->addrMode,
       source->addrMode,
       n1->getType(),
       n2->getType(),
-      source->getType()); // target is the base address, arg2 is offset (not
-                          // multiplied by size of base type), and arg1 is STE
-                          // of temporary (source)
+      source->getType()); // target is the temporary, arg2 is offset (not
+                          // multiplied by size of base type), and 3rd input STE of array (should be translated to base address)
     return instr;
 }
 
