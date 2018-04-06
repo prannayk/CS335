@@ -104,8 +104,8 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
                                 target->children[i]->getType(),
                                 source->children[i]->getType());
         i_list.push_back(instr);
-        if(source->children[i]->matched == "ArrayAccess"){
-            i_list.push_back(source->children[i]->patchInstruction);
+        if(!target->children[i]->matched.compare("ArrayAccess")){
+            i_list.push_back(target->children[i]->patchInstruction);
         }
     }
     return i_list;
@@ -278,6 +278,7 @@ fixNodeForExpression(Node* ptr, ST* curr)
         else
             ptr->setType(new BasicType("NOTYPE"));
         ptr->addrMode = REGISTER;
+        ptr->tmp = ptr->content;
     } else if (ptr->matched == "Literal") {
         ptr->addrMode = CONSTANT_VAL;
     } else if (ptr->matched == "Expression") {

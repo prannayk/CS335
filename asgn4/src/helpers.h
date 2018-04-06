@@ -86,8 +86,10 @@ extern void
 setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);
-extern vector<Instruction*>
+extern Instruction*
 generateInstructionReadArray(Node*, Node*, Node*, ST*);
+extern Instruction*
+generateInstructionWriteArray(Node*, Node*, Node*, ST*);
 extern void 
 checkListType(vector<Type*> source, Node * target);
 extern void

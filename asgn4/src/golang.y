@@ -884,7 +884,7 @@ if($2->count != 0) {
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"square_open" << " " << $1<< " " <<"OExpression"<< " " <<"square_close" << " " << $3<< " " <<"TypeName" << endl ;}
+$$->Add($4);}
 		| SQUARE_OPEN VARIADIC SQUARE_CLOSE TypeName{$$ = new Node("OtherType", new ArrayType($4->getType(), 0, true));
 $$->Add($1);
 $$->Add($2);
@@ -1172,6 +1172,8 @@ $$->Add($2);
 $$->Add($4);
 $$->instr_list = mergeInstructions($1->instr_list, $4->instr_list);
 $$->instr_list = mergeInstructions($$->instr_list, generateInstructionsAssignment($1, $4, curr));
+// random line
+int ijk = 0;
 }
 | ExpressionList DECL { setRValueMode(true, curr); } ExpressionList{
     setRValueMode(false, curr);
