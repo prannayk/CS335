@@ -39,8 +39,9 @@ enum OpCode
     // Memory/vector ops
     GETADDR = 150,
     FOLLOWPTR,
-    EELEM, // Read Element
-    IELEM, // Insert Element
+    EELEM,
+    IELEM,
+    ADDRASSIGN,
 
     // Unary math/bit operations
     NOT = 200,
@@ -65,7 +66,6 @@ enum OpCode
     PRINTINT = 400,
     // null instruction as default
     NULL_IST = 1000,
-
 };
 
 enum AddressingMode

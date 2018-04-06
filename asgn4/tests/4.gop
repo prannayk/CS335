@@ -1,100 +1,11 @@
-// structs and interfaces
-// Note the syntax change
+// recursion.c
 
 package main
 
-import "fmt"
-
-// This `person` struct type has `name` and `age` fields.
-type person struct {
-    name string
-    age  int
+func fibonnaci() int {
 }
 
-func main() {
-
-    // This syntax creates a new
-    fmt.Println(person [| "Bob", 20 |])
-
-     // // You can name the fields when initializing a struct.
-     fmt.Println(person[|name: "Alice", age: 30|])
-
-     // // Omitted fields will be zero-valued.
-     fmt.Println(person [|name: "Fred"|])
-
-     // // An `&` prefix yields a pointer to the struct.
-     fmt.Println(&person[|name: "Ann", age: 40|])
-
-     // // Access struct fields with a dot.
-     s := person[|name: "Sean", age: 50|]
-     fmt.Println(s.name)
-
-     // // You can also use dots with struct pointers - the
-     // // pointers are automatically dereferenced.
-     sp := &s
-     fmt.Println(sp.age)
-
-     // // Structs are mutable.
-     sp.age = 51
-     fmt.Println(sp.age)
-}
-
-
-type	Iputs	interface {
-	puts	(s string) string
-}
-
-// ---------
-
-type	Print	struct {
-	whoami	int
-	put	Iputs
-}
-
-func (p *Print) dop() string {
-	r := " print " + string(p.whoami + '0')
-	return r + p.put.puts("abc")
-}
-
-// ---------
-
-type	Bio	struct {
-	whoami	int
-	put	Iputs
-}
-
-func (b *Bio) puts(s string) string {
-	r := " bio " + string(b.whoami + '0')
-	return r + b.put.puts(s)
-}
-
-// ---------
-
-type	File	struct {
-	whoami	int
-	put	Iputs
-}
-
-func (f *File) puts(s string) string {
-	return " file " + string(f.whoami + '0') + " -- " + s
-}
-
-func main() {
-	p := new(Print)
-	b := new(Bio)
-	f := new(File)
-
-	p.whoami = 1
-	p.put = b
-
-	b.whoami = 2
-	b.put = f
-
-	f.whoami = 3
-
-	r := p.dop()
-	expected := " print 1 bio 2 file 3 -- abc"
-	if r != expected {
-		panic(r + " != " + expected)
-	}
+func x() int {
+var y = fibonnaci() + fibonnaci()
+return y
 }

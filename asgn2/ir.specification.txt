@@ -113,6 +113,9 @@ Instructions, Opcodes and Usage for POGOIR
 'followptr' Instruction (followptr)
 	%t1 = followptr %a1
 
+'addrassign' Instruction (addrassign)
+        %t1 = addrassign %a1 (this is basically *t1 = a1)
+
 ==== Unary Operators
 
 'negate' Instruction (neg)

@@ -383,7 +383,7 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($4);
 inferListType($1, $4); // : Add symbol table entry creation here
-populateST($1, $1, curr);
+populateSTInfer($1, curr);
 $$->instr_list = mergeInstructions($4->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
 | DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
@@ -775,7 +775,8 @@ $$->Add($3);
 
 ;
 PrimaryExprNoParen  :
-Name{$$ = $1;
+Name {
+$$ = $1;
 $$->addrMode = REGISTER;
 }
 | Literal{
@@ -859,11 +860,12 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4); // TODO : figure out what this does
 }
-		| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
-		| GeneratorLiteral{$$ = $1;}
-		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall
+| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
+| GeneratorLiteral{$$ = $1;}
+| PseudoCall {
+  $$ = $1;
+} // TODO: handle type checking of pseudocall
             // get type of function return type here
-
 ;
 NonExpressionType  :
 FunctionType{$$ = $1;}
@@ -1722,9 +1724,10 @@ if(!curr->checkEntryFunc($1->content)) {
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
 if($$->type_child.size())  cout << "Error : expecting " << $$->type_child.size()  <<" arguments, 0 provided!"<<endl;
-$$->setType(((FuncType*)$$->getType())->GetReturnType());
 vector<Node*> emptyVector;
 generateCall($$, $1, emptyVector, curr);
+// TODO: below statement seems to be uneeded.
+/* $$->setType(((FuncType*)$$->getType())->GetReturnType()); */
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
