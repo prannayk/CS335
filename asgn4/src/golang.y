@@ -811,7 +811,7 @@ $$->Add($5);cout <<"Warning : Unimplemented runtime feature being used!" << endl
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4); // TODO : handle array access
+$$->Add($4); 
 if(curr->rValueMode){
     $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr));
 } else {
