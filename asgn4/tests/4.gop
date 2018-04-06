@@ -1,0 +1,11 @@
+// recursion.c
+
+package main
+
+func fibonnaci() int {
+}
+
+func x() int {
+var y = fibonnaci() + fibonnaci()
+return y
+}

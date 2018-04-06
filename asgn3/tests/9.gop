@@ -1,0 +1,11 @@
+// typecasting
+
+package main
+
+func main(x int, y int) func(int, int) float {
+     // Unnamed type casting
+      y = struct{} :: (x)
+      z = struct { A int } :: (k)
+      // Named types
+      y = int(z)
+}

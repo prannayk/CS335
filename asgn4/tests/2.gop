@@ -1,0 +1,13 @@
+// func.go
+
+package main
+
+func foo() {
+    var i int = 1
+}
+
+func main() int {
+    foo()
+    return 0
+}
+

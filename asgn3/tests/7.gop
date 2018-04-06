@@ -1,0 +1,11 @@
+// literals
+
+package main
+
+import "fmt"
+
+func main() {
+     y = func(int, int) int {
+       return 4
+     }
+}

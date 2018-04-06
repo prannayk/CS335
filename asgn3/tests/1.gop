@@ -1,0 +1,126 @@
+// loops
+
+package main
+
+func main() {
+	var t,i int
+
+	for i=0; i<100; i=i+1 {
+		t = t+i
+	}
+        for ;i<100; {
+	}
+        for i<100 {
+	}
+        for i:=1; i<100; {
+	}
+        for ; i<100; i++ {
+	}
+	if t != 50*99  {
+           panic(t)
+        }
+}
+
+const size = 16
+
+var a [size]byte
+var p []byte
+
+func f(k int) byte {
+	return byte(k * 10007 % size)
+}
+
+func init() {
+	p = make([]byte, size)
+	for k := 0; k < size; k++ {
+		v := f(k)
+		a[k] = v
+		p[k] = v
+		m[k] = v
+	}
+}
+
+func main() {
+	var i int
+
+	i = 0
+	for k := range a {
+		v := a[k]
+		if v != f(k) {
+			println("key array range", k, v, a[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key array size", i)
+		panic("fail")
+	}
+
+	i = 0
+	for k := range p {
+		v := p[k]
+		if v != f(k) {
+			println("key pointer range", k, v, p[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key pointer size", i)
+		panic("fail")
+	}
+
+	i = 0
+	for k := range m {
+		v := m[k]
+		if v != f(k) {
+			println("key map range", k, v, m[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key map size", i)
+		panic("fail")
+	}
+
+	i = 0
+	for k, v := range a {
+		if v != f(k) {
+			println("key:value array range", k, v, a[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key:value array size", i)
+		panic("fail")
+	}
+
+	i = 0
+	for k, v := range p {
+		if v != f(k) {
+			println("key:value pointer range", k, v, p[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key:value pointer size", i)
+		panic("fail")
+	}
+
+	i = 0
+	for k, v := range m {
+		if v != f(k) {
+			println("key:value map range", k, v, m[k])
+			panic("fail")
+		}
+		i++
+	}
+	if i != size {
+		println("key:value map size", i)
+		panic("fail")
+	}
+}

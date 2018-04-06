@@ -1,0 +1,29 @@
+// label
+
+package main
+
+func main() {
+	i := 0
+	if false {
+		goto gogoloop
+	}
+	if false {
+		goto gogoloop
+	}
+	if false {
+		goto gogoloop
+	}
+	goto gogoloop
+
+	// backward declared
+loop:
+	i = i + 1
+	if i < 100 {
+		goto loop
+	}
+	return
+
+gogoloop:
+	goto loop
+}
+

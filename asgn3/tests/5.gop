@@ -1,0 +1,36 @@
+// generics
+
+package main
+
+import "fmt"
+
+type Reader interface {
+     read(IOStruct) string
+}
+
+type Writer interface {
+     write(IOStruct, string)
+}
+
+type IOStruct struct {
+     ImportedThing
+     IN int
+     OUT int
+}
+
+func<T: Reader $ K> doStuff(m T) K {
+        T.read(A, "do")
+        return new(K)
+}
+
+type SuperStruct struct<T: Reader, Writer $ K: Reader $ M: Reader, Writer> {
+     A int
+     B string
+     C T
+     D K
+     E M
+}
+
+func<T> (m *SuperStruct) kStuff(T a) SuperStruct {
+        return m;
+}
