@@ -39,8 +39,8 @@ enum OpCode
     // Memory/vector ops
     GETADDR = 150,
     FOLLOWPTR,
-    EELEM,
-    IELEM,
+    EELEM, // Read Element
+    IELEM, // Insert Element
 
     // Unary math/bit operations
     NOT = 200,

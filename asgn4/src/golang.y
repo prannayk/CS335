@@ -807,12 +807,16 @@ $$->Add($3);
 $$->Add($4);
 $$->Add($5);cout <<"Warning : Unimplemented runtime feature being used!" << endl;
 }
-		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("ArrayAccess", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4); // TODO : handle array access
-generateInstructionReadArray($$, $1, $3, curr);
+if(curr->rValueMode){
+    $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr));
+} else {
+    $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr);
+}
 }
 | PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
 $$->Add($1);
@@ -1554,7 +1558,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-cout << "Unimplemented" << endl;
+semanticError("Unimplemented");
 exit(1);
 }
 		| CASE ExpressionOrTypeList DECL Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
