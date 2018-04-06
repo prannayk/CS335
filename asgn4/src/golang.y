@@ -719,14 +719,14 @@ if (isRValueMode(curr)) {
   $$->instr_list = $2->instr_list;
   $$->instr_list.push_back(generateUnaryInstruction(FOLLOWPTR, $2, curr));
   $$->tmp = getTemp($$);
-  $$->addrMode = REGISTER;
   // Make sure that $2 is a pointer type
   // Or... just assume that it is so!
   PointerType* t = (PointerType*) $2->getType();
   $$->setType(t->GetUnderlyingType());
 } else {
-  syntaxError("Non RValue for mem op unsupported");
+    $$->matched = "PointerWrite";
 }
+  $$->addrMode = REGISTER;
 }
 		| AMPERSAND UnaryExpr{
 $$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
@@ -834,9 +834,9 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4); 
 if(curr->rValueMode){
-    $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr));
+    /* $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr)); */
 } else {
-    $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr);
+    /* $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr); */
 }
 }
 | PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices

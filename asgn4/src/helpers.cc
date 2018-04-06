@@ -96,16 +96,29 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
     for (int i = 0; i < target->children.size(); ++i) {
         void* arg1 = correctPointer(target->children[i], curr);
         void* arg2 = correctPointer(source->children[i], curr);
-        
-        instr = new Instruction(ASG,
-                                arg1,
-                                arg2,
-                                target->children[i]->addrMode,
-                                source->children[i]->addrMode,
-                                target->children[i]->getType(),
-                                source->children[i]->getType());
+
+        if (target->children[i]->matched == "PointerWrite") {
+            instr = new Instruction(
+              ADDRASSIGN,
+              // If this is the case, then the expression must be of the
+              // form *x, so this gives us the STE related to "x".
+              curr->table[target->children[i]->children[1]->content],
+              arg2,
+              target->children[i]->addrMode,
+              source->children[i]->addrMode,
+              target->children[i]->getType(),
+              source->children[i]->getType());
+        } else {
+            instr = new Instruction(ASG,
+                                    arg1,
+                                    arg2,
+                                    target->children[i]->addrMode,
+                                    source->children[i]->addrMode,
+                                    target->children[i]->getType(),
+                                    source->children[i]->getType());
+        }
         i_list.push_back(instr);
-        if(!target->children[i]->matched.compare("ArrayAccess")){
+        if (!target->children[i]->matched.compare("ArrayAccess")) {
             i_list.push_back(target->children[i]->patchInstruction);
         }
     }
@@ -313,68 +326,78 @@ copyInstruction(vector<Instruction*> i_list, int offset)
         if ((offset++) >= i_list.size())
             break;
     }
+    return new_list;
 }
 
+// extern Instruction*
+// generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
+// {
+//     // TODO : set tmp with temporary variable
+//     // TODO : create redundant instruction in patchInstruction
+//     // TODO : convert back patching to multi map
+//     n1 = fixNodeForExpression(n1, curr);
+//     n2 = fixNodeForExpression(n2, curr);
+//     string s = "temp" + to_string(clock());
+//     string* str = new string;
+//     *str = s;
+//     void* arg1 = correctPointer(n1, curr);
+//     if (arg1 != NULL) {
+//         if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
+//             semanticError("Non-Array Type indexed in operation");
+//         }
+//     }
+//     void* arg2 = correctPointer(n2, curr);
+//     Instruction* instr;
+//     source->addrMode = REGISTER;
+//     if (*(n2->getType()) != *(new BasicType("int"))) {
+//         semanticError("Can not index array with non integer type");
+//     }
+//     instr = new Instruction(EELEM,
+//                             str,
+//                             arg1,
+//                             arg2,
+//                             source->addrMode,
+//                             n1->addrMode,
+//                             n2->addrMode,
+//                             source->getType(),
+//                             n1->getType(),
+//                             n2->getType());
+//     source->tmp = s;
+//     return instr;
+// }
+
 extern Instruction*
-generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
+generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
 {
-    // TODO : set tmp with temporary variable
-    // TODO : create redundant instruction in patchInstruction
-    // TODO : convert back patching to multi map
-    n1 = fixNodeForExpression(n1, curr);
-    n2 = fixNodeForExpression(n2, curr);
-    string s = "temp" + to_string(clock());
-    string * str = new string;
-    *str = s;
-    void * arg1 = correctPointer(n1, curr);
-    if(arg1 != NULL){
-        if (((STEntry* )arg1)->getType()->GetTypeClass() != 4 ){
-            semanticError("Non-Array Type indexed in operation");
-        }
-    }
-    void * arg2 = correctPointer(n2, curr);
-    Instruction* instr;
-    source->addrMode = REGISTER;
-    if(*(n2->getType()) != *(new BasicType("int"))) {
-        semanticError("Can not index array with non integer type");
-    }
-    instr = new Instruction(EELEM, 
-                            str, arg1, arg2,
-                            source->addrMode,
-                            n1->addrMode, 
-                            n2->addrMode, 
-                            source->getType(),
-                            n1->getType(),
-                            n2->getType());
-    source->tmp = s ;
-    return instr;
-}
-
-extern Instruction*
-generateInstructionWriteArray(Node * source, Node* n1, Node* n2, ST* curr){
     n1 = fixNodeForExpression(n1, curr);
     n2 = fixNodeForExpression(n2, curr);
     Instruction* instr;
     string temp = "temp" + to_string(clock());
-    source -> tmp = temp;
-    void* arg1 = correctPointer(source,curr);
+    source->tmp = temp;
+    void* arg1 = correctPointer(source, curr);
     void* target = correctPointer(n1, curr);
-    if(((STEntry*)target)->getType()->GetTypeClass() != 4){
+    if (((STEntry*)target)->getType()->GetTypeClass() != 4) {
         semanticError("Invalid operation for non-array type");
     }
     void* arg2 = correctPointer(n2, curr);
     source->addrMode = REGISTER;
     source->setType(((ArrayType*)n1->getType())->GetArrayType());
-    if(*n2->getType() != *(new BasicType("int"))){
+    if (*n2->getType() != *(new BasicType("int"))) {
         semanticError("Can not index array with a non integer type");
     }
-    instr = new Instruction(IELEM, target, arg2, arg1, 
-                                        n1->addrMode, 
-                                        n2->addrMode, 
-                                        source->addrMode,
-                                        n1->getType(), 
-                                        n2->getType(),
-                                        source->getType()); // target is the base address, arg2 is offset (not multiplied by size of base type), and arg1 is STE of temporary (source)
+    instr = new Instruction(
+      IELEM,
+      target,
+      arg2,
+      arg1,
+      n1->addrMode,
+      n2->addrMode,
+      source->addrMode,
+      n1->getType(),
+      n2->getType(),
+      source->getType()); // target is the base address, arg2 is offset (not
+                          // multiplied by size of base type), and arg1 is STE
+                          // of temporary (source)
     return instr;
 }
 
@@ -841,4 +864,3 @@ semanticError(string aMessage)
 {
     reportError(aMessage, "\033[1;93mWarning: \033[0m");
 }
-
