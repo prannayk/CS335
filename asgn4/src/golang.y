@@ -1468,6 +1468,40 @@ if(($1->matched == "ForHeader")){
     $$->instr_list.push_back(generateLabelInstruction(s2));
 } else if ($1->matched == "RangeStatement"){
     // TODO : handle range expression Milind
+    string s1 = "forlabel" + to_string(clock());
+    string s2 = "forlabel" + to_string(clock());
+    $$->tmp = s2;
+    $$->content = s1;
+    if($1->count == 0){
+        void* arg1 = correctPointer($1, curr);
+        long * ptr = new long;
+        *ptr = 0;
+        $$->instr_list.push_back(new Instruction(ASG, arg1, ptr,
+                                                    REGISTER, CONSTANT_VAL,
+                                                    $1->getType(), 
+                                                    new BasicType("int")));
+        $$->instr_list.push_back(generateLabelInstruction(s1));
+        long *ptr2 = new long; *ptr2 = 1;
+        $1->tmp = "temp" + to_string(clock());
+        curr->addEntry($1->tmp, new BasicType("bool"), false);
+        void* arg2 = curr->getVar($1->tmp);
+        $$->instr_list.push_back(new Instruction(LT_OP, arg2, arg1, ptr2,
+                                                    REGISTER, 
+                                                    REGISTER, 
+                                                    CONSTANT_VAL,
+                                                    new BasicType("bool"), $1->getType(),
+                                                    new BasicType("long")
+                                                    ));
+        $$->instr_list.push_back(generateGotoInstruction($1,s2  ,curr, false));
+        $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
+        $$->instr_list.push_back(new Instruction(ADD_OPER, arg1, arg1, ptr,
+                                                REGISTER, REGISTER, CONSTANT_VAL, 
+                                                $1->getType(), $1->getType(),
+                                                new BasicType("int")));
+        $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
+        $$->instr_list.push_back(generateLabelInstruction(s2));
+
+    }
 } else {
     string s1 = "label" + to_string(clock());
     string s2 = "label" + to_string(clock());
@@ -1513,9 +1547,13 @@ $$->Add($5);
 }
 | RANGE { setRValueMode(true, curr); } Expression {
 setRValueMode(false, curr);
-$$ = new Node("RangeStatement", new BasicType("NOTYPE"), 0);
+$$ = new Node("RangeStatement", new BasicType("int"), 0);
 $$->Add($1);
 $$->Add($3);
+string temp = "temp" + to_string(clock());
+curr->addEntry(temp, $$->getType(), false);
+$$->tmp = temp;
+
 }
 ;
 SwitchStatement  :
