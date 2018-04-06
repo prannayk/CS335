@@ -288,6 +288,7 @@ $$->Add($3);
 }
 
 ;
+
 Imports  :
 /* Empty Rule */ {$$ = new Node("Imports", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| Imports Import STMTEND{$$ = new Node("Imports", new BasicType("NOTYPE"), $1->count + 1);
@@ -383,7 +384,7 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($4);
 inferListType($1, $4); // : Add symbol table entry creation here
-populateST($1, $1, curr);
+populateSTInfer($1, curr);
 $$->instr_list = mergeInstructions($4->instr_list, generateInstructionsAssignment($1, $4, curr));
 }
 | DeclarationNameList TypeName{$$ = new Node("VarDeclaration", new BasicType("NOTYPE"));
@@ -440,7 +441,7 @@ ID{$$ = new Node("Declaration Name", new BasicType("NOTYPE")); $$->tmp = $1; $$-
 
 ;
 PointerType  :
-STAR TypeName{$$ = new Node("PointerType", new BasicType($2->getType()->GetRepresentation(), false, true));
+STAR TypeName{$$ = new Node("PointerType", new PointerType($2->getType()));
 $$->Add($1);
 $$->Add($2);}
 
@@ -503,7 +504,7 @@ if ($4->getType() != new BasicType("NOTYPE"))
 		| STAR Embed OLiteral{$$ = new Node("StructDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->setType(new BasicType($2->getType()->GetRepresentation(), false, true));
+$$->setType(new PointerType($2->getType()));
 if ($3->getType() != new BasicType("NOTYPE"))
     $$->content = $3->content;
 }
@@ -513,7 +514,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->setType(new BasicType($3->getType()->GetRepresentation(), false, true));
+$$->setType(new PointerType($3->getType()));
 if ($5->getType() != new BasicType("NOTYPE"))
     $$->content = $5->content;
 }
@@ -523,7 +524,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-$$->setType(new BasicType($3->getType()->GetRepresentation(), false, true));
+$$->setType(new PointerType($3->getType()));
 if ($5->getType() != new BasicType("NOTYPE"))
     $$->content = $5->content;
 }
@@ -710,14 +711,33 @@ $$->Add("");}		| Expression{$$ = $1;}
 
 ;
 UnaryExpr  :
-STAR UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
+STAR UnaryExpr{
+$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->instr_list = $2->instr_list; // TODO : handle memory operation
+if (isRValueMode(curr)) {
+  $$->instr_list = $2->instr_list;
+  $$->instr_list.push_back(generateUnaryInstruction(FOLLOWPTR, $2, curr));
+  $$->tmp = getTemp($$);
+  $$->addrMode = REGISTER;
+  // Make sure that $2 is a pointer type
+  // Or... just assume that it is so!
+  PointerType* t = (PointerType*) $2->getType();
+  $$->setType(t->GetUnderlyingType());
+} else {
+  syntaxError("Non RValue for mem op unsupported");
 }
-		| AMPERSAND UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
+}
+		| AMPERSAND UnaryExpr{
+$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"ampersand" << " " << $1<< " " <<"UnaryExpr" << endl ;}
+$$->Add($2);
+$$->instr_list = $2->instr_list;
+$$->instr_list.push_back(generateUnaryInstruction(GETADDR, $2, curr));
+$$->tmp = getTemp($$);
+$$->addrMode = REGISTER;
+$$->setType(new PointerType($2->getType()));
+}
 		| ADD UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -775,7 +795,8 @@ $$->Add($3);
 
 ;
 PrimaryExprNoParen  :
-Name{$$ = $1;
+Name {
+$$ = $1;
 $$->addrMode = REGISTER;
 }
 | Literal{
@@ -859,17 +880,18 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4); // TODO : figure out what this does
 }
-		| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
-		| GeneratorLiteral{$$ = $1;}
-		| PseudoCall{$$ = $1;} // TODO: handle type checking of pseudocall
+| FunctionLiteral{$$ = $1;} // TODO : handle function calls, do type checking for function call
+| GeneratorLiteral{$$ = $1;}
+| PseudoCall {
+  $$ = $1;
+} // TODO: handle type checking of pseudocall
             // get type of function return type here
-
 ;
 NonExpressionType  :
 FunctionType{$$ = $1;}
 		| GeneratorType{$$ = $1;}
 		| OtherType{$$ = $1;}
-		| STAR NonExpressionType{$$ = new Node("NonExpressionType", new BasicType($2->getType()->GetRepresentation(),false, true));
+		| STAR NonExpressionType{$$ = new Node("NonExpressionType", new PointerType($2->getType()));
 $$->Add($1);
 $$->Add($2);}
 
@@ -1724,9 +1746,10 @@ if(!curr->checkEntryFunc($1->content)) {
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
 if($$->type_child.size())  cout << "Error : expecting " << $$->type_child.size()  <<" arguments, 0 provided!"<<endl;
-$$->setType(((FuncType*)$$->getType())->GetReturnType());
 vector<Node*> emptyVector;
 generateCall($$, $1, emptyVector, curr);
+// TODO: below statement seems to be uneeded.
+/* $$->setType(((FuncType*)$$->getType())->GetReturnType()); */
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);

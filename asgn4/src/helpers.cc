@@ -52,23 +52,25 @@ correctPointer(Node* ptr, ST* curr)
     return arg1;
 }
 
-extern void 
-backPatch(map<string, Instruction*> instr_map, string s){
+extern void
+backPatch(map<string, Instruction*> instr_map, string s)
+{
     string* str = new string;
     *str = s;
-    while(instr_map.count(s)){
+    while (instr_map.count(s)) {
         instr_map[s]->setV1(str);
         instr_map.erase(s);
     }
 }
 
-extern Instruction* 
-generateEqualityInstruction(Node * target, Node * source, ST* curr, string s){
+extern Instruction*
+generateEqualityInstruction(Node* target, Node* source, ST* curr, string s)
+{
     target = fixNodeForExpression(target, curr);
     source = fixNodeForExpression(source, curr);
-    string * str = new string;
-    * str = s;
-    Instruction * instr;
+    string* str = new string;
+    *str = s;
+    Instruction* instr;
     void* arg1 = correctPointer(target, curr);
     void* arg2 = correctPointer(source, curr);
     instr = new Instruction(GOTOEQ,
@@ -80,8 +82,7 @@ generateEqualityInstruction(Node * target, Node * source, ST* curr, string s){
                             target->addrMode,
                             new BasicType("switchstmt"),
                             source->getType(),
-                            target->getType()
-            );
+                            target->getType());
     return instr;
 }
 
@@ -144,15 +145,16 @@ createParamList(Node* list)
 }
 
 extern vector<string>
-createNameList(Node* list) {
-  vector<string> names;
-  if (list->children.size() == 0) {
+createNameList(Node* list)
+{
+    vector<string> names;
+    if (list->children.size() == 0) {
+        return names;
+    }
+    for (int i = 0; i < list->count; i++) {
+        names.push_back(list->children[i]->content);
+    }
     return names;
-  }
-  for (int i = 0; i < list->count; i++) {
-      names.push_back(list->children[i]->content);
-  }
-  return names;
 }
 
 extern void
@@ -208,16 +210,19 @@ populateSTInfer(Node* declNameList, ST* curr)
 }
 
 extern void
-populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr) {
-  if (names.size() != types.size()) {
-      cout << "Type List and Name List mismatch" << endl;
-      exit(1);
-  }
-  vector<string>::iterator itn;
-  vector<Type*>::iterator itt;
-  for (itn = names.begin(), itt = types.begin(); (itn != names.end()) && (itt != types.end()); itn++, itt++) {
-    curr->addEntry(*itn, *itt, false);
-  }
+populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr)
+{
+    if (names.size() != types.size()) {
+        cout << "Type List and Name List mismatch" << endl;
+        exit(1);
+    }
+    vector<string>::iterator itn;
+    vector<Type*>::iterator itt;
+    for (itn = names.begin(), itt = types.begin();
+         (itn != names.end()) && (itt != types.end());
+         itn++, itt++) {
+        curr->addEntry(*itn, *itt, false);
+    }
 }
 
 extern vector<string>
@@ -283,18 +288,30 @@ fixNodeForExpression(Node* ptr, ST* curr)
         ptr->addrMode = CONSTANT_VAL;
     } else if (ptr->matched == "Expression") {
         // TODO: implement this @Prannay
+        // TODO : I do not see the problem @Milindl
+        // TODO: My bad sorry @Prannay
+        ptr->tmp = ptr->matched;
+    } else if (ptr->matched == "PseudoCall") {
+        if (curr->getVar(ptr->content) != NULL) {
+            ptr->setType(curr->getVar(ptr->content)->type);
+        } else {
+            ptr->setType(new BasicType("NOTYPE"));
+            ptr->addrMode = REGISTER;
+        }
     } else {
         ptr->tmp = ptr->matched;
     }
     return ptr;
 }
 
-extern vector<Instruction*> 
-copyInstruction(vector<Instruction*> i_list, int offset ){
+extern vector<Instruction*>
+copyInstruction(vector<Instruction*> i_list, int offset)
+{
     vector<Instruction*> new_list;
-    for(auto elem : i_list ){
+    for (auto elem : i_list) {
         new_list.push_back(elem);
-        if((offset++) >= i_list.size()) break;
+        if ((offset++) >= i_list.size())
+            break;
     }
 }
 
@@ -582,7 +599,7 @@ extern Instruction*
 generateUnconditionalGoto(string label, ST* curr)
 {
     string s = label;
-    string* branch = getCharFromString(label) ;
+    string* branch = getCharFromString(label);
     Instruction* instr;
     instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
     return instr;
@@ -759,8 +776,7 @@ generateFunctionEnder(Node* source, Node* retVal, ST* curr, OpCode op)
         }
         source->instr_list.push_back(
           new Instruction(op, s, REGISTER, getScopeReturnType(curr)));
-    } else if (retVal->count == 1 &&
-               retVal->children[0]->matched == "Expression") {
+    } else if (retVal->count == 1 && (retVal->matched == "Expression")) {
         string tmp = getTemp(retVal->children[0]);
         STEntry* s;
         if (curr->checkEntry(tmp)) {

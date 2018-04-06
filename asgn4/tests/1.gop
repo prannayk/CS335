@@ -16,6 +16,17 @@ func main(ix, int y, int z) {
                     var x int
                     x = 1
                  } 
+func printf() {
+
+}
+
+func main() int {
+    var i int = 6
+    for ;i<= 8 && i>= 6 && i!= 7; i++ {
+        if i>=0 {
+            printf()
+        }        else {
+            printf()
         }
     }
     switch t {
@@ -26,11 +37,5 @@ func main(ix, int y, int z) {
         case 1 : {x++}
     }
     var x int
+    return 0
 }
-func dhish(m int){
-    var n int
-main(1,n+1,m+1)
-var m int
-m = 5*(m+m)
-}
-
