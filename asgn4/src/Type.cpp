@@ -48,7 +48,7 @@ BasicType::BasicType(string aName)
   : Type()
   , name(aName)
   , variadic(false)
-  , pointer(false)
+// , pointer(false)
 {
     this->representation = aName;
     this->type = 1;
@@ -58,20 +58,9 @@ BasicType::BasicType(string aName, bool flag)
   : Type()
   , name(aName)
   , variadic(flag)
-  , pointer(false)
+// , pointer(false)
 {
     this->representation = aName;
-    this->type = 1;
-}
-
-BasicType::BasicType(string aName, bool aFlag, bool aPointer)
-  : Type()
-  , name(aName)
-  , variadic(aFlag)
-  , pointer(aPointer)
-{
-    string star = "*";
-    this->representation = star + aName;
     this->type = 1;
 }
 
@@ -223,4 +212,16 @@ Type*
 ArrayType::GetArrayType() const
 {
     return this->arrayType;
+}
+
+PointerType::PointerType(Type* aUnderlyingType)
+{
+    this->underlyingType = aUnderlyingType;
+    this->representation = "*" + this->underlyingType->GetRepresentation();
+}
+
+Type*
+PointerType::GetUnderlyingType() const
+{
+    return this->underlyingType;
 }

@@ -14,6 +14,7 @@ class Type
   protected:
     string representation;
     int type;
+
   public:
     Type();
     string GetRepresentation() const;
@@ -29,11 +30,10 @@ class BasicType : public Type
 
   public:
     bool variadic;
-    bool pointer;
     string GetName() const;
     BasicType(string aName);
     BasicType(string aName, bool flag);
-    BasicType(string aName, bool flag, bool pointer);
+    /* BasicType(string aName, bool flag, bool pointer); */
 };
 
 class FuncType : public Type
@@ -59,10 +59,14 @@ class StructDefinitionType : public Type
     string name;
 
     map<string, Type*> GetFields() const;
-    string Hoist(string aStructVariableName, string aFieldName, string aSuffix) const;
+    string Hoist(string aStructVariableName,
+                 string aFieldName,
+                 string aSuffix) const;
     Type* GetTypeFor(string aFieldName);
     StructDefinitionType(string aName, map<string, Type*> aFields);
-    StructDefinitionType(string aName, vector<string> fieldNames, vector<Type*> fieldTypes);
+    StructDefinitionType(string aName,
+                         vector<string> fieldNames,
+                         vector<Type*> fieldTypes);
 };
 
 class CompoundType : public Type
@@ -87,4 +91,14 @@ class ArrayType : public Type
     Type* GetArrayType() const;
     ArrayType(Type* aArrayType, int aSize);
     ArrayType(Type* aArrayType, int aSize, bool flag);
+};
+
+class PointerType : public Type
+{
+  private:
+    Type* underlyingType;
+
+  public:
+    Type* GetUnderlyingType() const;
+    PointerType(Type* aUnderlyingType);
 };
