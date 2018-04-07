@@ -92,9 +92,8 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
 
 map<string, StructDefinitionType*> ST::structDefs;
 map<string, FuncType*> ST::funcDefs;
-vector<STEntry* > ST::paramEntryStack;
+vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
-
 
 ST::ST(int aDepth, ST* aParent)
 {
@@ -318,19 +317,43 @@ Instruction::Instruction(OpCode aOp)
     v1Type = new BasicType("NOTYPE");
 }
 
+string
+castAsPerType(const void* op, AddressingMode a)
+{
+    if (a == REGISTER) {
+        return ((STEntry*)op)->getName();
+    }
+    if (a == CONSTANT_VAL) {
+        return to_string(*(long*)op);
+    }
+    if (a == STRING) {
+        return *(string*)op;
+    }
+
+    return "Unprintable type";
+}
+
 void
 Instruction::printInstruction()
 {
-    // cout << op << " " << v1AddMode << " " << v1Type->GetRepresentation();
-    string op1 =
-      v1AddMode == REGISTER ? ((STEntry*)v1)->getName() : to_string(*(long*)v1);
-    string op2 =
-      v2AddMode == REGISTER ? ((STEntry*)v2)->getName() : to_string(*(long*)v2);
-    string op3 =
-      v3AddMode == REGISTER ? ((STEntry*)v3)->getName() : to_string(*(long*)v3);
-    cout << op << " " << op1 << "(" << v1Type->GetRepresentation() << ") "
-         << op2 << "(" << v2Type->GetRepresentation() << ") " << op3 << "("
-         << v3Type->GetRepresentation() << ")" << endl;
+
+    if (op == FUNC_ST) {
+        cout << "Starting function: ";
+    } else if (op == FUNC_ET) {
+        cout << "Ending function";
+    } else {
+        cout << op << " ";
+    }
+    if (v1 != nullptr) {
+        cout << castAsPerType(v1, v1AddMode) + " ";
+    }
+    if (v2 != nullptr) {
+        cout << castAsPerType(v2, v2AddMode) << " ";
+    }
+    if (v3 != nullptr) {
+        cout << castAsPerType(v3, v3AddMode) << " ";
+    }
+    cout << endl;
 }
 
 bool
@@ -352,8 +375,10 @@ ST::getFunc(string a)
     return nullptr;
 }
 
-void 
-Node::printInstructionList(){
-    // print here
-    int a = 3 + 5;
+void
+Node::printInstructionList()
+{
+    for (auto i : this->instr_list) {
+        i->printInstruction();
+    }
 }

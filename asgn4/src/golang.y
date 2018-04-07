@@ -258,14 +258,10 @@ ST* curr = root;
 %type		<nt>		PseudoCall
 %%
 StartSymbol  :
-             SourceFile{$$ = new Node("StartSymbol", new BasicType("NOTYPE"));
-$$->Add($1);$$->PrintJS();cout <<"SourceFile" << endl ;
-cout << "Printing instructions" << endl;
-for (auto i: instructionList) {
-    i->printInstruction();
-    cout << endl;
-  }
-
+SourceFile{
+$$ = new Node("StartSymbol", new BasicType("NOTYPE"));
+$$->Add($1);
+$$->PrintJS();
 }
 
 ;
@@ -982,8 +978,7 @@ FunctionDeclaration  :
 ST* t = new ST(curr->depth + 1, curr);
 curr->addChild(t);
 curr = t;
-cout << "Done" << endl;
-} 
+}
 FunctionHeader {
 
 vector<Type*> paramTypes = createParamList($4->children[2]);
@@ -992,7 +987,6 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
   ST::funcDefs[($4->children[0])->matched] = t;
-  cout << "Adding function " << ($4->children[0])->matched << endl;
 } else {
   // Throw error!
   cout << "Warning: unexpected function declaration.";
@@ -1007,7 +1001,7 @@ $$->Add($2);
 $$->Add($4);
 $$->Add($6);
 string * name = getCharFromString($4->children[0]->matched);
-$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
+$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
@@ -1017,8 +1011,7 @@ GeneratorDeclaration  :
 ST* t = new ST(curr->depth + 1, curr);
 curr->addChild(t);
 curr = t;
-cout << "Done" << endl;
-} 
+}
 FunctionHeader {
 
 vector<Type*> paramTypes = createParamList($4->children[2]);
@@ -1027,8 +1020,6 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   ST::funcDefs[($4->children[0])->matched] = t;
-  cout << "Adding generator " << ($4->children[0])->matched << endl;
-
 } else {
   // Throw error!
   cout << "Warning: unexpected generator declaration.";
@@ -1043,7 +1034,7 @@ $$->Add($2);
 $$->Add($4);
 $$->Add($6);
 string * name = getCharFromString($4->children[0]->matched);
-$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, CONSTANT_VAL, new BasicType("function_name")));
+$$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $4->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
 }
@@ -1357,7 +1348,7 @@ IfStatement  :
 ST* t = new ST(curr->depth + 1, curr);
 curr->addChild(t);
 curr = t;
-cout << "Done" << endl; } 
+}
 IfHeader {ST::paramPush = false;} 
 LoopBody ElseIfList Else{$$ = new Node("IfStatement", new BasicType("NOTYPE"), $5->count);
 $$->Add($5);
@@ -1388,7 +1379,7 @@ ElseIf  :
 ST* t = new ST(curr->depth + 1, curr);
 curr->addChild(t);
 curr = t;
-cout << "Done" << endl; } 
+}
 IfHeader {ST::paramPush = false;} LoopBody{$$ = new Node("ElseIf", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -1932,9 +1923,6 @@ int main(int argc, char** argv) {
     do {
         yyparse();
     } while (!feof(yyin));
-    cout << "Printing ST" << endl;
-    cout << "Number of functions declared :  " << (ST::funcDefs.size()) << endl;
-    cout << "fin" << endl;
     return 0;
 }
 
