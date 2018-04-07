@@ -10,9 +10,7 @@ BIN=bin
 
 all: pogo
 
-
 setup:
-	mkdir -p $(BIN)
 
 clean:
 	rm -r bin
@@ -23,16 +21,21 @@ parser-pure:
 	cd $(SRC); \
 	python3 ankit_bhardwaj.py > golang.y
 
-parser parser-defines: $(SRC)/golang.y
+$(SRC)/golang.tab.c: $(SRC)/golang.y
 	cd $(SRC); \
 	bison $(BISON_FLAGS) golang.y -v
 
-lexer: parser-defines $(SRC)/golang.l
+$(SRC)/golang.yy.c: $(SRC)/golang.l $(SRC)/golang.tab.c
 	cd $(SRC); \
 	flex -o golang.yy.c golang.l
 
-pogo: lexer parser setup
+$(BIN)/parser: $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/*.cpp $(SRC)/*.h $(SRC)/*.cc
 	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(SRC)/Type.cpp $(FLAGS) -o $(BIN)/parser
+
+$(BIN):
+	mkdir -p $(BIN)
+
+pogo: $(BIN) $(BIN)/parser
 
 test: pogo
 	for number in {1..10} ; do \
@@ -45,6 +48,6 @@ render:
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop;  \
 	$(BIN)/parser /tmp/1.gop 1> /dev/null 2> $(SRC)/display/data$(FNUM).js;
 
-render_one: 
+render_one:
 	./prepare.sh $(TESTS)/$(FNUM).gop /tmp/1.gop; \
 	$(BIN)/parser /tmp/1.gop 2> $(SRC)/display/flare.js;
