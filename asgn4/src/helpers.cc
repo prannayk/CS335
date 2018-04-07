@@ -853,7 +853,16 @@ syntaxError(string aMessage)
 }
 
 extern void
-semanticError(string aMessage)
+semanticError(string aMessage, bool aCrash)
 {
     reportError(aMessage, "\033[1;93mWarning: \033[0m");
+    if (aCrash) {
+        exit(1);
+    }
+}
+
+extern void
+semanticError(string aMessage)
+{
+    semanticError(aMessage, false);
 }
