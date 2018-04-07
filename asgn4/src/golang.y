@@ -194,7 +194,6 @@ ST* curr = root;
 %type		<nt>		NonExpressionType
 %type		<nt>		OtherType
 %type		<nt>		NewName
-%type		<nt>		DeclName
 %type		<nt>		ONewName
 %type		<nt>		Name
 %type		<nt>		ExpressionList
@@ -286,37 +285,43 @@ $$->Add($3);
 ;
 
 Imports  :
-/* Empty Rule */ {$$ = new Node("Imports", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("Imports", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| Imports Import STMTEND{$$ = new Node("Imports", new BasicType("NOTYPE"), $1->count + 1);
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Imports"<< " " <<"Import"<< " " <<"stmtend" << " " << $3 << endl ;}
+$$->Add($3)
+;}
 
 ;
 Import  :
 IMPORT ImportStatement{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"import" << " " << $1<< " " <<"ImportStatement" << endl ;}
+$$->Add($2);
+}
 		| IMPORT PAREN_OPEN ImportStatementList Ostmtend PAREN_CLOSE{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"import" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"ImportStatementList"<< " " <<"Ostmtend"<< " " <<"paren_close" << " " << $5 << endl ;}
+$$->Add($5);
+}
 		| IMPORT PAREN_OPEN PAREN_CLOSE{$$ = new Node("Import", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"import" << " " << $1<< " " <<"paren_open" << " " << $2<< " " <<"paren_close" << " " << $3 << endl ;}
+$$->Add($3);
+}
 
 ;
 ImportStatement  :
 Literal{$$ = $1;}
 		| ID Literal{$$ = new Node("ImportStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"id" << " " << $1<< " " <<"Literal" << endl ;}
+$$->Add($2);
+}
 		| DOT Literal{$$ = new Node("ImportStatement", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"dot" << " " << $1<< " " <<"Literal" << endl ;}
+$$->Add($2);
+}
 
 ;
 ImportStatementList  :
@@ -325,13 +330,14 @@ ImportStatement{$$ = new Node("ImportStatement", new BasicType("NOTYPE")); $$->A
 
 ;
 Ostmtend  :
-/* Empty Rule */ {$$ = new Node("Ostmtend", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("Ostmtend", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| STMTEND{$$ = new Node("Ostmtend", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"stmtend" << " " << $1 << endl ;}
+$$->Add($1);
+}
 
 ;
 DeclarationList  :
-/* Empty Rule */ {$$ = new Node("DeclarationList", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("DeclarationList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| DeclarationList Declaration STMTEND{$$ = $1; $$->incrementCount($2);
 $$->instr_list = mergeInstructions($$->instr_list, $2->instr_list);
 }
@@ -569,12 +575,14 @@ ConstDeclaration{$$ = new Node("Constant Declaration", new BasicType("NOTYPE"));
 TypeDeclaration  :
 TypeDeclarationName TypeName{$$ = new Node("TypeDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"TypeDeclarationName"<< " " <<"TypeName" << endl ;}
+$$->Add($2);
+}
 
 ;
 TypeDeclarationName  :
 ID{$$ = new Node("TypeDeclarationName", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"id" << " " << $1 << endl ;}
+$$->Add($1);
+}
 
 ;
 TypeDeclarationList  :
@@ -702,7 +710,7 @@ genInstructionBinWrapper(LT_OP, $$, $1, $3, curr);
 
 ;
 OExpression  :
-/* Empty Rule */ {$$ = new Node("OExpression", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("OExpression", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| Expression{$$ = $1;}
 
 ;
@@ -822,13 +830,14 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"Warning : Unimplemented runtime feature being used!" << endl;
+$$->Add($5);
+semanticError("Unimplemented runtime feature being used!");
 }
 		| PrimaryExpr SQUARE_OPEN Expression SQUARE_CLOSE{$$ = new Node("ArrayAccess", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4); 
+$$->Add($4);
 if(curr->rValueMode){
     /* $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr)); */
 } else {
@@ -851,7 +860,8 @@ $$->Add($4);
 $$->Add($5);
 $$->Add($6);
 $$->Add($7);
-$$->Add($8);cout <<"PrimaryExpr"<< " " <<"square_open" << " " << $2<< " " <<"OExpression"<< " " <<"colon" << " " << $4<< " " <<"OExpression"<< " " <<"colon" << " " << $6<< " " <<"OExpression"<< " " <<"square_close" << " " << $8 << endl ;}
+$$->Add($8);
+}
 		| ConvType AS PAREN_OPEN Expression OComma PAREN_CLOSE{
 $$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$ = $1;
@@ -917,17 +927,13 @@ NewName  :
 ID{$$ = new Node("NewName", new BasicType("NOTYPE")); $$->Add($1); $$->content = $1;}
 
 ;
-DeclName  :
-ID{$$ = $1;}
-
-;
 ONewName  :
-/* Empty Rule */ {$$ = new Node("Empty New Name", new BasicType("NOTYPE"), 0); $$->Add("");}
+%empty {$$ = new Node("Empty New Name", new BasicType("NOTYPE"), 0); $$->Add("");}
 | NewName{$$ = $1;}
 
 ;
 Name  :
-ID %prec NotParen{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));
+ID {$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->setType(new BasicType($1));
 $$->content = $1;
 }
 
@@ -947,12 +953,12 @@ $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 
 ;
 OExpressionList  :
-/* Empty Rule */ {$$ = new Node("Empty Expression List", new BasicType("NOTYPE"), 0);}
+%empty {$$ = new Node("Empty Expression List", new BasicType("NOTYPE"), 0);}
     | ExpressionList{$$ = $1;}
 
 ;
 OLiteral  :
-/* Empty Rule */ {$$ = new Node("Empty Literal", new BasicType("NOTYPE"), 0);}
+%empty {$$ = new Node("Empty Literal", new BasicType("NOTYPE"), 0);}
 | Literal{$$ = $1; $$->setType($1->getType());}
 
 ;
@@ -989,8 +995,7 @@ if (($4->children).size() == 5) {
   ST::funcDefs[($4->children[0])->matched] = t;
 } else {
   // Throw error!
-  cout << "Warning: unexpected function declaration.";
-  exit(1);
+  semanticError("Unexpected function declaration.", true);
 }
 ST::paramPush = false;
 
@@ -1022,8 +1027,7 @@ if (($4->children).size() == 5) {
   ST::funcDefs[($4->children[0])->matched] = t;
 } else {
   // Throw error!
-  cout << "Warning: unexpected generator declaration.";
-  exit(1);
+    semanticError("Unexpected generator declaration.", true);
 }
 ST::paramPush = false;
 
@@ -1063,12 +1067,16 @@ setScopeReturnType($8->getType(), curr);
 }
 ;
 ConvType  :
-FunctionType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"FunctionType" << endl ;}
+FunctionType{
+$$ = new Node("ConvType", new BasicType("NOTYPE"));
+$$->Add($1);
+}
 		| GeneratorType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"GeneratorType" << endl ;}
+$$->Add($1);
+}
 		| OtherType{$$ = new Node("ConvType", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"OtherType" << endl ;}
+$$->Add($1);
+}
 
 ;
 CompType  :
@@ -1101,7 +1109,7 @@ $$->setType(new FuncType($6->getType(), paramTypes, true));
 
 ;
 FunctionResult  :
-/* Empty Rule */ {$$ = new Node("FunctionResult", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("FunctionResult", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| FunctionReturnType{$$ = $1;}
 		| PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE{$$ = new Node("FunctionResult", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -1147,12 +1155,14 @@ $$->Add($1);
 $$->Add($2);$$->content = $1; }
 		| ID VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
 $$->Add($1);
-$$->Add($2);cout <<"id" << " " << $1<< " " <<"variadic" << " " << $2 << endl ;}
+$$->Add($2);
+}
 		| VARIADIC TypeName{$$ = new Node("ArgumentType", $2->getType(), 1, true); $$->count = 2;
 $$->Add($1);
-$$->Add($2);cout <<"variadic" << " " << $1<< " " <<"TypeName" << endl ;}
+$$->Add($2);
+}
 		| VARIADIC{$$ = new Node("ArgumentType", new BasicType("NOTYPE"), 1, true); $$->count = 2;
-$$->Add($1);cout <<"variadic" << " " << $1 << endl ; // TODO: handle this, since it opens possibility of no types being defined for the entire list
+$$->Add($1); // TODO: handle this, since it opens possibility of no types being defined for the entire list
 }
 
 ;
@@ -1171,7 +1181,7 @@ $$->Add(",");
 }
 ;
 OSimpleStatement  :
-/* Empty Rule */ {$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("OSimpleStatement", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| SimpleStatement{$$ = $1;}
 
 ;
@@ -1251,7 +1261,7 @@ if($3->flag)    $$->flag = $3->flag;
 
 ;
 Statement  :
-/* Empty Rule */ {$$ = new Node("Statement", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("Statement", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| CompoundStatement{$$ = $1;}
 		| CommonDeclaration{$$ = $1;}
 		| NonDeclarationStatement{$$ = $1;}
@@ -1388,12 +1398,12 @@ $$->Add($6);}
 
 ;
 ElseIfList  :
-/* Empty Rule */ {$$ = new Node("Empty ElseIfList", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("Empty ElseIfList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| ElseIfList ElseIf{$$ = $1 ; $$->incrementCount($2);}
 
 ;
 Else  :
-/* Empty Rule */ {$$ = new Node("Else", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("Else", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| ELSE CompoundStatement{$$ = new Node("Else", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
@@ -1430,7 +1440,7 @@ FOR {ST::paramPush = true; ST::paramEntryStack.empty();
     ST* t = new ST(curr->depth + 1, curr);
     curr->addChild(t);
     curr = t;
-cout << "done" << endl; } 
+}
 ForBody{$$ = new Node("ForStatement", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($3);
@@ -1514,7 +1524,8 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"OSimpleStatement"<< " " <<"stmtend" << " " << $2<< " " <<"OSimpleStatement"<< " " <<"stmtend" << " " << $4<< " " <<"OSimpleStatement" << endl ;}
+$$->Add($5);
+}
 		| OSimpleStatement{$$ = $1;}
 		| RangeStatement{$$ = $1;}
 
@@ -1581,7 +1592,7 @@ $$->instr_list.push_back(generateLabelInstruction(caseblock_label_list[caseblock
 }
 ;
 CaseBlockList  :
-/* Empty Rule */ {$$ = new Node("CaseBlockList", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("CaseBlockList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| CaseBlockList CaseBlock{$$ = $1; $$->incrementCount($2);
 $$->instr_list = mergeInstructions($$->instr_list, $2->instr_list);
 }
@@ -1611,8 +1622,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-semanticError("Unimplemented");
-exit(1);
+ semanticError("Unimplemented", true);
 }
 		| CASE ExpressionOrTypeList DECL Expression COLON{$$ = new Node("Case", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -1620,8 +1630,7 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
-cout << "Unimplemented" << endl;
-exit(1);
+semanticError("Unimplemented", true);
 }
 		| DEFAULT COLON{$$ = new Node("Default", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -1639,13 +1648,17 @@ ExpressionOrTypeList COMMA ExpressionOrType{$$ = $1 ; $$->incrementCount($3); $$
 InterfaceDeclaration  :
 NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
-$$->Add($2);cout <<"NewName"<< " " <<"InterfaceDecl" << endl ;}
-		| PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
+$$->Add($2);
+}
+	| PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"paren_open" << " " << $1<< " " <<"PackName"<< " " <<"paren_close" << " " << $3 << endl ;}
+$$->Add($3);
+}
 		| PackName{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"PackName" << endl ;}
+$$->Add($1);
+}
+
 
 ;
 InterfaceDecl  :
@@ -1653,7 +1666,8 @@ PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{$$ = new Node("Int
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
-$$->Add($4);cout <<"paren_open" << " " << $1<< " " <<"OArgumentTypeListOComma"<< " " <<"paren_close" << " " << $3<< " " <<"FunctionResult" << endl ;}
+$$->Add($4);
+}
 
 ;
 InterfaceDeclarationList  :
@@ -1668,11 +1682,13 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-$$->Add($5);cout <<"interface" << " " << $1<< " " <<"block_open" << " " << $2<< " " <<"InterfaceDeclarationList"<< " " <<"Ostmtend"<< " " <<"block_close" << " " << $5 << endl ;}
+$$->Add($5);
+}
 		| INTERFACE BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("InterfaceType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"interface" << " " << $1<< " " <<"block_open" << " " << $2<< " " <<"block_close" << " " << $3 << endl ;}
+$$->Add($3);
+}
 
 ;
 FunctionLiteral  :
@@ -1703,37 +1719,40 @@ KeyVal  :
 Expression COLON CompLiteralExpression{$$ = new Node("KeyVal", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Expression"<< " " <<"colon" << " " << $2<< " " <<"CompLiteralExpression" << endl ;}
-
+$$->Add($3);
+}
 ;
 KeyValList  :
 KeyVal{$$ = new Node("KeyVal declaration", new BasicType("NOTYPE")); $$->Add($1);}
-		| BareCompLiteralExpression{$$ = new Node("KeyValList", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"BareCompLiteralExpression" << endl ;}
+	| BareCompLiteralExpression{$$ = new Node("KeyValList", new BasicType("NOTYPE"));
+$$->Add($1);
+}
 		| KeyValList COMMA KeyVal{$$ = $1; $$->incrementCount($3);}
 		| KeyValList COMMA BareCompLiteralExpression{$$ = $1; $$->incrementCount($3);}
 
 ;
 BareCompLiteralExpression  :
 Expression{$$ = new Node("BareCompLiteralExpression", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"Expression" << endl ;}
+$$->Add($1);
+}
 		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("BareCompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"block_open" << " " << $1<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $3 << endl ;}
-
+$$->Add($3);
+}
 ;
 CompLiteralExpression  :
 Expression{$$ = new Node("CompLiteralExpression", new BasicType("NOTYPE"));
-$$->Add($1);cout <<"Expression" << endl ;}
+$$->Add($1);
+}
 		| BLOCK_OPEN BracedKeyValList BLOCK_CLOSE{$$ = new Node("CompLiteralExpression", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"block_open" << " " << $1<< " " <<"BracedKeyValList"<< " " <<"block_close" << " " << $3 << endl ;}
-
+$$->Add($3);
+}
 ;
 BracedKeyValList  :
-/* Empty Rule */ {$$ = new Node("BracedKeyValList", new BasicType("NOTYPE"), 0);
+%empty {$$ = new Node("BracedKeyValList", new BasicType("NOTYPE"), 0);
 $$->Add("");}		| KeyValList OComma{$$ = $1;}
 
 ;
@@ -1747,8 +1766,8 @@ Name{$$ = $1;}
 		| Name COLON TypeNameList{$$ = new Node("GenericType", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"Name"<< " " <<"colon" << " " << $2<< " " <<"TypeNameList" << endl ;}
-
+$$->Add($3);
+}
 ;
 GenericTypeList  :
 GenericType{$$ = new Node("GenericTypeList", new BasicType("NOTYPE")); $$->Add($1);}
@@ -1759,8 +1778,9 @@ OGenericTypeList  :
 LT GenericTypeList GT{$$ = new Node("OGenericTypeList", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
 $$->Add($2);
-$$->Add($3);cout <<"lt" << " " << $1<< " " <<"GenericTypeList"<< " " <<"gt" << " " << $3 << endl ;}
-		| /* Empty Rule */ {$$ = new Node("Empty GenericTypeList", new BasicType("NOTYPE"), 0);}
+$$->Add($3);
+}
+		| %empty {$$ = new Node("Empty GenericTypeList", new BasicType("NOTYPE"), 0);}
 ;
 PseudoCall  :
 PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), 0);
@@ -1770,11 +1790,12 @@ $$->Add($3);
 if(!curr->checkEntryFunc($1->content)) {
   $$->setType(curr->getFunc($1->content));
 } else {
-  cout << "Error: cannot find function " << $1->content << endl;
-  exit(1);
+  semanticError("Cannot find function " + $1->content, true);
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-if($$->type_child.size())  cout << "Error : expecting " << $$->type_child.size()  <<" arguments, 0 provided!"<<endl;
+ if($$->type_child.size())  {
+     semanticError("Unxpected " + to_string($$->type_child.size()) + " arguments, 0 needed!");
+  }
 vector<Node*> emptyVector;
 generateCall($$, $1, emptyVector, curr);
 // TODO: below statement seems to be uneeded.
@@ -1789,8 +1810,7 @@ $$->Add($5);
 if(!curr->checkEntryFunc($1->content)) {
   $$->setType(curr->getFunc($1->content));
 } else {
-  cout << "Error: cannot find function " << $1->content << endl;
-  exit(1);
+  semanticError("Error: cannot find function " + $1->content, true);
 }
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
 if($3->count != $$->type_child.size()) {
@@ -1808,19 +1828,19 @@ $$->Add($6);
 if(!curr->checkEntryFunc($1->content)) {
   $$->setType(curr->getFunc($1->content));
 } else {
-  cout << "Error: cannot find function " << $1->content << endl;
+  semanticError("Error: cannot find function " + $1->content, true);
   exit(1);
 }
 
 $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
 
 if($$->type_child[$$->type_child.size() - 1]->GetTypeClass() != 1) {
-    cout << "Variadic only work with basic types" << endl ; // TODO : extend this to compound types, struct types etc
+    semanticError("Variadic only work with basic types") ; // TODO : extend this to compound types, struct types etc
   }
 
 if((($3->count + 1) != $$->type_child.size())
 || ((BasicType*)($$->type_child[$$->type_child.size() - 1]))->variadic)   {
-    cout<<"Error invalid function call, unknown number of types" << endl;
+    semanticError("Invalid function call, unknown number of types");
   }
 };
 

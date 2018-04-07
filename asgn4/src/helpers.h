@@ -109,6 +109,7 @@ generateEqualityInstruction(Node * target, Node * source, ST* curr, string s);
 extern vector<string> createNameList(Node* list);
 extern void syntaxError(string aMessage);
 extern void semanticError(string aMessage);
+extern void semanticError(string aMessage, bool aCrash);
 
 extern vector<Instruction*> 
 copyInstruction(vector<Instruction*> i_list, int offset );
