@@ -194,8 +194,6 @@ populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
-        cout << declNameList->children[i]->children[0]->matched << " : "
-             << TypeName->type << endl;
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        TypeName->type,
                        constant);
@@ -213,9 +211,6 @@ populateSTInfer(Node* declNameList, ST* curr)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
-        cout << "infer : ";
-        cout << declNameList->children[i]->children[0]->matched << " : "
-             << declNameList->children[i]->getType() << endl;
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        declNameList->children[i]->getType(),
                        false);
@@ -547,7 +542,6 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
     i_list = mergeInstructions(i_list, n1->instr_list);
     i_list = mergeInstructions(i_list, n2->instr_list);
     i_list.push_back(instr);
-    // i_list[0]->printInstruction();
     return i_list;
 }
 
