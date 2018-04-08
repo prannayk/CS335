@@ -7,13 +7,10 @@ func main(ix, int y, int z) int {
     var array [5] int
     array[0] = array[10]
     var k,v int
-    for k,v = range array {
-        t++
-    }
     var x,y int = -5,6
     labelyo:    for i<100 {
 	    for t <= 100 {
-            for (z == 0) { 
+            for z == 0 { 
                 goto labelyo 
                 } 
                 for t==0 {

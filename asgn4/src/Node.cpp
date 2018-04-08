@@ -338,14 +338,17 @@ Instruction::printInstruction()
 {
 
     if (op == FUNC_ST) {
-        cout << "Starting function: ";
+        cout << "Starting function: " << endl;
+            return;
     } else if (op == FUNC_ET) {
-        cout << "Ending function";
+        cout << "Ending function" << endl;
+        return;
     } else {
         cout << op << " ";
     }
     if (v1 != nullptr) {
         cout << castAsPerType(v1, v1AddMode) + " ";
+        if(op == LABEL_ST || op == GOTO_OP) { cout << endl;  return;}
     }
     if (v2 != nullptr) {
         cout << castAsPerType(v2, v2AddMode) << " ";
@@ -379,6 +382,7 @@ void
 Node::printInstructionList()
 {
     for (auto i : this->instr_list) {
-        i->printInstruction();
+        if(i!=NULL)
+            i->printInstruction();
     }
 }
