@@ -6,6 +6,7 @@ func fibonnaci() int {
 }
 
 func x() int {
-var y = fibonnaci() + fibonnaci()
+var y int;
+y = fibonnaci()
 return y
 }
