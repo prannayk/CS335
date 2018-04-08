@@ -77,7 +77,7 @@ generateEqualityInstruction(Node* target, Node* source, ST* curr, string s)
                             str,
                             arg1,
                             arg2,
-                            CONSTANT_VAL,
+                            STRING,
                             source->addrMode,
                             target->addrMode,
                             new BasicType("switchstmt"),
@@ -391,7 +391,8 @@ generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
       n1->getType(),
       n2->getType(),
       source->getType()); // target is the temporary, arg2 is offset (not
-                          // multiplied by size of base type), and 3rd input STE of array (should be translated to base address)
+                          // multiplied by size of base type), and 3rd input STE
+                          // of array (should be translated to base address)
     return instr;
 }
 
@@ -469,11 +470,12 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
     Instruction* instr;
     // TODOmilindl: Change codegen to switch it around as well, since it is more
     // uniform this way, to have it with the STE before the function name.
+    string* nm = &(fn->content);
     instr = new Instruction(CALL,
                             arg3,
-                            (char*)fn->content.c_str(),
+                            nm,
                             REGISTER,
-                            CONSTANT_VAL,
+                            STRING,
                             fn->getType(),
                             new BasicType(fn->content));
     i_list.push_back(instr);
@@ -575,7 +577,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
                             (void*)branch,
                             (void*)arg1,
                             (void*)i,
-                            CONSTANT_VAL,
+                            STRING,
                             REGISTER,
                             CONSTANT_VAL,
                             new BasicType(label),
@@ -602,7 +604,7 @@ generateGotoInstruction(Node* n1, ST* curr)
                             (void*)branch,
                             (void*)arg1,
                             (void*)i,
-                            CONSTANT_VAL,
+                            STRING,
                             REGISTER,
                             CONSTANT_VAL,
                             new BasicType(s),
@@ -617,7 +619,7 @@ generateUnconditionalGoto(string label, ST* curr)
     string s = label;
     string* branch = getCharFromString(label);
     Instruction* instr;
-    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
+    instr = new Instruction(GOTO_OP, branch, STRING, new BasicType(s));
     return instr;
 }
 extern Instruction*
@@ -627,7 +629,7 @@ generateUnconditionalGoto(ST* curr)
     s = s + to_string(clock());
     string* branch = getCharFromString(s);
     Instruction* instr;
-    instr = new Instruction(GOTO_OP, branch, CONSTANT_VAL, new BasicType(s));
+    instr = new Instruction(GOTO_OP, branch, STRING, new BasicType(s));
     return instr;
 }
 
@@ -699,7 +701,7 @@ generateLabelInstruction(string s)
 {
     string* str = new string;
     *str = s;
-    return new Instruction(LABEL_ST, str, CONSTANT_VAL, new BasicType(s));
+    return new Instruction(LABEL_ST, str, STRING, new BasicType(s));
 }
 
 extern void
