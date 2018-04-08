@@ -1502,6 +1502,85 @@ if(($1->matched == "ForHeader")){
         $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
         $$->instr_list.push_back(generateLabelInstruction(s2));
 
+    } else {
+       if($1->children[3]->matched != "Name"){
+            semanticError("Can not iterate over literal / expression"); // TODO : handle slice
+       } else  {
+            STEntry * ste = curr->getVar($1->children[3]->content);
+            if(!ste) semanticError("Can not find array");
+            else {
+                if(ste->getType()->GetTypeClass() != 4 || ((PointerType*)ste->getType())->GetUnderlyingType()->GetTypeClass() != 4 || *ste->getType() == *(new BasicType("string"))){
+                    // handling array type
+                    // strings not handled yet 
+                    string s = "index" + to_string(clock()); // Index variable
+                    string s3 = "value" + to_string(clock()); // Value variable
+                    curr->addEntry(s, new BasicType("int"),false );
+                    Node* mainChild = fixNodeForExpression($1->children[3], curr); // TODO : Milind add translation from pointer to array to array, so that it can be handled similarily in mainChild
+                    Node* varChild = $1->children[0];
+                    if(varChild->children.size() != 2){
+                        semanticError("Can not handle more than 2 iterating variables for array enumeration");
+                    } 
+                    curr->addEntry(s3,((ArrayType*)mainChild->getType())->GetArrayType() ,false );
+                    void* arg1 = curr->getVar(s);  
+                    void * arg4 = curr->getVar(s3);
+                    long * ptr = new long;
+                    *ptr = 0;
+                    $$->instr_list.push_back(new Instruction(ASG, arg1, ptr,
+                                                    REGISTER, CONSTANT_VAL,
+                                                    $1->getType(), 
+                                                    new BasicType("int")));
+                    $$->instr_list.push_back(generateLabelInstruction(s1));
+                    long *ptr2 = new long; *ptr2 = 1;
+                    long *ptr3 = new long;
+                    *ptr3 = ((ArrayType*)mainChild->getType())->GetSize();
+                    $1->tmp = "temp" + to_string(clock()); // temporary var for keeping the LT_OP result
+                    curr->addEntry($1->tmp, new BasicType("bool"), false);
+                    void* arg2 = curr->getVar($1->tmp);
+                    $$->instr_list.push_back(new Instruction(LT_OP, arg2, arg1, ptr3,
+                                                    REGISTER, 
+                                                    REGISTER, 
+                                                    CONSTANT_VAL,
+                                                    new BasicType("bool"), $1->getType(),
+                                                    new BasicType("long")
+                                                    ));
+                    $$->instr_list.push_back(generateGotoInstruction($1,s2  ,curr, false));
+                    $$->instr_list.push_back(new Instruction(EELEM, arg4 ,arg2,correctPointer(mainChild, curr),
+                                                    REGISTER, REGISTER, REGISTER,
+                                                    ((STEntry*)arg4)->getType(), new BasicType("int"),
+                                                    mainChild->getType()));
+                    if(varChild->children[0]->content != "_")   {
+                        varChild->children[0] = fixNodeForExpression(varChild->children[0], curr);
+                         if(!$1->flag){
+                            curr->addEntry(varChild->children[0]->content, new BasicType("int"),false );
+                         }
+                         void *target1 = correctPointer(varChild->children[0], curr); 
+                         $$->instr_list.push_back(new Instruction(COPY_OP, target1, arg1, REGISTER, REGISTER,
+                                                    new BasicType("int"), new BasicType("int")
+                                                    ));
+                    }
+                    if(varChild->children[1]->content != "_")   {
+                        varChild->children[1] = fixNodeForExpression(varChild->children[1], curr);
+                         if(!$1->flag){
+                            curr->addEntry(varChild->children[1]->content, ((ArrayType*)mainChild->getType())->GetArrayType(),false );
+                         }
+                        void *target2 = correctPointer(varChild->children[1], curr);
+                        $$->instr_list.push_back(new Instruction(COPY_OP, target2, arg4, REGISTER, REGISTER,
+                                                    new BasicType("int"), new BasicType("int")
+                                                    ));
+                    }
+                    $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
+                    $$->instr_list.push_back(new Instruction(ADD_OPER, arg1, arg1, ptr2,
+                                                REGISTER, REGISTER, CONSTANT_VAL, 
+                                                $1->getType(), $1->getType(),
+                                                new BasicType("int")));
+                    $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
+                    $$->instr_list.push_back(generateLabelInstruction(s2));
+                    int kjk = 10;
+                } else {
+                    semanticError("Non Array type or pointer to array type can not be iterated over");
+                }
+            }
+       }
     }
 } else {
     string s1 = "label" + to_string(clock());
