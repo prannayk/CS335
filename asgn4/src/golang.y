@@ -1251,7 +1251,7 @@ $$ = $3;
 
 ;
 StatementList  : // TODO  : this is also beginning of a scope, unhandled
-Statement{$$ = new Node("StatementList", new BasicType("NOTYPE")); $$->Add($1); $$->flag = $1->flag;}
+Statement{$$ = new Node("StatementList", new BasicType("NOTYPE")); $$->Add($1); $$->flag = $1->flag; $$->instr_list = mergeInstructions($$->instr_list, $1->instr_list); }
 		| StatementList STMTEND Statement{
 $$ = $1;
 $$->incrementCount($3);
