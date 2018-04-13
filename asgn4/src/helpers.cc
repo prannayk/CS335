@@ -35,6 +35,15 @@ checkListType(vector<Type*> source, Node* target)
 }
 
 extern void*
+correctPointer(string s, ST* curr){
+    void * arg1;
+    if (curr->getVar(s))    return curr->getVar(s);
+    else {
+        semanticError("Variable or temporary not found");
+    }
+}
+
+extern void*
 correctPointer(Node* ptr, ST* curr)
 {
     void* arg1;
@@ -370,36 +379,65 @@ generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
 }
 
 extern vector<Instruction*>
-generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
+generateInstructionWriteArray(Node* source, ST* curr)
 {
-    n1 = fixNodeForExpression(n1, curr);
-    n2 = fixNodeForExpression(n2, curr);
     Instruction* instr;
     string temp = "temp" + to_string(clock());
+    string temp2 = "temp" + to_string(clock());
     source->tmp = temp;
-    void* arg1 = correctPointer(source, curr);
-    void* target = correctPointer(n1, curr);
-    if (((STEntry*)target)->getType()->GetTypeClass() != 4) {
+    curr->addEntry(source->tmp, new BasicType("int"), false);
+    curr->addEntry(temp2, new BasicType("int"), false);
+    void* arg1 = correctPointer(source->content,curr); // TODO : add in header new function
+    if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
         semanticError("Invalid operation for non-array type");
     }
-    void* arg2 = correctPointer(n2, curr);
-    source->addrMode = REGISTER;
-    source->setType(((ArrayType*)n1->getType())->GetArrayType());
-    if (*n2->getType() != *(new BasicType("int"))) {
-        semanticError("Can not index array with a non integer type");
-    }
+    vector<string>::iterator it;
+    Type* type = ((ArrayType*)source->getType())->GetArrayType();
     vector<Instruction*> i_list;
+    for(it = source->str_child.begin(); it != source->str_child.end(); ++it){
+       void * arg2 = correctPointer(*it, curr);
+       if(arg2==NULL){
+        semanticError("Incorrect Temp name");
+       } else {
+            if(!(*curr->getVar(*it)->getType() == *(new BasicType("int")))){
+                semanticError("Can not index array with non integer type");
+            } else {
+                long * ptr = new long;
+                *ptr = type->GetMemSize();
+                Instruction * instr = new Instruction(MUL_OPER, correctPointer(temp2, curr), // multiply by size of allocation
+                                            arg1, ptr,
+                                            REGISTER, REGISTER, REGISTER,
+                                            new BasicType("int"),
+                                            new BasicType("int"),
+                                            new BasicType("int")
+                                            );
+                i_list.push_back(instr);
+                instr = new Instruction(ADD_OPER,   correctPointer(temp, curr), // add offset to offset temporary
+                                                    correctPointer(temp2, curr),
+                                                    correctPointer(temp, curr),
+                                                    REGISTER, REGISTER, REGISTER,
+                                                    new BasicType("int"),
+                                                    new BasicType("int"),
+                                                    new BasicType("int"));
+                if(type->GetTypeClass() == 4)    type = ((ArrayType*)type)->GetArrayType();
+                else break;
+            }
+       }
+    }
+    source->tmp = "temp" + to_string(clock());
+    type = ((ArrayType*)source->getType())->GetArrayType();
+    curr->addEntry(source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
     instr = new Instruction(
       IELEM,
+      correctPointer(source, curr),
       arg1,
-      arg2,
-      target,
-      n1->addrMode,
-      n2->addrMode,
-      source->addrMode,
-      n1->getType(),
-      n2->getType(),
-      source->getType()); // target is the temporary, arg2 is offset (not
+      correctPointer(temp, curr),
+      REGISTER,
+      REGISTER,
+      REGISTER,
+      type,
+      new BasicType("int"),
+      new BasicType("int")); // target is the temporary, arg2 is offset (
                           // multiplied by size of base type), and 3rd input STE
                           // of array (should be translated to base address)
     i_list.push_back(instr);

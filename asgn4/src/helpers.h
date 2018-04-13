@@ -89,7 +89,7 @@ isRValueMode(ST* aST);
 extern vector<Instruction*>
 generateInstructionReadArray(Node*, Node*, Node*, ST*);
 extern vector<Instruction*>
-generateInstructionWriteArray(Node*, Node*, Node*, ST*);
+generateInstructionWriteArray(Node*, ST*);
 extern void 
 checkListType(vector<Type*> source, Node * target);
 extern void
@@ -99,6 +99,7 @@ extern Type* getScopeReturnType(ST* aST);
 extern void generateReturn(Node* source, Node* retVal, ST* curr);
 extern void generateYield(Node* source, Node* retVal, ST* curr);
 extern void* correctPointer(Node * ptr, ST* curr);
+extern void* correctPointer(string , ST*);
 extern string*
 getCharFromString(string s);
 extern void 

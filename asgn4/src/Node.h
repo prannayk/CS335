@@ -185,6 +185,7 @@ class STEntry
     int nextUse;
     int active;
 
+    bool arrayType; 
 
     string getName() const { return name; }
 

@@ -773,7 +773,15 @@ $$->setType($2->getType());
 		| PrimaryExpr{$$ = $1;$$->setType($1->getType());}
 ;
 PrimaryExpr  :
-PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());}
+PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());
+if (!$1->matched.compare("ArrayAccess")) { // shifted here to n-d array access
+if(curr->rValueMode){
+    $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadArray($$, $$->children[0], $$->children[2], curr));
+} else {
+    $$->patchInstruction =  generateInstructionWriteArray($$, curr); 
+} 
+}    
+}
 		| PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = $2; }
 
 ;
@@ -838,11 +846,20 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
-if(curr->rValueMode){
-    $$->instr_list = mergeInstructions($$->instr_list, generateInstructionReadArray($$, $1, $3, curr));
-} else {
-    $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr); 
+$$->content = $1->content;
+$$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
+$$->str_child = $1->str_child;
+if(!$3->matched.compare("Literal")){
+    string str = "temp" + to_string(clock());
+    curr->addEntry(str,$3->getType() ,false);
+    $$->instr_list.push_back(new Instruction(ASG, correctPointer(str, curr),
+                            correctPointer($3,curr),
+                            REGISTER, CONSTANT_VAL,
+                            $3->getType(), $3->getType()
+                            ));
+    $3->tmp = str;
 }
+$$->str_child.push_back($3->tmp);
 }
 | PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
 $$->Add($1);
@@ -904,10 +921,18 @@ $$->Add($2);}
 ;
 OtherType  :
 SQUARE_OPEN OExpression SQUARE_CLOSE TypeName{
-if($2->count != 0) {
+if($2->count != 0 && ($4->matched == "Name")) {
     $$ = new Node("OtherType", new ArrayType($4->getType(), atoi($2->content.c_str())) );
-} else {
+    $$->getType()->mem_size*= atoi($2->content.c_str());
+} else if ($4->matched == "Name") {
     // TODO : slice Type
+} else if ($2->count != 0 && $4->getType()->GetTypeClass()==4) {
+   // n-d array 
+   // layout is memory inefficient
+   $$ = new Node("ArrayType", new ArrayType($4->getType(), atoi($2->content.c_str()) ) );
+   $$->getType()->mem_size = atoi($2->content.c_str())*$4->getType()->GetMemSize();
+} else {    
+    // weird case
 }
 $$->Add($1);
 $$->Add($2);
