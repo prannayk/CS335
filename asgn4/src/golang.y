@@ -839,9 +839,9 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 if(curr->rValueMode){
-    /* $$->instr_list.push_back(generateInstructionReadArray($$, $1, $3, curr)); */
+    $$->instr_list = mergeInstructions($$->instr_list, generateInstructionReadArray($$, $1, $3, curr));
 } else {
-    /* $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr); */
+    $$->patchInstruction =  generateInstructionWriteArray($$, $1, $3, curr); 
 }
 }
 | PrimaryExpr SQUARE_OPEN OExpression COLON OExpression SQUARE_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE")) ; // TODO : slices
@@ -1530,7 +1530,7 @@ if(($1->matched == "ForHeader")){
                                                     $1->getType(), 
                                                     new BasicType("int")));
                     $$->instr_list.push_back(generateLabelInstruction(s1));
-                    long *ptr2 = new long; *ptr2 = 1;
+                    long *ptr2 = new long; *ptr2 = ((STEntry*)arg1)->getType()->GetMemSize();
                     long *ptr3 = new long;
                     *ptr3 = ((ArrayType*)mainChild->getType())->GetSize();
                     $1->tmp = "temp" + to_string(clock()); // temporary var for keeping the LT_OP result

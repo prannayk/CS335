@@ -146,7 +146,7 @@ class Node
     Type *type;
     vector<Instruction*> instr_list;
     AddressingMode addrMode;
-    Instruction* patchInstruction;
+    vector<Instruction*> patchInstruction;
     string tmp; // temp variable for value stored in expression eval
     vector<Node*> children;
     vector<string> str_child; // to handle struct type

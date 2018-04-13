@@ -119,7 +119,7 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
         }
         i_list.push_back(instr);
         if (!target->children[i]->matched.compare("ArrayAccess")) {
-            i_list.push_back(target->children[i]->patchInstruction);
+            i_list = mergeInstructions(i_list, target->children[i]->patchInstruction);
         }
     }
     return i_list;
@@ -324,44 +324,52 @@ copyInstruction(vector<Instruction*> i_list, int offset)
     return new_list;
 }
 
-// extern Instruction*
-// generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
-// {
-//     // TODO : set tmp with temporary variable
-//     // TODO : create redundant instruction in patchInstruction
-//     // TODO : convert back patching to multi map
-//     n1 = fixNodeForExpression(n1, curr);
-//     n2 = fixNodeForExpression(n2, curr);
-//     string s = "temp" + to_string(clock());
-//     string* str = new string;
-//     *str = s;
-//     void* arg1 = correctPointer(n1, curr);
-//     if (arg1 != NULL) {
-//         if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
-//             semanticError("Non-Array Type indexed in operation");
-//         }
-//     }
-//     void* arg2 = correctPointer(n2, curr);
-//     Instruction* instr;
-//     source->addrMode = REGISTER;
-//     if (*(n2->getType()) != *(new BasicType("int"))) {
-//         semanticError("Can not index array with non integer type");
-//     }
-//     instr = new Instruction(EELEM,
-//                             str,
-//                             arg1,
-//                             arg2,
-//                             source->addrMode,
-//                             n1->addrMode,
-//                             n2->addrMode,
-//                             source->getType(),
-//                             n1->getType(),
-//                             n2->getType());
-//     source->tmp = s;
-//     return instr;
-// }
+extern vector<Instruction*>
+generateInstructionReadArray(Node* source, Node* n1, Node* n2, ST* curr)
+{
+      //TODO : set tmp with temporary variable
+      //TODO : create redundant instruction in patchInstruction
+      //TODO : convert back patching to multi map
+     n1 = fixNodeForExpression(n1, curr);
+     n2 = fixNodeForExpression(n2, curr);
+     string s = "temp" + to_string(clock());
+     string* str = new string;
+     *str = s;
+     void* arg1 = correctPointer(n1, curr);
+     if (arg1 != NULL) {
+         if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
+             semanticError("Non-Array Type indexed in operation");
+         }
+     }
+     void* arg2 = correctPointer(n2, curr);
+     Instruction* instr;
+     source->addrMode = REGISTER;
+     if (*(n2->getType()) != *(new BasicType("int"))) {
+         semanticError("Can not index array with non integer type");
+     }
+     vector<Instruction*> i_list;
+     long * num = new long; *num = n2->getType()->GetMemSize();
+     instr = new Instruction(MUL_OPER, arg2, arg2, num,
+                            n2->addrMode, n2->addrMode, REGISTER,
+                            n2->getType(), n2->getType(), new BasicType("int")
+                            );
+     i_list.push_back(instr);
+     instr = new Instruction(EELEM,
+                             str,
+                             arg1,
+                             arg2,
+                             source->addrMode,
+                             n1->addrMode,
+                             n2->addrMode,
+                             source->getType(),
+                             n1->getType(),
+                             n2->getType());
+     source->tmp = s;
+     i_list.push_back(instr);
+     return i_list;
+}
 
-extern Instruction*
+extern vector<Instruction*>
 generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
 {
     n1 = fixNodeForExpression(n1, curr);
@@ -380,6 +388,7 @@ generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
     if (*n2->getType() != *(new BasicType("int"))) {
         semanticError("Can not index array with a non integer type");
     }
+    vector<Instruction*> i_list;
     instr = new Instruction(
       IELEM,
       arg1,
@@ -393,7 +402,8 @@ generateInstructionWriteArray(Node* source, Node* n1, Node* n2, ST* curr)
       source->getType()); // target is the temporary, arg2 is offset (not
                           // multiplied by size of base type), and 3rd input STE
                           // of array (should be translated to base address)
-    return instr;
+    i_list.push_back(instr);
+    return i_list;
 }
 
 extern void
