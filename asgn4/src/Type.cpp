@@ -1,6 +1,17 @@
 #include "Type.h"
 #include <ctime>
 
+map<string, Type*> TypeList; // list of string to type* for reference
+
+extern void fillTypeList (){
+    TypeList["int"] = new BasicType("int");
+    TypeList["int"]->mem_size = 4;
+    TypeList["float"] = new BasicType("float");
+    TypeList["float"]->mem_size = 8;
+    TypeList["char"] = new BasicType("char");
+    TypeList["char"]->mem_size = 1;
+}
+
 string
 structRepr(map<string, Type*> fields)
 {
@@ -50,6 +61,9 @@ BasicType::BasicType(string aName)
   , variadic(false)
 // , pointer(false)
 {
+    if(TypeList.count(aName)){
+        this->mem_size = TypeList[aName]->mem_size;
+    }
     this->representation = aName;
     this->type = 1;
 }
@@ -62,6 +76,9 @@ BasicType::BasicType(string aName, bool flag)
 {
     this->representation = aName;
     this->type = 1;
+    if(TypeList.count(aName)){
+        this->mem_size = TypeList[aName]->mem_size;
+    }
 }
 
 string
@@ -88,6 +105,7 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
     }
     this->representation += ") " + returnType->GetRepresentation();
     this->type = 2;
+    this->mem_size = 8; // store function type variables as function pointers and therefore take pointer amount of memory
 }
 
 FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
@@ -105,6 +123,7 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
     }
     this->representation += ") " + returnType->GetRepresentation();
     this->type = 2;
+    this->mem_size = 8; // store function type variables as function pointers and therefore take pointer amount of memory
 }
 
 Type*
@@ -127,6 +146,13 @@ StructDefinitionType::StructDefinitionType(string aName,
     name = aName;
     this->representation = structRepr(this->fields);
     this->type = 3;
+    int sum;
+    std::map<string, Type*>::iterator it;
+    for(it = aFields.begin(); it!=aFields.end(); ++it ){
+        this->mem_size_list[it->first] = it->second->mem_size;
+        sum+= it->second->mem_size;
+    }
+    this->mem_size = sum;
 }
 
 StructDefinitionType::StructDefinitionType(string aName,
@@ -146,6 +172,14 @@ StructDefinitionType::StructDefinitionType(string aName,
     }
     this->representation = structRepr(this->fields);
     this->type = 3;
+    int sum;
+    vector<string>::iterator first;
+    vector<Type*>::iterator second;
+    for(first = fieldNames.begin(); first!=fieldNames.end(); ++first ){
+        this->mem_size_list[*first] = (*second)->mem_size;
+        sum+= (*second)->mem_size;
+    }
+    this->mem_size = sum;
 }
 
 Type*
@@ -190,6 +224,7 @@ ArrayType::ArrayType(Type* aArrayType, int aSize)
     this->representation =
       "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
     this->type = 4;
+    this->mem_size = aArrayType->mem_size;
 }
 
 ArrayType::ArrayType(Type* aArrayType, int aSize, bool flag)
@@ -200,6 +235,7 @@ ArrayType::ArrayType(Type* aArrayType, int aSize, bool flag)
     this->representation =
       "[" + to_string(aSize) + "]" + aArrayType->GetRepresentation();
     this->type = 4;
+    this->mem_size = aArrayType->mem_size;
 }
 
 int
@@ -224,4 +260,9 @@ Type*
 PointerType::GetUnderlyingType() const
 {
     return this->underlyingType;
+}
+
+int Type::GetMemSize() const 
+{
+    return this->mem_size;
 }

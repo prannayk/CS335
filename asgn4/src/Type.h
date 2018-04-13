@@ -9,6 +9,7 @@
 
 using namespace std;
 
+
 class Type
 {
   protected:
@@ -16,17 +17,20 @@ class Type
     int type;
 
   public:
+    int mem_size;
     Type();
     string GetRepresentation() const;
     bool operator==(const Type& rhs);
     bool operator!=(const Type& rhs);
     int GetTypeClass() const;
+    int GetMemSize() const;
 };
 
 class BasicType : public Type
 {
   private:
     string name;
+    int size;
 
   public:
     bool variadic;
@@ -56,6 +60,7 @@ class StructDefinitionType : public Type
   public:
     map<string, Type*> fields;
     string randomSuffix;
+    map <string, int> mem_size_list;
     string name;
 
     map<string, Type*> GetFields() const;
@@ -102,3 +107,6 @@ class PointerType : public Type
     Type* GetUnderlyingType() const;
     PointerType(Type* aUnderlyingType);
 };
+
+extern map<string, Type*> TypeList;
+extern void fillTypeList();

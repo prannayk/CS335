@@ -20,7 +20,6 @@ void yyerror(const char *s);
 ST* root = new ST(0, nullptr);
 ST* curr = root;
 
-
 %}
 
 %code requires {
@@ -256,10 +255,11 @@ ST* curr = root;
 %type		<nt>		OGenericTypeList
 %type		<nt>		PseudoCall
 %%
+
 StartSymbol  :
-SourceFile{
+{ fillTypeList();}SourceFile{
 $$ = new Node("StartSymbol", new BasicType("NOTYPE"));
-$$->Add($1);
+$$->Add($2);
 $$->PrintJS();
 }
 
