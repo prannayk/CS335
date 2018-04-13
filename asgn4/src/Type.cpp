@@ -173,11 +173,10 @@ StructDefinitionType::StructDefinitionType(string aName,
     this->representation = structRepr(this->fields);
     this->type = 3;
     int sum;
-    vector<string>::iterator first;
-    vector<Type*>::iterator second;
-    for(first = fieldNames.begin(); first!=fieldNames.end(); ++first ){
-        this->mem_size_list[*first] = (*second)->mem_size;
-        sum+= (*second)->mem_size;
+    std::map<string, Type*>::iterator it;
+    for(it = fields.begin(); it!=fields.end(); ++it ){
+        this->mem_size_list[it->first] = it->second->mem_size;
+        sum+= it->second->mem_size;
     }
     this->mem_size = sum;
 }
