@@ -188,7 +188,8 @@ printST(ST* root)
     map<string, STEntry*>::iterator it;
     for (it = root->table.begin(); it != root->table.end(); it++) {
         cout << string(root->depth * 8, ' ') << (it->second)->name
-             << " of type " << (it->second)->type->GetRepresentation() << endl;
+             << " of type " << (it->second)->type->GetRepresentation()
+             << "and number " << ((it->second)->type)->GetTypeClass() << endl;
     }
 
     cout << string(root->depth, ' ') << "Calling recursively: " << endl;
@@ -203,6 +204,9 @@ populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
+        if (TypeName->type->GetTypeClass() == 5) { // This is a struct
+          curr->addStructEntry(declNameList->children[i]->children[0]->matched, TypeName->type->GetRepresentation());
+        }
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        TypeName->type,
                        constant);
@@ -223,6 +227,7 @@ populateSTInfer(Node* declNameList, ST* curr)
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        declNameList->children[i]->getType(),
                        false);
+        cout << "Entry" << declNameList->children[i]->children[0]->matched << endl;
     }
 }
 
@@ -436,6 +441,83 @@ generateInstructionWriteArray(Node* source, ST* curr)
       REGISTER,
       REGISTER,
       type,
+      new BasicType("int"),
+      new BasicType("int")); // target is the temporary, arg2 is offset (
+                          // multiplied by size of base type), and 3rd input STE
+                          // of array (should be translated to base address)
+    i_list.push_back(instr);
+    return i_list;
+}
+
+extern vector<Instruction*>
+generateInstructionReadStruct(Node* source, Node* n1, Node* n2, Type* ty, ST* curr)
+{
+      //TODO : set tmp with temporary variable
+      //TODO : create redundant instruction in patchInstruction
+      //TODO : convert back patching to multi map
+
+     n1 = fixNodeForExpression(n1, curr);
+     n2 = fixNodeForExpression(n2, curr);
+     string s = "temp" + to_string(clock());
+     string* str = new string;
+     *str = s;
+     void* arg1 = correctPointer(n1, curr); // This should be n1->content I think
+     if (arg1 != NULL) {
+         if (((STEntry*)arg1)->getType()->GetTypeClass() != 5) {
+             semanticError("Non-Struct Type indexed in operation");
+         }
+     }
+     void* arg2 = correctPointer(n2, curr);
+     Instruction* instr;
+     source->addrMode = REGISTER;
+     if (*(n2->getType()) != *(new BasicType("int"))) {
+         semanticError("Can not index array with non integer type");
+     }
+     vector<Instruction*> i_list;
+     long * num = new long; *num = 1;
+     instr = new Instruction(EELEM,
+                             str,
+                             arg1,
+                             arg2,
+                             source->addrMode,
+                             n1->addrMode,
+                             n2->addrMode,
+                             ty,
+                             n1->getType(),
+                             n2->getType());
+     source->tmp = s;
+     i_list.push_back(instr);
+     return i_list;
+}
+
+extern vector<Instruction*>
+generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, ST* curr)
+{
+    Instruction* instr;
+    string temp = "temp" + to_string(clock());
+    source->tmp = temp;
+    curr->addEntry(source->tmp, new BasicType("int"), false);
+
+    void* arg1 = correctPointer(base->content ,curr); // TODO : add in header new function
+    if (((STEntry*)arg1)->getType()->GetTypeClass() != 5) {
+        semanticError("Invalid operation for non-struct type");
+    }
+    Type* type = ((StructType*)source->getType())->GetStructType();
+    vector<Instruction*> i_list;
+
+    source->tmp = "temp" + to_string(clock());
+
+    curr->addEntry(source->tmp, ((StructType*)source->getType())->GetStructType(), false);
+
+    instr = new Instruction(
+      IELEM,
+      correctPointer(source, curr),
+      correctPointer(addr, curr),
+      arg1,
+      REGISTER,
+      REGISTER,
+      REGISTER,
+      ty,
       new BasicType("int"),
       new BasicType("int")); // target is the temporary, arg2 is offset (
                           // multiplied by size of base type), and 3rd input STE

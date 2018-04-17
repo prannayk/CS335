@@ -89,9 +89,15 @@ isRValueMode(ST* aST);
 extern vector<Instruction*>
 generateInstructionReadArray(Node*, Node*, Node*, ST*);
 extern vector<Instruction*>
+generateInstructionReadStruct(Node* source, Node* n1, Node* n2, Type* ty, ST* curr);
+extern vector<Instruction*>
 generateInstructionWriteArray(Node*, ST*);
 extern void 
 checkListType(vector<Type*> source, Node * target);
+
+extern vector<Instruction*>
+generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, ST* curr);
+
 extern void
 generateCall(Node* source, Node* fn, vector<Node*> args, ST*);
 extern void setScopeReturnType(Type* aReturnType, ST* aST);

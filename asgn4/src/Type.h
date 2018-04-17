@@ -61,16 +61,15 @@ class StructDefinitionType : public Type
     map<string, Type*> fields;
     string randomSuffix;
     map <string, int> mem_size_list;
-    string name;
+    map <string, int> offset;
 
     map<string, Type*> GetFields() const;
     string Hoist(string aStructVariableName,
                  string aFieldName,
                  string aSuffix) const;
     Type* GetTypeFor(string aFieldName);
-    StructDefinitionType(string aName, map<string, Type*> aFields);
-    StructDefinitionType(string aName,
-                         vector<string> fieldNames,
+    StructDefinitionType(map<string, Type*> aFields);
+    StructDefinitionType(vector<string> fieldNames,
                          vector<Type*> fieldTypes);
 };
 
@@ -96,6 +95,19 @@ class ArrayType : public Type
     Type* GetArrayType() const;
     ArrayType(Type* aArrayType, int aSize);
     ArrayType(Type* aArrayType, int aSize, bool flag);
+};
+
+class StructType : public Type
+{
+  private:
+    Type* structType;
+    string structName;
+    StructDefinitionType* baseType;
+
+  public:
+    Type* GetStructType() const;
+    Type* GetStructMemberType(string a);
+    StructType(Type* aStructType, string aName, int aMem);
 };
 
 class PointerType : public Type

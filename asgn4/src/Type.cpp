@@ -138,31 +138,29 @@ FuncType::GetParamTypes() const
     return this->paramTypes;
 }
 
-StructDefinitionType::StructDefinitionType(string aName,
-                                           map<string, Type*> aFields)
+StructDefinitionType::StructDefinitionType(map<string, Type*> aFields)
   : fields(aFields)
   , randomSuffix(to_string(clock()))
 {
-    name = aName;
     this->representation = structRepr(this->fields);
     this->type = 3;
-    int sum;
+    int sum = 0;
     std::map<string, Type*>::iterator it;
     for(it = aFields.begin(); it!=aFields.end(); ++it ){
         this->mem_size_list[it->first] = it->second->mem_size;
+        this->offset[it->first] = sum;
         sum+= it->second->mem_size;
     }
     this->mem_size = sum;
+
 }
 
-StructDefinitionType::StructDefinitionType(string aName,
-                                           vector<string> fieldNames,
+StructDefinitionType::StructDefinitionType(vector<string> fieldNames,
                                            vector<Type*> fieldTypes)
   : fields()
   , randomSuffix(to_string(clock()))
 {
 
-    name = aName;
     vector<string>::iterator ni;
     vector<Type*>::iterator ti;
     for (ni = fieldNames.begin(), ti = fieldTypes.begin();
@@ -172,10 +170,11 @@ StructDefinitionType::StructDefinitionType(string aName,
     }
     this->representation = structRepr(this->fields);
     this->type = 3;
-    int sum;
+    int sum = 0;
     std::map<string, Type*>::iterator it;
     for(it = fields.begin(); it!=fields.end(); ++it ){
         this->mem_size_list[it->first] = it->second->mem_size;
+        this->offset[it->first] = sum;
         sum+= it->second->mem_size;
     }
     this->mem_size = sum;
@@ -264,4 +263,25 @@ PointerType::GetUnderlyingType() const
 int Type::GetMemSize() const 
 {
     return this->mem_size;
+}
+
+StructType::StructType(Type* aStructType, string aName, int aMem) {
+  structType = aStructType;
+  this->type = 5;
+  this->mem_size = aMem;
+  this->structName = aName;
+  this->representation = aName;
+}
+
+Type*
+StructType::GetStructType() const {
+  return this->structType;
+}
+
+Type*
+StructType::GetStructMemberType(string a) {
+  if ((baseType->fields).count(a)) {
+    return baseType->fields[a];
+  }
+  return NULL;
 }

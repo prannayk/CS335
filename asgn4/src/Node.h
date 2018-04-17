@@ -236,6 +236,7 @@ class ST {
 
      map<string, STEntry*> table;
      map<string, string> structs;
+
      vector<ST*> children;
 
      ST* parent;
@@ -252,6 +253,7 @@ class ST {
      
      bool checkEntry(string a);
      static bool checkEntryFunc(string a);
+     static bool checkEntryStruct(string a);
      void resetNextUseInfo(int a);
 
     ST* getParentScope() const { return parent; }

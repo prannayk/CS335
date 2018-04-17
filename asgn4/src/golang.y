@@ -458,7 +458,8 @@ $$->Add($5);
 $$->Add($6);
 vector<string> fieldNames = getNames($4);
 vector<Type*> typeList = getTypes($4);
-$$->setType(new StructDefinitionType("placeholder", fieldNames, typeList));
+StructDefinitionType* t = new StructDefinitionType(fieldNames, typeList);
+$$->setType(t);
 }
 		| STRUCT OGenericTypeList BLOCK_OPEN BLOCK_CLOSE{$$ = new Node("StructType", new BasicType("NOTYPE"), $2->count);
 $$->Add($1);
@@ -467,7 +468,7 @@ $$->Add($3);
 $$->Add($4);
 vector <string> fieldNames;
 vector<Type*> typeList;
-$$->setType(new StructDefinitionType("placeholder", fieldNames, typeList));
+$$->setType(new StructDefinitionType(fieldNames, typeList));
 }
 
 ;
@@ -558,7 +559,15 @@ FunctionType{$$ = $1;}
         | GeneratorType{$$ = $1;}
 		| PointerType{$$ = $1;}
 		| OtherType{$$ = $1;}
-		| DotName{$$ = $1;}
+		| DotName{$$ = $1;
+              // Change Type if it turns out to be a struct. This is p hacky -Abhibhav
+              if (ST::checkEntryStruct($1->content)) {
+                StructDefinitionType* temp = ST::structDefs[$1->content];
+                StructType* t = new StructType(temp, $1->content, temp->mem_size);
+                $1->setType(t);
+              }
+    
+    }
 		| PAREN_OPEN TypeName PAREN_CLOSE{$$ = $2;}
 
 ;
@@ -576,6 +585,10 @@ TypeDeclaration  :
 TypeDeclarationName TypeName{$$ = new Node("TypeDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
+if (!($2->children[0]->matched).compare("struct")) {
+  ST::structDefs[$1->children[0]->matched] = (StructDefinitionType*)$2->getType();
+}
+
 }
 
 ;
@@ -779,8 +792,43 @@ if(curr->rValueMode){
     $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadArray($$, $$->children[0], $$->children[2], curr));
 } else {
     $$->patchInstruction =  generateInstructionWriteArray($$, curr); 
-} 
-}    
+}
+}
+
+if (!$1->matched.compare("StructAccess")) { // shifted here to n-d array access
+if(curr->rValueMode){
+		Node* t = new Node("Literal", new BasicType("NOTYPE"));
+    // Need to extract the array offset
+    /*$1->children[2] is the member variable and children[0] the name*/
+    StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
+    string number = to_string((n->offset)[$$->children[2]->matched]);
+    Type* ty = (n->fields)[$$->children[2]->matched];
+    t->Add(number);
+    t->setType(new BasicType("int"));
+    t->content = number;
+    t->tmp = number;
+
+    $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
+
+} else {
+    cout << "pob" << ($1->children).size() << endl;
+    cout << ($1->children)[0]->content << endl;
+    cout << ($1->children)[1]->matched << endl;
+    cout << ($1->children)[2]->matched << endl;
+
+		Node* t = new Node("Literal", new BasicType("NOTYPE"));
+    StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
+    Type* ty = (n->fields)[$$->children[2]->matched];
+    string number = to_string((n->offset)[$$->children[2]->matched]);
+    t->Add(number);
+    t->setType(new BasicType("int"));
+    t->content = number;
+    t->tmp = number;
+
+    $$->patchInstruction =  generateInstructionWriteStruct($$, $$->children[0], t, ty, curr);
+}
+}
+
 }
 		| PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = $2; }
 
@@ -815,7 +863,7 @@ $$->addrMode = REGISTER;
 $$ = $1;$$->setType($1->getType());
 $$->addrMode = CONSTANT_VAL;
 }
-| PrimaryExpr DOT ID{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
+| PrimaryExpr DOT ID{$$ = new Node("StructAccess", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
@@ -1964,6 +2012,13 @@ int main(int argc, char** argv) {
     do {
         yyparse();
     } while (!feof(yyin));
+    vector<ST*>::iterator it;
+    for (it = root->children.begin(); it != root->children.end(); it++) {
+      ;
+    }
+    printST(root);
+    cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl;
+    cout << "fin" << endl;
     return 0;
 }
 

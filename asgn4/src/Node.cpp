@@ -111,13 +111,13 @@ ST::addEntry(string aName, Type* aType, bool aConstant)
 void
 ST::addStructEntry(string aName, string structName)
 {
-    StructDefinitionType* t = ST::structDefs[structName];
-    map<string, Type*>::iterator iter;
-    string temp;
-    for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
-        temp = aName + t->randomSuffix + iter->first;
-        addEntry(temp, iter->second, 0);
-    }
+    //StructDefinitionType* t = ST::structDefs[structName];
+    //map<string, Type*>::iterator iter;
+    //string temp;
+    //for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
+        //temp = aName + t->randomSuffix + iter->first;
+        //addEntry(temp, iter->second, 0);
+    //}
     structs[aName] = structName;
 }
 
@@ -363,6 +363,15 @@ bool
 ST::checkEntryFunc(string a)
 {
     if (getFunc(a) == NULL) {
+        return true;
+    }
+    return false;
+}
+
+bool
+ST::checkEntryStruct(string a)
+{
+    if (structDefs.count(a)) {
         return true;
     }
     return false;
