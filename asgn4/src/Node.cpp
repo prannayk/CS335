@@ -91,7 +91,7 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
 }
 
 map<string, StructDefinitionType*> ST::structDefs;
-map<string, FuncType*> ST::funcDefs;
+multimap<string, FuncType*> ST::funcDefs;
 vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
 
@@ -362,7 +362,7 @@ Instruction::printInstruction()
 bool
 ST::checkEntryFunc(string a)
 {
-    if (getFunc(a) == NULL) {
+    if (getFunc(a).size() == 0) {
         return true;
     }
     return false;
@@ -377,15 +377,22 @@ ST::checkEntryStruct(string a)
     return false;
 }
 
-FuncType*
+bool checkEqual(string a, pair <string, FuncType*> p){
+    return (p.first == a);
+}
+vector<FuncType*>
 ST::getFunc(string a)
 {
 
-    if (funcDefs.count(a)) {
-        return funcDefs[a];
+    vector<FuncType*> list;
+    map<string, FuncType*>::iterator it = funcDefs.begin();
+    for( ; it!=funcDefs.end(); ++it){
+        if((*it).first == a)
+            list.push_back((*it).second);
     }
-    return nullptr;
+    return list;
 }
+
 
 void
 Node::printInstructionList()

@@ -8,6 +8,7 @@
 #include <iomanip>
 #include "Type.h"
 #include "enums.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -225,7 +226,7 @@ class ST {
    public:
     
      static map<string, StructDefinitionType*> structDefs;
-     static map<string, FuncType*> funcDefs;
+     static multimap<string, FuncType*> funcDefs;
      static vector<STEntry*> paramEntryStack;
      static bool paramPush;
 
@@ -248,7 +249,7 @@ class ST {
      void addStructEntry(string aName, string structName);
      void addChild(ST* aChild);
      STEntry* getVar(string a);
-     static FuncType* getFunc(string a);
+     static vector<FuncType*> getFunc(string a);
      STEntry* getStructVar(string aName, string memberName);
      
      bool checkEntry(string a);

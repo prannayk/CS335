@@ -789,7 +789,7 @@ PrimaryExpr  :
 PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());
 if (!$1->matched.compare("ArrayAccess")) { // shifted here to n-d array access
 if(curr->rValueMode){
-    $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadArray($$, $$->children[0], $$->children[2], curr));
+    $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadArray($$, curr));
 } else {
     $$->patchInstruction =  generateInstructionWriteArray($$, curr); 
 }
@@ -1065,7 +1065,7 @@ vector<string> paramNames = createNameList($4->children[2]);
 populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
-  ST::funcDefs[($4->children[0])->matched] = t;
+  ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
 } else {
   // Throw error!
   semanticError("Unexpected function declaration.", true);
@@ -1082,6 +1082,7 @@ string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
+curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
 }
 ;
 GeneratorDeclaration  :
@@ -1097,7 +1098,7 @@ vector<string> paramNames = createNameList($4->children[2]);
 populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
-  ST::funcDefs[($4->children[0])->matched] = t;
+  ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
 } else {
   // Throw error!
     semanticError("Unexpected generator declaration.", true);
@@ -1114,6 +1115,7 @@ string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($2->instr_list, $4->instr_list);
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
+fn_map.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
 }
 ;
 
@@ -1121,15 +1123,23 @@ FunctionHeader  :
 ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $3->count, $3->flag);
 $$->Add($1);
+$$->content = $4;
 $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 setScopeReturnType($5->getType(), curr);
+vector<Type*> paramTypes;
+if($3->count > 1){
+    paramTypes = createParamList($3->children[0]);
+    $$->setType(new FuncType($5->getType(), paramTypes));
+} 
+$$->setType(new FuncType($5->getType(), paramTypes));
 }
 | PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
 $$->Add($4); // ID
+$$->content = $4;
 $$->Add($5); // (
 $2->children[0]->children.insert($2->children[0]->children.end(), $6->children[0]->children.begin(), $6->children[0]->children.end());
 $2->children[0]->count = $2->count + $6->count;
@@ -1137,6 +1147,13 @@ $$->Add($2); // Fixed up argument list
 $$->Add($7); // )
 $$->Add($8); // FunctionResult
 setScopeReturnType($8->getType(), curr);
+if($6->count > 1){
+    vector<Type*> paramTypes = createParamList($6->children[0]);
+    $$->setType(new FuncType($8->getType(), paramTypes));
+} else {
+    vector<Type*> paramTypes;
+    $$->setType(new FuncType($8->getType(), paramTypes));
+}
 }
 ;
 ConvType  :
@@ -1939,19 +1956,35 @@ PrimaryExpr PAREN_OPEN PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NO
 $$->Add($1);
 $$->Add($2);
 $$->Add($3);
+/* vector<Type*> types; */ // TODO : why is this here?
+vector<FuncType*> cand_list;
+if($1->matched.compare("PseudoCall")){
 if(!curr->checkEntryFunc($1->content)) {
-  $$->setType(curr->getFunc($1->content));
+  cand_list = curr->getFunc($1->content);
 } else {
   semanticError("Cannot find function " + $1->content, true);
 }
-$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
- if($$->type_child.size())  {
-     semanticError("Unxpected " + to_string($$->type_child.size()) + " arguments, 0 needed!");
-  }
+$$->type_child = verifyFunctionType(cand_list, 0);
+$$->setType($$->type_child.back());
+$$->type_child.pop_back();
+/* $$->type_child = ((FuncType*)$$->getType())->GetParamTypes(); */
+/*  if($$->type_child.size())  { */
+/*      semanticError("Unxpected " + to_string($$->type_child.size()) + " arguments, 0 needed!"); */
+/*   } */
 vector<Node*> emptyVector;
 generateCall($$, $1, emptyVector, curr);
 // TODO: below statement seems to be uneeded.
 /* $$->setType(((FuncType*)$$->getType())->GetReturnType()); */
+} else {
+    if($1->getType()->GetTypeClass() != 2){
+        semanticError("Return type is not function type");
+        exit(1);
+    }
+    $$->type_child = ((FuncType*)$1->getType())->GetParamTypes();
+    $$->setType(((FuncType*)$1->getType())->GetReturnType());
+}
+vector<Node*> emptyVector;
+generateCall($$, $1, emptyVector, curr);
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count);
 $$->Add($1);
@@ -1959,14 +1992,34 @@ $$->Add($2);
 $$->Add($3);
 $$->Add($4);
 $$->Add($5);
+if($1->matched.compare("PseudoCall")){
+vector<FuncType*> cand_list;
 if(!curr->checkEntryFunc($1->content)) {
-  $$->setType(curr->getFunc($1->content));
+  cand_list = curr->getFunc($1->content);
 } else {
-  semanticError("Error: cannot find function " + $1->content, true);
+  semanticError("Cannot find function " + $1->content, true);
 }
-$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
+$$->type_child = verifyFunctionType(cand_list, 0);
+$$->setType($$->type_child.back());
+$$->type_child.pop_back();
 if($3->count != $$->type_child.size()) {
   semanticError("Unexpected number of arguments");
+}
+} else {
+    if($1->getType()->GetTypeClass() != 2){
+        semanticError("Return type is not function type");
+        exit(1);
+    }
+    $$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
+    $$->setType(((FuncType*)$$->getType())->GetReturnType());
+    vector<Type*>::iterator it = $$->type_child.begin();
+    int i=0;
+    for(; it!=$$->type_child.end(); ++it){
+        if(!(*(*it) == *$3->children[i++]->getType())){
+            semanticError("Mismatched return types");
+        }
+    }
+    $$->setType(((FuncType*)$1->getType())->GetReturnType());
 }
  generateCall($$, $1, $3->children, curr);
 }
@@ -1977,22 +2030,32 @@ $$->Add($3);
 $$->Add($4);
 $$->Add($5);
 $$->Add($6);
+if($1->matched.compare("PseudoCall")){
+vector<FuncType*> cand_list;
 if(!curr->checkEntryFunc($1->content)) {
-  $$->setType(curr->getFunc($1->content));
+  cand_list = curr->getFunc($1->content);
 } else {
-  semanticError("Error: cannot find function " + $1->content, true);
-  exit(1);
+  semanticError("Cannot find function " + $1->content, true);
 }
-
-$$->type_child = ((FuncType*)$$->getType())->GetParamTypes();
-
+$$->type_child = verifyFunctionType(cand_list, 0);
+$$->setType($$->type_child.back());
+$$->type_child.pop_back();
+} else {
+    if($1->getType()->GetTypeClass() != 2){
+        semanticError("Return type is not function type");
+        exit(1);
+    }
+    FuncType* type = (FuncType*)$1->getType();
+    $$->setType(type->GetReturnType());
+    $$->type_child = type->GetParamTypes();
+}
 if($$->type_child[$$->type_child.size() - 1]->GetTypeClass() != 1) {
     semanticError("Variadic only work with basic types") ; // TODO : extend this to compound types, struct types etc
   }
 
 if((($3->count + 1) != $$->type_child.size())
 || ((BasicType*)($$->type_child[$$->type_child.size() - 1]))->variadic)   {
-    semanticError("Invalid function call, unknown number of types");
+    semanticError("Invalid function call, incorrect number of types");
   }
 };
 

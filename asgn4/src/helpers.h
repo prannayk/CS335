@@ -27,6 +27,7 @@ extern map<string, Instruction*> break_map;
 extern map<string, string> goto_label_map;
 extern map<string, string> cont_label_map;
 extern map<string, string> break_label_map;
+extern multimap<string, FuncType*> fn_map;
 extern void
 inferListType(Node* target, Node* source);
 extern vector<Type*>
@@ -87,7 +88,7 @@ setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);
 extern vector<Instruction*>
-generateInstructionReadArray(Node*, Node*, Node*, ST*);
+generateInstructionReadArray(Node*, ST*);
 extern vector<Instruction*>
 generateInstructionReadStruct(Node* source, Node* n1, Node* n2, Type* ty, ST* curr);
 extern vector<Instruction*>
@@ -120,4 +121,6 @@ extern void semanticError(string aMessage, bool aCrash);
 
 extern vector<Instruction*> 
 copyInstruction(vector<Instruction*> i_list, int offset );
+extern vector<Type*>
+verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args = new Node("bullshit", new BasicType("Empty")));
 
