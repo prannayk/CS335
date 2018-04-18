@@ -18,8 +18,8 @@ enum OpCode
     DIV_OP,
     MOD_OP,
     NOT_OPER,
-    NAND_OP, 
-    
+    NAND_OP,
+
     // Binary relops
     GT_OP = 50,
     LT_OP,

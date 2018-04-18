@@ -20,6 +20,7 @@ void yyerror(const char *s);
 #include "Node.h"
 ST* root = new ST(0, nullptr);
 ST* curr = root;
+vector<Instruction*> finalInstList;
 
 %}
 
@@ -272,6 +273,7 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $3->printInstructionList();
+finalInstList = $3->instr_list;
 }
 
 ;
@@ -2101,7 +2103,7 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
-int xgen(ST*);
+int xgen(vector<Instruction*>, ST*);
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -2124,7 +2126,7 @@ int main(int argc, char** argv) {
     printST(root);
     /* cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl; */
     /* cout << "fin" << endl; */
-    return xgen(root);
+    return xgen(finalInstList, root);
 }
 
 void yyerror(const char *s) {
@@ -2133,13 +2135,10 @@ void yyerror(const char *s) {
 
 
 int
-xgen(ST* glob)
+xgen(vector<Instruction*> finalInstList, ST* glob)
 {
-    X86Generator gen(glob);
-    string s = gen.StackAlloc();
-    string p =  gen.Prolog();
-    string e = (gen.Epilog());
-    cout << (p + s + e) << endl;
+    X86Generator gen(finalInstList, glob);
+    cout << gen.Generate();
     return 0;
 }
 

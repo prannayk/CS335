@@ -30,7 +30,7 @@ $(SRC)/golang.yy.c: $(SRC)/golang.l $(SRC)/golang.tab.c
 	flex -o golang.yy.c golang.l
 
 $(BIN)/parser: $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/*.cpp $(SRC)/*.h $(SRC)/*.cc
-	$(CC) $(SRC)/x86generator.cpp $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(SRC)/Type.cpp $(FLAGS) -o $(BIN)/parser
+	$(CC) $(SRC)/x86generator.cpp $(SRC)/registerdescriptor.cpp $(SRC)/block.cpp $(SRC)/ir.cpp $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(SRC)/Type.cpp $(FLAGS) -o $(BIN)/parser
 
 $(BIN)/codegen: $(SRC)/*.h $(SRC)/*.cc $(SRC)/*.cpp
 	$(CC) $(SRC)/Type.cpp $(SRC)/Node.cpp $(SRC)/x86generator.cpp $(FLAGS) -o $(BIN)/codegen

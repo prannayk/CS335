@@ -3,11 +3,13 @@
 #include "Node.h"
 #include "Type.h"
 #include "enums.h"
+#include "ir.h"
 #include <queue>
 #include <vector>
 #include <typeinfo>
 #include <string.h>
 #include <iostream>
+#include <assert.h>
 
 #define PTRSIZE 8
 #define RBPSAVESPACE 8
@@ -28,14 +30,19 @@ using namespace std;
 class X86Generator{
  private:
   ST* globalTable;
+  vector<Instruction*> instructionList;
   string text;
   int totalAllocatedSpace = 0; // Note: reset this at the start of every new func def
   string currentFName = "";
+  map<string, ComplexBlock*> complexBlocks;
  public:
-  X86Generator(ST*);
+  X86Generator(vector<Instruction*>, ST*);
   ST* Flatten(ST*);
   string Prolog();
   string Epilog();
   string StackAlloc();
   string Output() const { return this->text; }
+  string GenerateFunctions();
+  string GenerateFunction();
+  string Generate();
 };

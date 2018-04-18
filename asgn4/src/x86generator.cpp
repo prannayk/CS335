@@ -1,13 +1,20 @@
 #include "x86generator.h"
 
-X86Generator::X86Generator(ST* aGlobalTable)
+X86Generator::X86Generator(vector<Instruction*> aInstructionList,
+                           ST* aGlobalTable)
   : globalTable(aGlobalTable)
+  , instructionList(aInstructionList)
   , currentFName("main") // remember to fix this
 {}
 
 string
 X86Generator::StackAlloc()
 {
+
+    // 1. Allocate space on stack for temps
+    // 2. Allocate space on heap for arrays and structs
+    // 3. Transfer arguments from registers to newly allocated space.
+
     ST* fnTable = ST::funcSTs[this->currentFName];
     string malloced = "";
     vector<STEntry*> deferredMallocs;
@@ -114,8 +121,8 @@ X86Generator::Prolog()
     // 1. Fix stack base and top.
     // 2. Save any callee saved registers. (Not to do, because we will write
     // back all anyway while calling a function)
-    // 3. Move parameters from register to stack space.
-    string prolog = this->currentFName + ":";
+    string prolog = ".globl " + this->currentFName;
+    APPEND(prolog, this->currentFName + ":");
     INSTR1(prolog, pushq, "%rbp");
     INSTR2(prolog, movq, "%rsp", "%rbp");
     INSTR2(prolog, subq, NUM(this->totalAllocatedSpace), "%rsp");
@@ -130,4 +137,52 @@ X86Generator::Epilog()
     INSTR1(epilog, popq, "%rbp");
     INSTR0(epilog, retq);
     return epilog;
+}
+
+string
+X86Generator::GenerateFunctions()
+{
+    string gen = "";
+    string s, p, e, fncode;
+    for (auto f : ST::funcDefs) {
+        this->currentFName = f.first;
+        this->totalAllocatedSpace = 0;
+        // This order matters, because p depends on s's side effect.
+        s = this->StackAlloc();
+        p = this->Prolog();
+        e = this->Epilog();
+        fncode = this->GenerateFunction();
+        gen += p + s + fncode + e + "\n";
+    }
+    return gen;
+}
+
+string
+X86Generator::GenerateFunction()
+{
+    string genSt = "";
+    if (this->complexBlocks.count(this->currentFName) == 0) {
+        REPORTERR("Complex block does not exist for a function");
+    }
+    ComplexBlock* cb = this->complexBlocks[this->currentFName];
+    for (auto sbkey : cb->blocks) {
+        // Iterate over, and generate all the simple blocks.
+        // TODO: GenerateSimpleBlock()
+        // Just print the label out somehow
+        SimpleBlock* sb = sbkey.second;
+        APPEND(genSt,
+               ("labelm" + to_string(sb->getLabel()) + ":" +
+                to_string(sb->instructions.size())));
+    }
+    return genSt;
+}
+
+string
+X86Generator::Generate()
+{
+    // The basic generation method which calls all other methods.
+    IR ir(this->instructionList, globalTable);
+    ir.fillStructure();
+    this->complexBlocks = ir.complexBlocks;
+    return GenerateFunctions();
 }
