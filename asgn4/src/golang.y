@@ -2017,7 +2017,6 @@ int main(int argc, char** argv) {
       ;
     }
     printST(root);
-    cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl;
     cout << "fin" << endl;
     return 0;
 }
