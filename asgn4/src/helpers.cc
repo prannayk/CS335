@@ -189,7 +189,7 @@ printST(ST* root)
     for (it = root->table.begin(); it != root->table.end(); it++) {
         cout << string(root->depth * 8, ' ') << (it->second)->name
              << " of type " << (it->second)->type->GetRepresentation()
-             << "and number " << ((it->second)->type)->GetTypeClass() << endl;
+             << " and number " << ((it->second)->type)->GetTypeClass() << endl;
     }
 
     cout << string(root->depth, ' ') << "Calling recursively: " << endl;

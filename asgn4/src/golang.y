@@ -1066,6 +1066,12 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
   ST::funcDefs[($4->children[0])->matched] = t;
+  if (ST::structPush) {
+    (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
+    ST::structPush = false;
+    ST::structName = "";
+    ST::funcName = "";
+  }
 } else {
   // Throw error!
   semanticError("Unexpected function declaration.", true);
@@ -1098,6 +1104,12 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   ST::funcDefs[($4->children[0])->matched] = t;
+  if (ST::structPush) {
+    (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
+    ST::structPush = false;
+    ST::structName = "";
+    ST::funcName = "";
+  }
 } else {
   // Throw error!
     semanticError("Unexpected generator declaration.", true);
@@ -1131,8 +1143,14 @@ setScopeReturnType($5->getType(), curr);
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
 $$->Add($4); // ID
 $$->Add($5); // (
-$2->children[0]->children.insert($2->children[0]->children.end(), $6->children[0]->children.begin(), $6->children[0]->children.end());
-$2->children[0]->count = $2->count + $6->count;
+// Add stuff to the structdefinitiontype
+ST::structPush = true;
+ST::structName = $2->children[0]->children[1]->content;
+ST::funcName = $4;
+/*$2->children[0]->children.insert($2->children[0]->children.end(), $6->children[0]->children.begin(), $6->children[0]->children.end());*/
+/*$2->children[0]->count = $2->count + $6->count;*/
+$2->children.insert($2->children.end(), $6->children.begin(), $6->children.end());
+$2->count = $2->count + $6->count;
 $$->Add($2); // Fixed up argument list
 $$->Add($7); // )
 $$->Add($8); // FunctionResult

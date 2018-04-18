@@ -95,6 +95,10 @@ map<string, FuncType*> ST::funcDefs;
 vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
 
+bool ST::structPush = false;
+string ST::structName = "";
+string ST::funcName = "";
+
 ST::ST(int aDepth, ST* aParent)
 {
     depth = aDepth;

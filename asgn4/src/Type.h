@@ -60,8 +60,9 @@ class StructDefinitionType : public Type
   public:
     map<string, Type*> fields;
     string randomSuffix;
-    map <string, int> mem_size_list;
-    map <string, int> offset;
+    map<string, int> mem_size_list;
+    map<string, int> offset;
+    map<string, FuncType*> structFunctions;
 
     map<string, Type*> GetFields() const;
     string Hoist(string aStructVariableName,
