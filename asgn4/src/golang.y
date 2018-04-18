@@ -8,6 +8,7 @@
 #include "helpers.h"
 #include "Type.h"
 #include <typeinfo>
+#include "x86generator.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -1075,6 +1076,8 @@ if (($4->children).size() == 5) {
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
+    ST::funcSTs[($4->children[0])->matched] = curr;
+    ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   }
 } else {
   // Throw error!
@@ -1114,6 +1117,8 @@ if (($4->children).size() == 5) {
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
+    ST::funcSTs[($4->children[0])->matched] = curr;
+    ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   }
 } else {
   // Throw error!
@@ -2096,6 +2101,7 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
+int xgen(ST*);
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -2116,10 +2122,24 @@ int main(int argc, char** argv) {
       ;
     }
     printST(root);
-    cout << "fin" << endl;
-    return 0;
+    /* cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl; */
+    /* cout << "fin" << endl; */
+    return xgen(root);
 }
 
 void yyerror(const char *s) {
     syntaxError(s);
 }
+
+
+int
+xgen(ST* glob)
+{
+    X86Generator gen(glob);
+    string s = gen.StackAlloc();
+    string p =  gen.Prolog();
+    string e = (gen.Epilog());
+    cout << (p + s + e) << endl;
+    return 0;
+}
+

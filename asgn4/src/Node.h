@@ -179,8 +179,9 @@ class STEntry
 
     bool dirty;
     bool valid;
-    
+
     Register reg;
+    int offset;
 
     bool live;
     int nextUse;
@@ -224,9 +225,11 @@ class STEntry
 
 class ST {
    public:
-    
      static map<string, StructDefinitionType*> structDefs;
      static multimap<string, FuncType*> funcDefs;
+     static map<string, FuncType*> funcDefs;
+     static map<string, ST*> funcSTs;
+     static map<string, vector<string>> funcParamNamesInOrder;
      static vector<STEntry*> paramEntryStack;
 
      static bool paramPush;

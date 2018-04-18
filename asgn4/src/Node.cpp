@@ -92,6 +92,8 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
 
 map<string, StructDefinitionType*> ST::structDefs;
 multimap<string, FuncType*> ST::funcDefs;
+map<string, ST*> ST::funcSTs;
+map<string, vector<string>> ST::funcParamNamesInOrder;
 vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
 
