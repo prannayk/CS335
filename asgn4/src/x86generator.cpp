@@ -5,6 +5,7 @@ X86Generator::X86Generator(vector<Instruction*> aInstructionList,
   : globalTable(aGlobalTable)
   , instructionList(aInstructionList)
   , currentFName("main") // remember to fix this
+  , regDesc()
 {}
 
 string
@@ -184,5 +185,111 @@ X86Generator::Generate()
     IR ir(this->instructionList, globalTable);
     ir.fillStructure();
     this->complexBlocks = ir.complexBlocks;
+    // TODO: Global allocation.
+    // TODO: Globals should be marked separately so that they can be written
+    // back as per requirement.
     return GenerateFunctions();
+}
+
+STEntry*
+X86Generator::dummyGetRegister(STEntry* old)
+{
+    static int regn = -1;
+    regn = (regn + 1) % 13;
+
+    old->setReg((Register)(regn + 1));
+    return this->regDesc.getRegisterSTE((Register)(regn + 1));
+}
+
+void
+X86Generator::MaybeWriteBack(Register aRegister)
+{
+    STEntry* ste;
+    // Can't writeback nothing or if already written back.
+    if ((ste = regDesc.getRegisterSTE(aRegister)) == nullptr ||
+        ste->getDirty() == 0) {
+        return;
+    }
+
+    INSTR2(this->text, movq, STEREG(ste), FROMRBP(ste->offset));
+    ste->setDirty(0);
+}
+
+void
+X86Generator::LoadFromMemory(STEntry* aSte)
+{
+    if (aSte == nullptr || aSte->getReg() == NONE ||
+        aSte != this->regDesc.getRegisterSTE(aSte->getReg())) {
+        // Can'load from nothing, can't load into if register is
+        // not owned by STE.
+        return;
+    }
+
+    INSTR2(this->text, movq, FROMRBP(aSte->offset), STEREG(aSte));
+    // Freshly loaded data is not dirty.
+    aSte->setDirty(0);
+}
+
+void
+X86Generator::MaybeGetRegister(STEntry* aRegisterFor, bool aLoadImmediately)
+{
+    if (aRegisterFor->getReg() == NONE) {
+        STEntry* oldSymbolForRegister = dummyGetRegister(aRegisterFor);
+        assert(aRegisterFor->getReg() != NONE);
+
+        // Write back if needed.
+        if (oldSymbolForRegister != nullptr) {
+            MaybeWriteBack(oldSymbolForRegister->getReg());
+        }
+
+        // Make sure the descriptors look as they should.
+        SynchronizeDescriptors(
+          aRegisterFor->getReg(), oldSymbolForRegister, aRegisterFor);
+
+        if (aLoadImmediately) {
+            // This needs to be done only when we didn't have a register,
+            // since otherwise we don't need to load from memory.
+            // In fact we should not, since the value in register
+            // will be more recent than that in memory.
+            LoadFromMemory(aRegisterFor);
+        }
+    }
+}
+
+void
+X86Generator::FlushRegisters()
+{
+    for (int r = RAX; r <= R14; r++) {
+        STEntry* ste = this->regDesc.getRegisterSTE((Register)r);
+        if (ste != nullptr) {
+            // We need to clear this up, writeback has been called before.
+            assert(ste->getDirty() == 0);
+            ste->setReg(NONE);
+            this->regDesc.setRegisterSTE((Register)r, nullptr);
+        }
+    }
+}
+void
+X86Generator::SynchronizeDescriptors(Register aRegister,
+                                     STEntry* oldSymbol,
+                                     STEntry* newSymbol)
+{
+    if (oldSymbol != nullptr) {
+        assert(oldSymbol->getReg() == aRegister);
+        oldSymbol->setReg(NONE);
+        oldSymbol->setDirty(0);
+    }
+
+    assert(newSymbol->getReg() == aRegister);
+    this->regDesc.setRegisterSTE(aRegister, newSymbol);
+    newSymbol->setDirty(0);
+}
+
+void
+X86Generator::WriteBackAll()
+{
+    // Note: this depends on the enums being sequential.
+    for (int r = RAX; r <= R14; r++) {
+        MaybeWriteBack((Register)r);
+    }
 }

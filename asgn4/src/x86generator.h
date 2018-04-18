@@ -20,6 +20,7 @@
 #define INSTR2(v, I, o1, o2) v = v + "\n\t" + #I + "\t" + o1 + ",\t" + o2
 #define APPENDT(v, lit) v = v + "\n\t" + lit
 #define APPEND(v, lit) v = v + "\n" + lit
+#define STEREG(s) (this->regDesc.getX86Name(s->getReg()))
 #define REPORTERR(err)                                                         \
     cerr << "\033[1;31mError: \033[0m(" << __FUNCTION__ << ", " << __LINE__    \
          << "): " << err << endl;                                              \
@@ -35,6 +36,7 @@ class X86Generator{
   int totalAllocatedSpace = 0; // Note: reset this at the start of every new func def
   string currentFName = "";
   map<string, ComplexBlock*> complexBlocks;
+  RegisterDescriptor regDesc;
  public:
   X86Generator(vector<Instruction*>, ST*);
   ST* Flatten(ST*);
@@ -45,4 +47,14 @@ class X86Generator{
   string GenerateFunctions();
   string GenerateFunction();
   string Generate();
+  STEntry* dummyGetRegister(STEntry* old);
+  void MaybeWriteBack(Register aRegister);
+  void LoadFromMemory(STEntry* aSte);
+  void MaybeGetRegister(STEntry* aRegisterFor,
+                        bool aLoadImmediately);
+  void SynchronizeDescriptors(Register aRegister,
+                              STEntry* oldSymbol,
+                              STEntry* newSymbol);
+  void WriteBackAll();
+  void FlushRegisters();
 };

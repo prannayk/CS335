@@ -194,7 +194,7 @@ IR::fillStructure()
     }
 
     // Do nextuse stuff
-    // return; // TODO: Fix with abhibhav, use dummy function right now.
+    return; // TODO: Fix with abhibhav, use dummy function right now.
     vector<SimpleBlock*>::iterator riter;
     vector<Instruction*>::reverse_iterator ri;
 
