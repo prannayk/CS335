@@ -7,7 +7,7 @@ extern void
 fillTypeList()
 {
     TypeList["int"] = new BasicType("int");
-    TypeList["int"]->mem_size = 4;
+    TypeList["int"]->mem_size = 8; // ints are int64
     TypeList["float"] = new BasicType("float");
     TypeList["float"]->mem_size = 8;
     TypeList["char"] = new BasicType("char");
