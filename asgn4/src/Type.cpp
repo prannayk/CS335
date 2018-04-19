@@ -3,7 +3,9 @@
 
 map<string, Type*> TypeList; // list of string to type* for reference
 
-extern void fillTypeList (){
+extern void
+fillTypeList()
+{
     TypeList["int"] = new BasicType("int");
     TypeList["int"]->mem_size = 4;
     TypeList["float"] = new BasicType("float");
@@ -61,7 +63,7 @@ BasicType::BasicType(string aName)
   , variadic(false)
 // , pointer(false)
 {
-    if(TypeList.count(aName)){
+    if (TypeList.count(aName)) {
         this->mem_size = TypeList[aName]->mem_size;
     }
     this->representation = aName;
@@ -76,7 +78,7 @@ BasicType::BasicType(string aName, bool flag)
 {
     this->representation = aName;
     this->type = 1;
-    if(TypeList.count(aName)){
+    if (TypeList.count(aName)) {
         this->mem_size = TypeList[aName]->mem_size;
     }
 }
@@ -105,7 +107,8 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
     }
     this->representation += ") " + returnType->GetRepresentation();
     this->type = 2;
-    this->mem_size = 8; // store function type variables as function pointers and therefore take pointer amount of memory
+    this->mem_size = 8; // store function type variables as function pointers
+                        // and therefore take pointer amount of memory
 }
 
 FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
@@ -123,7 +126,8 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
     }
     this->representation += ") " + returnType->GetRepresentation();
     this->type = 2;
-    this->mem_size = 8; // store function type variables as function pointers and therefore take pointer amount of memory
+    this->mem_size = 8; // store function type variables as function pointers
+                        // and therefore take pointer amount of memory
 }
 
 Type*
@@ -146,13 +150,12 @@ StructDefinitionType::StructDefinitionType(map<string, Type*> aFields)
     this->type = 3;
     int sum = 0;
     std::map<string, Type*>::iterator it;
-    for(it = aFields.begin(); it!=aFields.end(); ++it ){
+    for (it = aFields.begin(); it != aFields.end(); ++it) {
         this->mem_size_list[it->first] = it->second->mem_size;
         this->offset[it->first] = sum;
-        sum+= it->second->mem_size;
+        sum += it->second->mem_size;
     }
     this->mem_size = sum;
-
 }
 
 StructDefinitionType::StructDefinitionType(vector<string> fieldNames,
@@ -172,10 +175,10 @@ StructDefinitionType::StructDefinitionType(vector<string> fieldNames,
     this->type = 3;
     int sum = 0;
     std::map<string, Type*>::iterator it;
-    for(it = fields.begin(); it!=fields.end(); ++it ){
+    for (it = fields.begin(); it != fields.end(); ++it) {
         this->mem_size_list[it->first] = it->second->mem_size;
         this->offset[it->first] = sum;
-        sum+= it->second->mem_size;
+        sum += it->second->mem_size;
     }
     this->mem_size = sum;
 }
@@ -260,28 +263,39 @@ PointerType::GetUnderlyingType() const
     return this->underlyingType;
 }
 
-int Type::GetMemSize() const 
+int
+Type::GetMemSize() const
 {
     return this->mem_size;
 }
 
-StructType::StructType(Type* aStructType, string aName, int aMem) {
-  structType = aStructType;
-  this->type = 5;
-  this->mem_size = aMem;
-  this->structName = aName;
-  this->representation = aName;
+StructType::StructType(Type* aStructType, string aName, int aMem)
+{
+    structType = aStructType;
+    this->type = 5;
+    this->mem_size = aMem;
+    this->structName = aName;
+    this->representation = aName;
 }
 
 Type*
-StructType::GetStructType() const {
-  return this->structType;
+StructType::GetStructType() const
+{
+    return this->structType;
 }
 
 Type*
-StructType::GetStructMemberType(string a) {
-  if ((baseType->fields).count(a)) {
-    return baseType->fields[a];
-  }
-  return NULL;
+StructType::GetStructMemberType(string a)
+{
+    if ((baseType->fields).count(a)) {
+        return baseType->fields[a];
+    }
+    return NULL;
+}
+
+InterfaceType::InterfaceType(string aInterfaceName, vector<FuncType*> aFuncList)
+  : interfaceName(aInterfaceName)
+  , funcList(aFuncList)
+{
+    this->representation = interfaceName;
 }

@@ -58,10 +58,12 @@ class StructDefinitionType : public Type
 {
 
   public:
+    map<string, InterfaceType*> implemented;
     map<string, Type*> fields;
     string randomSuffix;
-    map <string, int> mem_size_list;
-    map <string, int> offset;
+    map<string, int> mem_size_list;
+    map<string, int> offset;
+    map<string, FuncType*> structFunctions;
 
     map<string, Type*> GetFields() const;
     string Hoist(string aStructVariableName,
@@ -118,6 +120,14 @@ class PointerType : public Type
   public:
     Type* GetUnderlyingType() const;
     PointerType(Type* aUnderlyingType);
+};
+
+class InterfaceType : public Type
+{
+  public:
+    string interfaceName;
+    vector<FuncType*> funcList;
+    InterfaceType(string, vector<FuncType*>);
 };
 
 extern map<string, Type*> TypeList;
