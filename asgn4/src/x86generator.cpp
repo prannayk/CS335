@@ -39,6 +39,7 @@ X86Generator::StackAlloc()
 
         for (auto x : s->table) {
             STEntry* s1 = x.second;
+            s1->setReg(NONE);
             s1->offset = totalSpace;
             if (s1->getType()->GetTypeClass() == 5 ||
                 s1->getType()->GetTypeClass() == 4) {
@@ -278,7 +279,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
         // Quit early if we're calling a function and we're interrupted by some
         // other instructions.
         if (functionCallMode &&
-            (instruction->getOp() != PARAM || instruction->getOp() != CALL)) {
+            (instruction->getOp() != PARAM && instruction->getOp() != CALL)) {
             REPORTERR("Function call interrupted by other instructions");
         }
         if (instruction->getOp() == PARAM) {
@@ -294,14 +295,14 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
                            movq,
                            memoryOrConstant((void*)instruction->getV1(),
                                             instruction->getV1AddMode()),
-                           "%rsi");
+                           "%rdi");
                     break;
                 case 2:
                     INSTR2(this->text,
                            movq,
                            memoryOrConstant((void*)instruction->getV1(),
                                             instruction->getV1AddMode()),
-                           "%rdi");
+                           "%rsi");
                     break;
                 case 3:
                     INSTR2(this->text,
