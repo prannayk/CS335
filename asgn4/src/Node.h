@@ -228,7 +228,6 @@ class ST {
    public:
      static map<string, StructDefinitionType*> structDefs;
      static multimap<string, FuncType*> funcDefs;
-     static map<string, FuncType*> funcDefs;
      static map<string, ST*> funcSTs;
      static map<string, vector<string>> funcParamNamesInOrder;
      static vector<STEntry*> paramEntryStack;

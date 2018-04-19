@@ -1073,13 +1073,13 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
-    ST::funcSTs[($4->children[0])->matched] = curr;
-    ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   }
 } else {
   // Throw error!
@@ -1114,13 +1114,13 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
-    ST::funcSTs[($4->children[0])->matched] = curr;
-    ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   }
 } else {
   // Throw error!
