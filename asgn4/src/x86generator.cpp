@@ -394,7 +394,6 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
         // Unary ops start here --------------------------------------- //
         if (instruction->getOp() >= 200 && instruction->getOp() < 250) {
-            continue;
             if (instruction->getV1AddMode() != REGISTER) {
                 REPORTERR("Tried to write to non memory location");
             }
@@ -538,6 +537,11 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
                 REPORTERR("Tried to write to non memory location");
             }
 
+            // Need to write back to prevent memory being overwritten in case it
+            // has already been changed.
+            WriteBackAll();
+            FlushRegisters();
+
             // Prepare the first operand.
             STEntry* result = (STEntry*)instruction->getV1();
             MaybeGetRegister(result, false);
@@ -551,6 +555,45 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             INSTR2(this->text, movq, op2, "(" + op1 + ")");
         }
 
+        if (instruction->getOp() == IELEM) {
+            if (instruction->getV1AddMode() != REGISTER ||
+                instruction->getV2AddMode() != REGISTER) {
+                REPORTERR(
+                  "Either the source or the base is not a mem location");
+            }
+
+            // The IELEM instruction has the form (source, base, offset)
+
+            // All the three operands should be registers for this to work.
+
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV1(), instruction->getV2AddMode(), true);
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV2(), instruction->getV2AddMode(), true);
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV3(), instruction->getV3AddMode(), true);
+
+            string op1 = registerOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode());
+            string op2 = registerOrConstant((void*)instruction->getV2(),
+                                            instruction->getV2AddMode());
+            string offsetOp = "";
+
+            // op3 might be a number or a register, we need to deal with it very
+            // differently.
+            if (instruction->getV3AddMode() == CONSTANT_VAL) {
+                long o = *(long*)instruction->getV3();
+                offsetOp = to_string(o) + "(" + op2 + ")";
+            } else if (instruction->getV3AddMode() == REGISTER) {
+                string o = registerOrConstant((void*)instruction->getV3(),
+                                              instruction->getV3AddMode());
+                offsetOp = "(" + op2 + ", " + o + ", 1)";
+            } else {
+                REPORTERR("Unexpected type of addressing mode of offset");
+            }
+
+            INSTR2(this->text, movq, op1, offsetOp);
+        }
         // End memory operations
     }
 }

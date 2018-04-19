@@ -816,10 +816,10 @@ if(curr->rValueMode){
     $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
 
 } else {
-    cout << "pob" << ($1->children).size() << endl;
-    cout << ($1->children)[0]->content << endl;
-    cout << ($1->children)[1]->matched << endl;
-    cout << ($1->children)[2]->matched << endl;
+    /* cout << "pob" << ($1->children).size() << endl; */
+    /* cout << ($1->children)[0]->content << endl; */
+    /* cout << ($1->children)[1]->matched << endl; */
+    /* cout << ($1->children)[2]->matched << endl; */
 
 		Node* t = new Node("Literal", new BasicType("NOTYPE"));
     StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
@@ -1097,7 +1097,7 @@ string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
-curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
+/* curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType())); */
 }
 ;
 GeneratorDeclaration  :

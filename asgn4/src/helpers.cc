@@ -36,9 +36,11 @@ checkListType(vector<Type*> source, Node* target)
 }
 
 extern void*
-correctPointer(string s, ST* curr){
-    void * arg1;
-    if (curr->getVar(s))    return curr->getVar(s);
+correctPointer(string s, ST* curr)
+{
+    void* arg1;
+    if (curr->getVar(s))
+        return curr->getVar(s);
     else {
         semanticError("Variable or temporary not found");
     }
@@ -129,7 +131,12 @@ generateInstructionsAssignment(Node* target, Node* source, ST* curr)
         }
         i_list.push_back(instr);
         if (!target->children[i]->matched.compare("ArrayAccess")) {
-            i_list = mergeInstructions(i_list, target->children[i]->patchInstruction);
+            i_list =
+              mergeInstructions(i_list, target->children[i]->patchInstruction);
+        }
+        if (!target->children[i]->matched.compare("StructAccess")) {
+            i_list =
+              mergeInstructions(i_list, target->children[i]->patchInstruction);
         }
     }
     return i_list;
@@ -206,7 +213,9 @@ populateST(Node* declNameList, Node* TypeName, ST* curr, bool constant)
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
         if (TypeName->type->GetTypeClass() == 5) { // This is a struct
-          curr->addStructEntry(declNameList->children[i]->children[0]->matched, TypeName->type->GetRepresentation());
+            curr->addStructEntry(
+              declNameList->children[i]->children[0]->matched,
+              TypeName->type->GetRepresentation());
         }
         curr->addEntry(declNameList->children[i]->children[0]->matched,
                        TypeName->type,
@@ -226,9 +235,10 @@ populateSTInfer(Node* declNameList, ST* curr)
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
         /* curr->addEntry(declNameList->children[i]->children[0]->matched, */
-                       /* declNameList->children[i]->getType(), */
-                       /* false); */
-        cout << "Entry" << declNameList->children[i]->children[0]->matched << endl;
+        /* declNameList->children[i]->getType(), */
+        /* false); */
+        cout << "Entry" << declNameList->children[i]->children[0]->matched
+             << endl;
     }
 }
 
@@ -347,47 +357,58 @@ generateInstructionReadArray(Node* source, ST* curr)
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
     curr->addEntry(temp2, new BasicType("int"), false);
-    void* arg1 = correctPointer(source->content,curr); 
+    void* arg1 = correctPointer(source->content, curr);
     if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
         semanticError("Invalid operation for non-array type");
     }
     vector<string>::iterator it;
     Type* type = ((ArrayType*)source->getType())->GetArrayType();
     vector<Instruction*> i_list;
-    for(it = source->str_child.begin(); it != source->str_child.end(); ++it){
-       void * arg2 = correctPointer(*it, curr);
-       if(arg2==NULL){
-        semanticError("Incorrect Temp name");
-       } else {
-            if(!(*curr->getVar(*it)->getType() == *(new BasicType("int")))){
+    for (it = source->str_child.begin(); it != source->str_child.end(); ++it) {
+        void* arg2 = correctPointer(*it, curr);
+        if (arg2 == NULL) {
+            semanticError("Incorrect Temp name");
+        } else {
+            if (!(*curr->getVar(*it)->getType() == *(new BasicType("int")))) {
                 semanticError("Can not index array with non integer type");
             } else {
-                long * ptr = new long;
+                long* ptr = new long;
                 *ptr = type->GetMemSize();
-                Instruction * instr = new Instruction(MUL_OPER, correctPointer(temp2, curr), // multiply by size of allocation
-                                            arg2, ptr,
-                                            REGISTER, REGISTER, REGISTER,
-                                            new BasicType("int"),
-                                            new BasicType("int"),
-                                            new BasicType("int")
-                                            );
+                Instruction* instr = new Instruction(
+                  MUL_OPER,
+                  correctPointer(temp2, curr), // multiply by size of allocation
+                  arg2,
+                  ptr,
+                  REGISTER,
+                  REGISTER,
+                  CONSTANT_VAL,
+                  new BasicType("int"),
+                  new BasicType("int"),
+                  new BasicType("int"));
                 i_list.push_back(instr);
-                instr = new Instruction(ADD_OPER,   correctPointer(temp, curr), // add offset to offset temporary
-                                                    correctPointer(temp2, curr),
-                                                    correctPointer(temp, curr),
-                                                    REGISTER, REGISTER, REGISTER,
-                                                    new BasicType("int"),
-                                                    new BasicType("int"),
-                                                    new BasicType("int"));
-                if(type->GetTypeClass() == 4)    type = ((ArrayType*)type)->GetArrayType();
-                else break;
+                instr = new Instruction(
+                  ADD_OPER,
+                  correctPointer(temp, curr), // add offset to offset temporary
+                  correctPointer(temp2, curr),
+                  correctPointer(temp, curr),
+                  REGISTER,
+                  REGISTER,
+                  REGISTER,
+                  new BasicType("int"),
+                  new BasicType("int"),
+                  new BasicType("int"));
+                if (type->GetTypeClass() == 4)
+                    type = ((ArrayType*)type)->GetArrayType();
+                else
+                    break;
             }
-       }
+        }
     }
     Type* currentType = type;
     source->tmp = "temp" + to_string(clock());
     type = ((ArrayType*)source->getType())->GetArrayType();
-    curr->addEntry(source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
+    curr->addEntry(
+      source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
     instr = new Instruction(
       EELEM,
       correctPointer(source, curr),
@@ -398,52 +419,54 @@ generateInstructionReadArray(Node* source, ST* curr)
       REGISTER,
       type,
       new BasicType("int"),
-      new BasicType("int")); // target is the temporary, temp is offset (
-                          // multiplied by size of base type), and 3rd input STE
-                          // of array (should be translated to base address)
+      new BasicType(
+        "int")); // target is the temporary, temp is offset (
+                 // multiplied by size of base type), and 3rd input STE
+                 // of array (should be translated to base address)
     i_list.push_back(instr);
     source->setType(currentType);
     return i_list;
-      /* //TODO : set tmp with temporary variable */
-      /* //TODO : create redundant instruction in patchInstruction */
-      /* //TODO : convert back patching to multi map */
-     /* n1 = fixNodeForExpression(n1, curr); */
-     /* n2 = fixNodeForExpression(n2, curr); */
-     /* string s = "temp" + to_string(clock()); */
-     /* string* str = new string; */
-     /* *str = s; */
-     /* void* arg1 = correctPointer(n1, curr); */
-     /* if (arg1 != NULL) { */
-      /*    if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) { */
-      /*        semanticError("Non-Array Type indexed in operation"); */
-      /*    } */
-     /* } */
-     /* void* arg2 = correctPointer(n2, curr); */
-     /* Instruction* instr; */
-     /* source->addrMode = REGISTER; */
-     /* if (*(n2->getType()) != *(new BasicType("int"))) { */
-      /*    semanticError("Can not index array with non integer type"); */
-     /* } */
-     /* vector<Instruction*> i_list; */
-     /* long * num = new long; *num = n2->getType()->GetMemSize(); */
-     /* instr = new Instruction(MUL_OPER, arg2, arg2, num, */
-      /*                       n2->addrMode, n2->addrMode, REGISTER, */
-      /*                       n2->getType(), n2->getType(), new BasicType("int") */
-      /*                       ); */
-     /* i_list.push_back(instr); */
-     /* instr = new Instruction(EELEM, */
-      /*                        str, */
-      /*                        arg1, */
-      /*                        arg2, */
-      /*                        source->addrMode, */
-      /*                        n1->addrMode, */
-      /*                        n2->addrMode, */
-      /*                        source->getType(), */
-      /*                        n1->getType(), */
-      /*                        n2->getType()); */
-     /* source->tmp = s; */
-     /* i_list.push_back(instr); */
-     /* return i_list; */
+    /* //TODO : set tmp with temporary variable */
+    /* //TODO : create redundant instruction in patchInstruction */
+    /* //TODO : convert back patching to multi map */
+    /* n1 = fixNodeForExpression(n1, curr); */
+    /* n2 = fixNodeForExpression(n2, curr); */
+    /* string s = "temp" + to_string(clock()); */
+    /* string* str = new string; */
+    /* *str = s; */
+    /* void* arg1 = correctPointer(n1, curr); */
+    /* if (arg1 != NULL) { */
+    /*    if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) { */
+    /*        semanticError("Non-Array Type indexed in operation"); */
+    /*    } */
+    /* } */
+    /* void* arg2 = correctPointer(n2, curr); */
+    /* Instruction* instr; */
+    /* source->addrMode = REGISTER; */
+    /* if (*(n2->getType()) != *(new BasicType("int"))) { */
+    /*    semanticError("Can not index array with non integer type"); */
+    /* } */
+    /* vector<Instruction*> i_list; */
+    /* long * num = new long; *num = n2->getType()->GetMemSize(); */
+    /* instr = new Instruction(MUL_OPER, arg2, arg2, num, */
+    /*                       n2->addrMode, n2->addrMode, REGISTER, */
+    /*                       n2->getType(), n2->getType(), new BasicType("int")
+     */
+    /*                       ); */
+    /* i_list.push_back(instr); */
+    /* instr = new Instruction(EELEM, */
+    /*                        str, */
+    /*                        arg1, */
+    /*                        arg2, */
+    /*                        source->addrMode, */
+    /*                        n1->addrMode, */
+    /*                        n2->addrMode, */
+    /*                        source->getType(), */
+    /*                        n1->getType(), */
+    /*                        n2->getType()); */
+    /* source->tmp = s; */
+    /* i_list.push_back(instr); */
+    /* return i_list; */
 }
 
 extern vector<Instruction*>
@@ -455,47 +478,70 @@ generateInstructionWriteArray(Node* source, ST* curr)
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
     curr->addEntry(temp2, new BasicType("int"), false);
-    void* arg1 = correctPointer(source->content,curr); 
+    void* arg1 = correctPointer(source->content, curr);
     if (((STEntry*)arg1)->getType()->GetTypeClass() != 4) {
         semanticError("Invalid operation for non-array type");
     }
     vector<string>::iterator it;
-    Type* type = ((ArrayType*)source->getType())->GetArrayType();
+    Type* type = ((ArrayType*)(((STEntry*)arg1)->getType()))->GetArrayType();
     vector<Instruction*> i_list;
-    for(it = source->str_child.begin(); it != source->str_child.end(); ++it){
-       void * arg2 = correctPointer(*it, curr);
-       if(arg2==NULL){
-        semanticError("Incorrect Temp name");
-       } else {
-            if(!(*curr->getVar(*it)->getType() == *(new BasicType("int")))){
+    long* initVal = new long;
+    *initVal = 0;
+    i_list.push_back(new Instruction(
+      ASG,
+      correctPointer(temp, curr),
+      (void*)initVal,
+      REGISTER,
+      CONSTANT_VAL,
+      new BasicType("int"),
+      new BasicType("int")
+    ));
+    for (it = source->str_child.begin(); it != source->str_child.end(); ++it) {
+        void* arg2 = correctPointer(*it, curr);
+        if (arg2 == NULL) {
+            semanticError("Incorrect Temp name");
+        } else {
+            if (!(*curr->getVar(*it)->getType() == *(new BasicType("int")))) {
                 semanticError("Can not index array with non integer type");
             } else {
-                long * ptr = new long;
+                long* ptr = new long;
                 *ptr = type->GetMemSize();
-                Instruction * instr = new Instruction(MUL_OPER, correctPointer(temp2, curr), // multiply by size of allocation
-                                            arg2, ptr,
-                                            REGISTER, REGISTER, REGISTER,
-                                            new BasicType("int"),
-                                            new BasicType("int"),
-                                            new BasicType("int")
-                                            );
+                Instruction* instr = new Instruction(
+                  MUL_OPER,
+                  correctPointer(temp2, curr), // multiply by size of allocation
+                  arg2,
+                  ptr,
+                  REGISTER,
+                  REGISTER,
+                  CONSTANT_VAL,
+                  new BasicType("int"),
+                  new BasicType("int"),
+                  new BasicType("int"));
                 i_list.push_back(instr);
-                instr = new Instruction(ADD_OPER,   correctPointer(temp, curr), // add offset to offset temporary
-                                                    correctPointer(temp2, curr),
-                                                    correctPointer(temp, curr),
-                                                    REGISTER, REGISTER, REGISTER,
-                                                    new BasicType("int"),
-                                                    new BasicType("int"),
-                                                    new BasicType("int"));
-                if(type->GetTypeClass() == 4)    type = ((ArrayType*)type)->GetArrayType();
-                else break;
+                instr = new Instruction(
+                  ADD_OPER,
+                  correctPointer(temp, curr), // add offset to offset temporary
+                  correctPointer(temp, curr),
+                  correctPointer(temp2, curr),
+                  REGISTER,
+                  REGISTER,
+                  REGISTER,
+                  new BasicType("int"),
+                  new BasicType("int"),
+                  new BasicType("int"));
+                  i_list.push_back(instr);
+                if (type->GetTypeClass() == 4)
+                    type = ((ArrayType*)type)->GetArrayType();
+                else
+                    break;
             }
-       }
+        }
     }
     Type* currentType = type;
     source->tmp = "temp" + to_string(clock());
     type = ((ArrayType*)source->getType())->GetArrayType();
-    curr->addEntry(source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
+    curr->addEntry(
+      source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
     instr = new Instruction(
       IELEM,
       correctPointer(source, curr),
@@ -506,65 +552,77 @@ generateInstructionWriteArray(Node* source, ST* curr)
       REGISTER,
       type,
       new BasicType("int"),
-      new BasicType("int")); // target is the temporary, temp is offset (
-                          // multiplied by size of base type), and 3rd input STE
-                          // of array (should be translated to base address)
+      new BasicType(
+        "int")); // target is the temporary, temp is offset (
+                 // multiplied by size of base type), and 3rd input STE
+                 // of array (should be translated to base address)
     i_list.push_back(instr);
     source->setType(currentType);
     return i_list;
 }
 
 extern vector<Instruction*>
-generateInstructionReadStruct(Node* source, Node* n1, Node* n2, Type* ty, ST* curr)
+generateInstructionReadStruct(Node* source,
+                              Node* n1,
+                              Node* n2,
+                              Type* ty,
+                              ST* curr)
 {
-      //TODO : set tmp with temporary variable
-      //TODO : create redundant instruction in patchInstruction
-      //TODO : convert back patching to multi map
+    // TODO : set tmp with temporary variable
+    // TODO : create redundant instruction in patchInstruction
+    // TODO : convert back patching to multi map
 
-     n1 = fixNodeForExpression(n1, curr);
-     n2 = fixNodeForExpression(n2, curr);
-     string s = "temp" + to_string(clock());
-     string* str = new string;
-     *str = s;
-     void* arg1 = correctPointer(n1->content, curr); // This should be n1->content I think
-     if (arg1 != NULL) {
-         if (((STEntry*)arg1)->getType()->GetTypeClass() != 5) {
-             semanticError("Non-Struct Type indexed in operation");
-         }
-     }
-     void* arg2 = correctPointer(n2, curr);
-     Instruction* instr;
-     source->addrMode = REGISTER;
-     if (*(n2->getType()) != *(new BasicType("int"))) {
-         semanticError("Can not index array with non integer type");
-     }
-     vector<Instruction*> i_list;
-     long * num = new long; *num = 1;
-     instr = new Instruction(EELEM,
-                             str,
-                             arg1,
-                             arg2,
-                             source->addrMode,
-                             n1->addrMode,
-                             n2->addrMode,
-                             ty,
-                             n1->getType(),
-                             n2->getType());
-     source->tmp = s;
-     i_list.push_back(instr);
-     source->setType(ty);
-     return i_list;
+    n1 = fixNodeForExpression(n1, curr);
+    n2 = fixNodeForExpression(n2, curr);
+    string s = "temp" + to_string(clock());
+    string* str = new string;
+    *str = s;
+    void* arg1 =
+      correctPointer(n1->content, curr); // This should be n1->content I think
+    if (arg1 != NULL) {
+        if (((STEntry*)arg1)->getType()->GetTypeClass() != 5) {
+            semanticError("Non-Struct Type indexed in operation");
+        }
+    }
+    void* arg2 = correctPointer(n2, curr);
+    Instruction* instr;
+    source->addrMode = REGISTER;
+    if (*(n2->getType()) != *(new BasicType("int"))) {
+        semanticError("Can not index array with non integer type");
+    }
+    vector<Instruction*> i_list;
+    long* num = new long;
+    *num = 1;
+    instr = new Instruction(EELEM,
+                            str,
+                            arg1,
+                            arg2,
+                            source->addrMode,
+                            n1->addrMode,
+                            n2->addrMode,
+                            ty,
+                            n1->getType(),
+                            n2->getType());
+    source->tmp = s;
+    i_list.push_back(instr);
+    source->setType(ty);
+    return i_list;
 }
 
 extern vector<Instruction*>
-generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, ST* curr)
+generateInstructionWriteStruct(Node* source,
+                               Node* base,
+                               Node* addr,
+                               Type* ty,
+                               ST* curr)
 {
     Instruction* instr;
     string temp = "temp" + to_string(clock());
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
 
-    void* arg1 = correctPointer(base->content ,curr); // TODO : add in header new function
+    void* arg1 =
+      correctPointer(base->content, curr); // TODO : add in header new function
     if (((STEntry*)arg1)->getType()->GetTypeClass() != 5) {
         semanticError("Invalid operation for non-struct type");
     }
@@ -573,21 +631,24 @@ generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, S
 
     source->tmp = "temp" + to_string(clock());
 
-    curr->addEntry(source->tmp, ((StructType*)source->getType())->GetStructType(), false);
+    curr->addEntry(
+      source->tmp, ((StructType*)source->getType())->GetStructType(), false);
 
     instr = new Instruction(
       IELEM,
       correctPointer(source, curr),
-      correctPointer(addr, curr),
+      // XXXmilindl: Abhibhav pls check this
       arg1,
+      correctPointer(addr, curr),
       REGISTER,
       REGISTER,
-      REGISTER,
+      CONSTANT_VAL,
       ty,
       new BasicType("int"),
-      new BasicType("int")); // target is the temporary, arg2 is offset (
-                          // multiplied by size of base type), and 3rd input STE
-                          // of array (should be translated to base address)
+      new BasicType(
+        "int")); // target is the temporary, arg2 is offset (
+                 // multiplied by size of base type), and 3rd input STE
+                 // of array (should be translated to base address)
     i_list.push_back(instr);
     source->setType(ty);
     return i_list;
@@ -1067,17 +1128,21 @@ semanticError(string aMessage)
 }
 
 extern vector<Type*>
-verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args ){
+verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args)
+{
     vector<Type*> types;
-    if (count){
+    if (count) {
         vector<Node*>::iterator it = args->children.begin();
-        for(;it!=args->children.end(); ++it){
+        for (; it != args->children.end(); ++it) {
             types.push_back((*it)->getType());
         }
     }
     vector<FuncType*>::iterator cand = cand_list.begin();
-    for(;cand!=cand_list.end();++cand){
-        if(count == (*cand)->GetParamTypes().size() && (equal(types.begin(), types.begin()+types.size(), (*cand)->GetParamTypes().begin()))){
+    for (; cand != cand_list.end(); ++cand) {
+        if (count == (*cand)->GetParamTypes().size() &&
+            (equal(types.begin(),
+                   types.begin() + types.size(),
+                   (*cand)->GetParamTypes().begin()))) {
             vector<Type*> type_list = (*cand)->GetParamTypes();
             type_list.push_back((*cand)->GetReturnType());
             return type_list;
