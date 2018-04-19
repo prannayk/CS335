@@ -133,7 +133,7 @@ X86Generator::Prolog()
 string
 X86Generator::Epilog()
 {
-    string epilog = "";
+    string epilog = "\nepilog" + this->currentFName + ":";
     INSTR2(epilog, addq, NUM(this->totalAllocatedSpace), "%rsp");
     INSTR1(epilog, popq, "%rbp");
     INSTR0(epilog, retq);
@@ -168,14 +168,332 @@ X86Generator::GenerateFunction()
     ComplexBlock* cb = this->complexBlocks[this->currentFName];
     for (auto sbkey : cb->blocks) {
         // Iterate over, and generate all the simple blocks.
-        // TODO: GenerateSimpleBlock()
-        // Just print the label out somehow
         SimpleBlock* sb = sbkey.second;
-        APPEND(genSt,
-               ("labelm" + to_string(sb->getLabel()) + ":" +
-                to_string(sb->instructions.size())));
+        APPEND(genSt, ("labelm" + to_string(sb->getLabel()) + ":"));
+        this->text = "";
+        GenerateSimpleBlock(sb);
+        genSt += this->text;
     }
     return genSt;
+}
+
+string
+memoryOrConstant(void* op, AddressingMode a)
+{
+    if (a == REGISTER) {
+        STEntry* s = (STEntry*)op;
+        return FROMRBP(s->offset);
+    } else if (a == CONSTANT_VAL) {
+        long l = *(long*)op;
+        return NUM(l);
+    }
+    REPORTERR("Operand was not memoryOrConstant");
+    return "";
+}
+
+string
+registerOrConstant(void* op, AddressingMode a)
+{
+    if (a == CONSTANT_VAL) {
+        long l = *(long*)op;
+        return NUM(l);
+    }
+
+    if (a != REGISTER) {
+        REPORTERR("Operand was not registerOrConstant");
+        return "";
+    }
+    STEntry* ste = (STEntry*)op;
+    return RegisterDescriptor::getX86Name(ste->getReg());
+}
+
+enum ArithmeticInstructionType
+{
+    ABC,
+    AAB,
+    ABA,
+    ABB,
+    AAA
+};
+
+ArithmeticInstructionType
+arithmeticInstructionType(Instruction* aInstruction)
+{
+    auto op1 = aInstruction->getV1();
+    auto op2 = aInstruction->getV2();
+    auto op3 = aInstruction->getV3();
+    if (op1 == op2 && op2 == op3) {
+        return AAA;
+    }
+    if (op1 == op3 && op1 != op2) {
+        return ABA;
+    }
+    if (op1 == op2 && op1 != op3) {
+        return AAB;
+    }
+    if (op2 == op3 && op1 != op2) {
+        return ABB;
+    }
+    return ABC;
+}
+
+enum UnaryInstructionType
+{
+    AA,
+    AB
+};
+
+UnaryInstructionType
+unaryInstructionType(Instruction* aInstruction)
+{
+    auto op1 = aInstruction->getV1();
+    auto op2 = aInstruction->getV2();
+    if (op1 == op2) {
+        return AA;
+    }
+    return AB;
+}
+
+void
+X86Generator::maybeGetRegisterIfNotConstant(void* op,
+                                            AddressingMode a,
+                                            bool aLoadImmediately)
+{
+    if (a != REGISTER) {
+        return;
+    }
+    STEntry* ste = (STEntry*)op;
+    MaybeGetRegister(ste, aLoadImmediately);
+}
+
+void
+X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
+{
+    bool functionCallMode = false;
+    int numParams = 0;
+    vector<string> deferredArgs;
+    for (auto instruction : aSb->instructions) {
+
+        // Function calling starts here ------------------------------- //
+        // Quit early if we're calling a function and we're interrupted by some
+        // other instructions.
+        if (functionCallMode &&
+            (instruction->getOp() != PARAM || instruction->getOp() != CALL)) {
+            REPORTERR("Function call interrupted by other instructions");
+        }
+        if (instruction->getOp() == PARAM) {
+            if (functionCallMode == false) {
+                functionCallMode = true;
+                WriteBackAll();
+                FlushRegisters();
+            }
+            numParams++;
+            switch (numParams) {
+                case 1:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%rsi");
+                    break;
+                case 2:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%rdi");
+                    break;
+                case 3:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%rdx");
+                    break;
+                case 4:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%rcx");
+                case 5:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%r8");
+                case 6:
+                    INSTR2(this->text,
+                           movq,
+                           memoryOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode()),
+                           "%r9");
+                    break;
+                default:
+                    // We have more than 6 parameters, simply push to stack
+                    // However, we cannot simply push, since the order would be
+                    // reversed, so we defer the pushing.
+                    deferredArgs.push_back(
+                      memoryOrConstant((void*)instruction->getV1(),
+                                       instruction->getV1AddMode()));
+            }
+        }
+        if (instruction->getOp() == CALL) {
+            // First do the deferred args
+            reverse(deferredArgs.begin(), deferredArgs.end());
+            for (auto fragment : deferredArgs) {
+                INSTR1(this->text, pushq, fragment);
+            }
+
+            // Do any writebacks.
+            if (functionCallMode == false) {
+                WriteBackAll();
+                FlushRegisters();
+            }
+
+            // Finally, call
+            string* fName;
+            if (instruction->getV2AddMode() != STRING ||
+                (fName = (string*)instruction->getV2()) == nullptr) {
+                REPORTERR("Incorrect name in function invocation");
+            }
+
+            INSTR1(this->text, callq, *fName);
+
+            functionCallMode = false;
+            deferredArgs.clear();
+            numParams = 0;
+
+            // Now, the result is in RAX. We need to move it to the designated
+            // memory location.
+
+            STEntry* tempSte;
+            if (instruction->getV1AddMode() != REGISTER ||
+                (tempSte = (STEntry*)instruction->getV1()) == nullptr) {
+                REPORTERR("Incorrect return temporary supplied");
+            }
+
+            tempSte->setDirty(1);
+            INSTR2(this->text, movq, "%rax", FROMRBP(tempSte->offset));
+        }
+        // Function calling ends here --------------------------------- //
+
+        // Function returns start here -------------------------------- //
+        if (instruction->getOp() == RET) {
+            // Returning means the end of a simple block.
+            WriteBackAll();
+            FlushRegisters();
+            // First, load the thing to be returned into RAX TODO
+            string op = memoryOrConstant((void*)instruction->getV1(),
+                                         instruction->getV1AddMode());
+            INSTR2(this->text, movq, op, "%rax");
+            // Then, jump to the epilog
+            INSTR1(this->text, jmp, "epilog" + this->currentFName);
+        }
+        // Function returns end here ---------------------------------- //
+
+        // Unary ops start here --------------------------------------- //
+        if (instruction->getOp() >= 200 && instruction->getOp() < 250) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            UnaryInstructionType iType = unaryInstructionType(instruction);
+            if (iType == AB) {
+                // This is the most straightforward, A = op B
+                // Prepare the result register.
+                STEntry* result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, false);
+                result->setDirty(1);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+
+                // Prepare the other two operands.
+                maybeGetRegisterIfNotConstant((void*)instruction->getV2(),
+                                              instruction->getV2AddMode(),
+                                              true);
+                string op2 = registerOrConstant((void*)instruction->getV2(),
+                                                instruction->getV2AddMode());
+                INSTR2(this->text, movq, op2, op1);
+                UNARYINSTR2(this->text, instruction->getOp(), op1);
+            } else { // if (iType == AA)
+                // This is A = op A, this saves one mov instruction
+                // Prepare the result register.
+                STEntry* result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, false);
+                result->setDirty(1);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+                UNARYINSTR2(this->text, instruction->getOp(), op1);
+            }
+        }
+        // Unary ops end here ----------------------------------------- //
+
+        // Sane arithmetic ops start here (not div/mod) ---------------- //
+        if (instruction->getOp() < 30) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            ArithmeticInstructionType iType =
+              arithmeticInstructionType(instruction);
+            if (iType == ABC || iType == ABB) {
+                // This is the most straightforward case. A = B op C
+                // Prepare the result register.
+                STEntry* result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, false);
+                result->setDirty(1);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+
+                // Prepare the other two operands.
+                maybeGetRegisterIfNotConstant((void*)instruction->getV2(),
+                                              instruction->getV2AddMode(),
+                                              true);
+                maybeGetRegisterIfNotConstant((void*)instruction->getV3(),
+                                              instruction->getV3AddMode(),
+                                              true);
+                string op2 = registerOrConstant((void*)instruction->getV2(),
+                                                instruction->getV2AddMode());
+                string op3 = registerOrConstant((void*)instruction->getV3(),
+                                                instruction->getV3AddMode());
+                INSTR2(this->text, movq, op2, op1);
+                ARITHINSTR2(this->text, instruction->getOp(), op3, op1);
+            } else if (iType == AAB) {
+                // XXXmilindl: Untested because we never seem to generate ops of
+                // this kind in the IR.
+
+                // A = A op B, this requires one MOV less
+                // Prepare the result, A, and the first operand at once
+                STEntry* result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, true);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+                result->setDirty(1);
+
+                // Prepare the other operand
+                maybeGetRegisterIfNotConstant((void*)instruction->getV3(),
+                                              instruction->getV3AddMode(),
+                                              true);
+                string op3 = registerOrConstant((void*)instruction->getV3(),
+                                                instruction->getV3AddMode());
+                ARITHINSTR2(this->text, instruction->getOp(), op3, op1);
+            } else if (iType == AAA) {
+                // XXXmilindl: Untested because we never seem to generate ops of
+                // this kind in the IR.
+
+                // A = A op A, this requires one MOV less
+                // Prepare the result, A, and the first operand at once
+                STEntry* result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, true);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+                result->setDirty(1);
+
+                ARITHINSTR2(this->text, instruction->getOp(), op1, op1);
+            } else { // if iType == ABA
+                // XXXmilindl: IR never seems to generate these also, lucky for
+                // me.
+                REPORTERR("IR instruction is in ABA format, unimplemented");
+            }
+        }
+        // Sane arithmetic ops end here (not div/mod) ---------------- //
+    }
 }
 
 string
