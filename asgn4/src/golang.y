@@ -719,7 +719,10 @@ $$->Add($2);
 $$->Add($3);
 genInstructionBinWrapper(LT_OP, $$, $1, $3, curr);
 }
-		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); $$->tmp = $$->content; }
+		| UnaryExpr{ $$ = $1;$$->setType($1->getType()); 
+            if((!$1->matched.compare("Name")) || (!$1->matched.compare("Literal")))
+                $$->tmp = $$->content; 
+}
 
 ;
 OExpression  :
@@ -771,8 +774,7 @@ $$->instr_list.push_back(generateUnaryInstruction(NEG, $2, curr));
 $$->tmp = getTemp($$);
 $$->addrMode = REGISTER;
 $$->setType($2->getType());
-
-
+$$->tmp = getTemp($$);
 }
 		| NOT_OP UnaryExpr{$$ = new Node("UnaryExpr", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -997,7 +999,9 @@ $$->Add($4);
 
 ;
 NewName  :
-ID{$$ = new Node("NewName", new BasicType("NOTYPE")); $$->Add($1); $$->content = $1;}
+ID{$$ = new Node("Name", new BasicType("NOTYPE")); $$->Add($1); $$->content = $1;
+$$->setType(new BasicType($1));
+}
 
 ;
 ONewName  :
@@ -1304,6 +1308,12 @@ $$->Add($2);
 $$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateUnaryInstruction(INC_OP, $1, curr));
 $$->tmp = getTemp($$);
+$$->instr_list.push_back(new Instruction(ASG, 
+        correctPointer($1, curr),
+        correctPointer($$, curr),
+        REGISTER, REGISTER, 
+        $$->getType(), $$->getType()));
+$$->tmp = $1->tmp;
 $$->addrMode = REGISTER;
 }
 		| Expression DEC{$$ = new Node("SimpleStatement", new BasicType("NOTYPE"));
@@ -1312,6 +1322,12 @@ $$->Add($2);
 $$->instr_list = $1->instr_list;
 $$->instr_list.push_back(generateUnaryInstruction(DEC_OP, $1, curr));
 $$->tmp = getTemp($$);
+$$->instr_list.push_back(new Instruction(ASG, 
+        correctPointer($1, curr),
+        correctPointer($$, curr),
+        REGISTER, REGISTER, 
+        $$->getType(), $$->getType()));
+$$->tmp = $1->tmp;
 $$->addrMode = REGISTER;
 }
 
@@ -1551,10 +1567,10 @@ if(($1->matched == "ForHeader")){
     $$->content = s1;
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
     $$->instr_list.push_back(generateLabelInstruction(s1));
-    $$->instr_list = mergeInstructions($$->instr_list, $1->children[1]->instr_list);
-    $$->instr_list.push_back(generateGotoInstruction($1->children[1],s2  ,curr, false));
-    $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[2]->instr_list);
+    $$->instr_list.push_back(generateGotoInstruction($1->children[2],s2  ,curr, false));
+    $$->instr_list = mergeInstructions($$->instr_list,$3->instr_list);
+    $$->instr_list = mergeInstructions($$->instr_list, $1->children[4]->instr_list);
     $$->instr_list.push_back(generateUnconditionalGoto(s1,curr));
     $$->instr_list.push_back(generateLabelInstruction(s2));
 } else if ($1->matched == "RangeStatement"){
@@ -1999,7 +2015,7 @@ if(!curr->checkEntryFunc($1->content)) {
 } else {
   semanticError("Cannot find function " + $1->content, true);
 }
-$$->type_child = verifyFunctionType(cand_list, 0);
+$$->type_child = verifyFunctionType(cand_list, $3->count);
 $$->setType($$->type_child.back());
 $$->type_child.pop_back();
 if($3->count != $$->type_child.size()) {
@@ -2080,7 +2096,7 @@ int main(int argc, char** argv) {
       ;
     }
     printST(root);
-    cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl;
+    /* cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl; */
     cout << "fin" << endl;
     return 0;
 }

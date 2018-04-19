@@ -193,7 +193,7 @@ printST(ST* root)
              << "and number " << ((it->second)->type)->GetTypeClass() << endl;
     }
 
-    cout << string(root->depth, ' ') << "Calling recursively: " << endl;
+    cout << string(root->depth, ' ') << "Calling reluctantly: " << endl;
     vector<ST*>::iterator it1;
     for (it1 = root->children.begin(); it1 != root->children.end(); it1++) {
         printST(*it1);
@@ -225,9 +225,9 @@ populateSTInfer(Node* declNameList, ST* curr)
 {
     vector<string>::iterator it;
     for (int i = 0; i < declNameList->children.size(); ++i) {
-        curr->addEntry(declNameList->children[i]->children[0]->matched,
-                       declNameList->children[i]->getType(),
-                       false);
+        /* curr->addEntry(declNameList->children[i]->children[0]->matched, */
+                       /* declNameList->children[i]->getType(), */
+                       /* false); */
         cout << "Entry" << declNameList->children[i]->children[0]->matched << endl;
     }
 }
@@ -658,7 +658,7 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
     }
     string st = "temp";
     string str = st + to_string(clock());
-    curr->addEntry(str, ((FuncType*)source->getType())->GetReturnType(), false);
+    curr->addEntry(str, source->getType(), false);
     STEntry* arg3;
     if (!(arg3 = curr->getVar(str))) {
         semanticError("STE creation failed");

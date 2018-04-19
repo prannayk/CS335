@@ -2,21 +2,7 @@
 
 package main
 
-func main(ix, int y, int z) int {
-	var t,i,z int
-    var array [5] int
-    array[0] = array[10]
-    var k,v int
-    var x,y int = -5,6
-    labelyo:    for i<100 {
-	    for t <= 100 {
-            for z == 0 { 
-                goto labelyo 
-                } 
-                for t==0 {
-                    var x int
-                    x = 1
-                 } 
-        }
-}
+func other() {
+     var y int = -5
+     var x int = -y
 }
