@@ -362,8 +362,17 @@ generateInstructionReadArray(Node* source, ST* curr)
         semanticError("Invalid operation for non-array type");
     }
     vector<string>::iterator it;
-    Type* type = ((ArrayType*)source->getType())->GetArrayType();
+    Type* type = ((ArrayType*)((STEntry*)arg1)->getType())->GetArrayType();
     vector<Instruction*> i_list;
+    long* initVal = new long;
+    *initVal = 0;
+    i_list.push_back(new Instruction(ASG,
+                                     correctPointer(temp, curr),
+                                     (void*)initVal,
+                                     REGISTER,
+                                     CONSTANT_VAL,
+                                     new BasicType("int"),
+                                     new BasicType("int")));
     for (it = source->str_child.begin(); it != source->str_child.end(); ++it) {
         void* arg2 = correctPointer(*it, curr);
         if (arg2 == NULL) {
@@ -389,14 +398,15 @@ generateInstructionReadArray(Node* source, ST* curr)
                 instr = new Instruction(
                   ADD_OPER,
                   correctPointer(temp, curr), // add offset to offset temporary
-                  correctPointer(temp2, curr),
                   correctPointer(temp, curr),
+                  correctPointer(temp2, curr),
                   REGISTER,
                   REGISTER,
                   REGISTER,
                   new BasicType("int"),
                   new BasicType("int"),
                   new BasicType("int"));
+                i_list.push_back(instr);
                 if (type->GetTypeClass() == 4)
                     type = ((ArrayType*)type)->GetArrayType();
                 else
@@ -487,15 +497,13 @@ generateInstructionWriteArray(Node* source, ST* curr)
     vector<Instruction*> i_list;
     long* initVal = new long;
     *initVal = 0;
-    i_list.push_back(new Instruction(
-      ASG,
-      correctPointer(temp, curr),
-      (void*)initVal,
-      REGISTER,
-      CONSTANT_VAL,
-      new BasicType("int"),
-      new BasicType("int")
-    ));
+    i_list.push_back(new Instruction(ASG,
+                                     correctPointer(temp, curr),
+                                     (void*)initVal,
+                                     REGISTER,
+                                     CONSTANT_VAL,
+                                     new BasicType("int"),
+                                     new BasicType("int")));
     for (it = source->str_child.begin(); it != source->str_child.end(); ++it) {
         void* arg2 = correctPointer(*it, curr);
         if (arg2 == NULL) {
@@ -529,7 +537,7 @@ generateInstructionWriteArray(Node* source, ST* curr)
                   new BasicType("int"),
                   new BasicType("int"),
                   new BasicType("int"));
-                  i_list.push_back(instr);
+                i_list.push_back(instr);
                 if (type->GetTypeClass() == 4)
                     type = ((ArrayType*)type)->GetArrayType();
                 else
@@ -568,6 +576,7 @@ generateInstructionReadStruct(Node* source,
                               Type* ty,
                               ST* curr)
 {
+    // TODO: Abhibhav please fix, I am too sleepy right now.
     // TODO : set tmp with temporary variable
     // TODO : create redundant instruction in patchInstruction
     // TODO : convert back patching to multi map
@@ -593,15 +602,16 @@ generateInstructionReadStruct(Node* source,
     vector<Instruction*> i_list;
     long* num = new long;
     *num = 1;
+    // XXXmilindl: Abhibhav pls check this.
     instr = new Instruction(EELEM,
-                            str,
-                            arg1,
+                            correctPointer(s, curr),
                             arg2,
-                            source->addrMode,
-                            n1->addrMode,
-                            n2->addrMode,
-                            ty,
+                            arg1,
+                            REGISTER,
+                            CONSTANT_VAL,
+                            REGISTER,
                             n1->getType(),
+                            ty,
                             n2->getType());
     source->tmp = s;
     i_list.push_back(instr);

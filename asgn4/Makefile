@@ -1,4 +1,4 @@
-CC=clang++
+CC=g++
 FLAGS=-lfl -std=c++14 -g -O0 -fextended-identifiers
 TESTS=tests
 BISON_FLAGS=-d -Wall -v -Werror=conflicts-sr -Werror=conflicts-rr -g

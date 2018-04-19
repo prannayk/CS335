@@ -594,6 +594,42 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             INSTR2(this->text, movq, op1, offsetOp);
         }
+
+        if (instruction->getOp() == EELEM) {
+            if (instruction->getV1AddMode() != REGISTER ||
+                instruction->getV3AddMode() != REGISTER) {
+                REPORTERR(
+                  "Either the source or the base is not a mem location");
+            }
+
+            // This instruction has the form (lvalue, offset, base)
+
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV1(), instruction->getV2AddMode(), false);
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV2(), instruction->getV2AddMode(), true);
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV3(), instruction->getV3AddMode(), true);
+
+            string op1 = registerOrConstant((void*)instruction->getV1(),
+                                            instruction->getV1AddMode());
+            string base = registerOrConstant((void*)instruction->getV3(),
+                                             instruction->getV3AddMode());
+            string offsetOp = "";
+
+            if (instruction->getV2AddMode() == CONSTANT_VAL) {
+                long o = *(long*)instruction->getV2();
+                offsetOp = to_string(o) + "(" + base + ")";
+            } else if (instruction->getV2AddMode() == REGISTER) {
+                string o = registerOrConstant((void*)instruction->getV2(),
+                                              instruction->getV2AddMode());
+                offsetOp = "(" + base + ", " + o + ", 1)";
+            } else {
+                REPORTERR("Unexpected type of addressing mode of offset");
+            }
+
+            INSTR2(this->text, movq, offsetOp, op1);
+        }
         // End memory operations
     }
 }
