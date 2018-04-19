@@ -511,7 +511,6 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             string op1 = registerOrConstant((void*)result, REGISTER);
             INSTR2(this->text, leaq, FROMRBP(target->offset), op1);
         }
-
         if (instruction->getOp() == FOLLOWPTR) {
             if (instruction->getV1AddMode() != REGISTER) {
                 REPORTERR("Tried to write to non memory location");
@@ -531,7 +530,6 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             string op2 = registerOrConstant((void*)target, REGISTER);
             INSTR2(this->text, leaq, "(" + op2 + ")", op1);
         }
-
         if (instruction->getOp() == ADDRASSIGN) {
             if (instruction->getV1AddMode() != REGISTER) {
                 REPORTERR("Tried to write to non memory location");
@@ -554,7 +552,6 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
                                             instruction->getV2AddMode());
             INSTR2(this->text, movq, op2, "(" + op1 + ")");
         }
-
         if (instruction->getOp() == IELEM) {
             if (instruction->getV1AddMode() != REGISTER ||
                 instruction->getV2AddMode() != REGISTER) {
@@ -594,7 +591,6 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             INSTR2(this->text, movq, op1, offsetOp);
         }
-
         if (instruction->getOp() == EELEM) {
             if (instruction->getV1AddMode() != REGISTER ||
                 instruction->getV3AddMode() != REGISTER) {
@@ -631,6 +627,40 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             INSTR2(this->text, movq, offsetOp, op1);
         }
         // End memory operations
+
+        // Start insane arithmetic ops
+        if (instruction->getOp() == DIV_OP || instruction->getOp() == MOD_OP) {
+            // Insane instructions require insane sacrifices
+            WriteBackAll();
+            FlushRegisters();
+
+            STEntry* result = (STEntry*)instruction->getV1();
+
+            ArithmeticInstructionType iType =
+              arithmeticInstructionType(instruction);
+            if (iType == AAA) {
+                if (instruction->getOp() == DIV_OP) {
+                    INSTR2(this->text, movq, NUM(1), FROMRBP(result->offset));
+                } else {
+                    INSTR2(this->text, movq, NUM(0), FROMRBP(result->offset));
+                }
+            } else { // if (iType == any)
+                string b = memoryOrConstant((void*)instruction->getV2(),
+                                            instruction->getV2AddMode());
+                string c = memoryOrConstant((void*)instruction->getV3(),
+                                            instruction->getV3AddMode());
+                INSTR2(this->text, movq, b, "%rax");
+                INSTR0(this->text, cqto);
+                INSTR2(this->text, movq, c, "%rcx");
+                INSTR1(this->text, idiv, "%rcx");
+                if (instruction->getOp() == DIV_OP) {
+                    INSTR2(this->text, movq, "%rax", FROMRBP(result->offset));
+                } else {
+                    INSTR2(this->text, movq, "%rdx", FROMRBP(result->offset));
+                }
+            }
+        }
+        // End insane arithmetic ops
     }
 }
 
