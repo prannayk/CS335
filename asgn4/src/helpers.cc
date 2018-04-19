@@ -313,7 +313,6 @@ fixNodeForExpression(Node* ptr, ST* curr)
         // TODO: implement this @Prannay
         // TODO : I do not see the problem @Milindl
         // TODO: My bad sorry @Prannay
-        ptr->tmp = ptr->matched;
     } else if (ptr->matched == "PseudoCall") {
         if (curr->getVar(ptr->content) != NULL) {
             ptr->setType(curr->getVar(ptr->content)->type);
@@ -622,7 +621,7 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
                 *i = atol(n->tmp.c_str());
                 p = i;
             } else if (n->getType()->GetRepresentation() == "bool") {
-                int* i = new int;
+                long* i = new long;
                 *i = "true" == n->tmp;
                 p = i;
             } else {
@@ -763,7 +762,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
         arg1 = curr->getVar(n1->tmp);
     }
     string* branch = getCharFromString(label);
-    int* i = new int;
+    long* i = new long;
     *i = 1;
     Instruction* instr;
     OpCode op;
@@ -795,7 +794,7 @@ generateGotoInstruction(Node* n1, ST* curr)
     string s = "label";
     s = s + to_string(clock());
     string* branch = getCharFromString(s);
-    int* i = new int;
+    long* i = new long;
     *i = 1;
     Instruction* instr;
     instr = new Instruction(GOTOEQ,

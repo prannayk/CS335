@@ -1518,8 +1518,10 @@ IfHeader {ST::paramPush = false;} LoopBody{$$ = new Node("ElseIf", new BasicType
 $$->Add($1);
 $$->Add($2);
 $$->Add($4);
-$$->Add($6);}
-
+$$->Add($6);
+$$->instr_list = $4->instr_list;
+$$->setType(new BasicType(*(string*)$$->instr_list[$$->instr_list.size()-1]->getV1()));
+ }
 ;
 ElseIfList  :
 %empty {$$ = new Node("Empty ElseIfList", new BasicType("NOTYPE"), 0);

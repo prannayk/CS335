@@ -42,7 +42,7 @@ void
 Node::Print()
 {
     stringstream ss;
-    ss << quoted(this->matched);
+    ss << quoted(this->matched + "_" + this->tmp);
     cerr << "{ \"name\" : " << ss.str() << ", \"children\" : [";
     for (int i = 0; i < this->children.size(); ++i) {
         this->children[i]->Print();
@@ -115,12 +115,12 @@ ST::addEntry(string aName, Type* aType, bool aConstant)
 void
 ST::addStructEntry(string aName, string structName)
 {
-    //StructDefinitionType* t = ST::structDefs[structName];
-    //map<string, Type*>::iterator iter;
-    //string temp;
-    //for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
-        //temp = aName + t->randomSuffix + iter->first;
-        //addEntry(temp, iter->second, 0);
+    // StructDefinitionType* t = ST::structDefs[structName];
+    // map<string, Type*>::iterator iter;
+    // string temp;
+    // for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
+    // temp = aName + t->randomSuffix + iter->first;
+    // addEntry(temp, iter->second, 0);
     //}
     structs[aName] = structName;
 }
@@ -343,7 +343,7 @@ Instruction::printInstruction()
 
     if (op == FUNC_ST) {
         cout << "Starting function: " << endl;
-            return;
+        return;
     } else if (op == FUNC_ET) {
         cout << "Ending function" << endl;
         return;
@@ -352,7 +352,10 @@ Instruction::printInstruction()
     }
     if (v1 != nullptr) {
         cout << castAsPerType(v1, v1AddMode) + " ";
-        if(op == LABEL_ST || op == GOTO_OP) { cout << endl;  return;}
+        if (op == LABEL_ST || op == GOTO_OP) {
+            cout << endl;
+            return;
+        }
     }
     if (v2 != nullptr) {
         cout << castAsPerType(v2, v2AddMode) << " ";
@@ -381,7 +384,9 @@ ST::checkEntryStruct(string a)
     return false;
 }
 
-bool checkEqual(string a, pair <string, FuncType*> p){
+bool
+checkEqual(string a, pair<string, FuncType*> p)
+{
     return (p.first == a);
 }
 vector<FuncType*>
@@ -390,19 +395,18 @@ ST::getFunc(string a)
 
     vector<FuncType*> list;
     map<string, FuncType*>::iterator it = funcDefs.begin();
-    for( ; it!=funcDefs.end(); ++it){
-        if((*it).first == a)
+    for (; it != funcDefs.end(); ++it) {
+        if ((*it).first == a)
             list.push_back((*it).second);
     }
     return list;
 }
 
-
 void
 Node::printInstructionList()
 {
     for (auto i : this->instr_list) {
-        if(i!=NULL)
+        if (i != NULL)
             i->printInstruction();
     }
 }

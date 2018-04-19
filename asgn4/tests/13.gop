@@ -2,11 +2,9 @@ package main
 
 func main() {
     // Go does not allow i++ to be an expression
-    var a int
-    for i := 0; i < 100; i = i + 1 {
+    var a, i int
+    for i = 0; i < 100; i = i + 1 {
           a = a + 1
     }
 }
 
-// One of the gotoeq seems wrong, like 100 forlabel2467 label2473 1, it's comparing
-// a label to something? In general also check pls

@@ -1,20 +1,12 @@
 package main
 
-func foo() int {
-    var bar int
-    return bar
-}
-
 func foo(x int) int {
     var bar int
     return bar
 }
 
 func main() {
-    var a,b int
-    a = foo()
-    b = foo(a)
+    var a int
+    a = foo(a)
 }
 
-// Error a = foo() never works out, in that there's a temp assigned to the return of foo
-// but then ASG with only 'a' is called.

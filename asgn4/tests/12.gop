@@ -1,0 +1,12 @@
+package main
+
+func main() {
+     var c, d int
+    if (c != 0) {
+	    if (d != 0) {
+        	d = d + 1
+        } else {
+            d = d - 1
+        }
+    }
+}

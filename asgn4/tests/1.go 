@@ -1,0 +1,8 @@
+// loops
+
+package main
+
+func main() {
+	x := [1]int{1}
+	y = (x[1] = 1)
+}
