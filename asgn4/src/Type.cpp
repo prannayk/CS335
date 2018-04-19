@@ -255,6 +255,7 @@ PointerType::PointerType(Type* aUnderlyingType)
 {
     this->underlyingType = aUnderlyingType;
     this->representation = "*" + this->underlyingType->GetRepresentation();
+    this->mem_size = 8; // Pointers are 8 bytes in x64
 }
 
 Type*
