@@ -58,7 +58,7 @@ class StructDefinitionType : public Type
 {
 
   public:
-    map<string, InterfaceType*> implemented;
+    /* map<string, InterfaceType*> implemented; */
     map<string, Type*> fields;
     string randomSuffix;
     map<string, int> mem_size_list;
