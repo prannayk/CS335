@@ -32,10 +32,10 @@ class Instruction
     Type* v3Type;
 
     int v1num, v2num, v3num;
-    
-    
+
+
     Register v1reg, v2reg, v3reg;
-    
+
     int numOps;
 
     bool v1Live;
@@ -60,9 +60,9 @@ class Instruction
                          AddressingMode aV3AddMode,
                          Type* aV1Type,
                          Type* aV2Type,
-                         Type* aV3Type, 
-                         int aV1num, 
-                         int aV2num, 
+                         Type* aV3Type,
+                         int aV1num,
+                         int aV2num,
                          int aV3num);
 
     Instruction(OpCode aOp, void* aV1, void* aV2, AddressingMode aV1AddMode,
@@ -76,7 +76,7 @@ class Instruction
                 AddressingMode aV1AddMode,
                 AddressingMode aV2AddMode,
                 Type* aV1Type,
-                Type* aV2Type, 
+                Type* aV2Type,
                 int aV1num, int aV2num);
     Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type* aV1Type);
     Instruction(OpCode aOp, void* aV1, AddressingMode aV1AddMode, Type* aV1Type, int numV1);
@@ -135,7 +135,7 @@ class Instruction
     void setV2Register(Register a) { v2reg = a; }
     void setV3Register(Register a) { v3reg = a; }
 
-    // Print Instruction 
+    // Print Instruction
     void printInstruction();
 };
 
@@ -179,14 +179,16 @@ class STEntry
 
     bool dirty;
     bool valid;
-    
+
     Register reg;
+    int offset;
+    bool global;
 
     bool live;
     int nextUse;
     int active;
 
-    bool arrayType; 
+    bool arrayType;
 
     string getName() const { return name; }
 
@@ -214,7 +216,7 @@ class STEntry
     void setLive(bool a) { live = a; }
     void setNextUse(int a) {nextUse = a; }
 
-		void setUse(int a) { active = a; } 
+		void setUse(int a) { active = a; }
 
 
     STEntry(string aName, Type* aType);
@@ -224,9 +226,10 @@ class STEntry
 
 class ST {
    public:
-
      static map<string, StructDefinitionType*> structDefs;
      static multimap<string, FuncType*> funcDefs;
+     static map<string, ST*> funcSTs;
+     static map<string, vector<string>> funcParamNamesInOrder;
      static vector<STEntry*> paramEntryStack;
 
      static bool paramPush;

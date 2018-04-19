@@ -4,22 +4,19 @@ enum OpCode
 {
     // Enum numbering, if not assigned, is +1 the previous one
     // Binary math/bit operations
-    ADD_OPER = 0,
-    SUB_OP,
-    SL_OP,
-    SR_OP,
-    ASHR_OP,
-    AND_OP, // logical AND
-    OR_OP, // logical OR
-    XOR_OP,
-    BOR_OP, // bitwise OR
-    BAND_OP, // bitwise AND
-    MUL_OPER,
-    DIV_OP,
+    ADD_OPER = 0, // ✓
+    SUB_OP,       // ✓
+    SL_OP,        // ✓
+    SR_OP,        // ✓
+    ASHR_OP,      // ✓
+    XOR_OP,       // ✓
+    BOR_OP,       // ✓  bitwise OR
+    BAND_OP,      //  ✓  bitwise AND
+    MUL_OPER,     // ✓
+    NAND_OP,      // TODO: After implementing NEG
+    DIV_OP = 30,
     MOD_OP,
-    NOT_OPER,
-    NAND_OP, 
-    
+
     // Binary relops
     GT_OP = 50,
     LT_OP,
@@ -27,6 +24,9 @@ enum OpCode
     LEQ_OP,
     EQ_OP,
     NEQ_OP,
+    AND_OP, // logical AND
+    OR_OP,  // logical OR
+    LNOT,   // logical not
 
     // Binary control flow ops
     GOTOEQ = 100,
@@ -44,25 +44,29 @@ enum OpCode
     ADDRASSIGN,
 
     // Unary math/bit operations
-    NOT = 200,
-    NEG,
-    ASG,
-    LNOT,
-    INC_OP,
-    DEC_OP,
-    COPY_OP,
+    NOT = 200, // ✓
+    NEG,       // ✓
+    ASG,       // ✓
+    NOT_OPER,  // ✓
+    INC_OP,    // ✓
+    DEC_OP,    // ✓
+    COPY_OP,   // TODO what?
+
     // Unary control flow/special operations
     GOTO_OP = 250,
-    CALL,
-    PARAM,
+    CALL,  // ✓
+    PARAM, // ✓
+
     // function start and end operation
-    FUNC_ST,
-    FUNC_ET,
-    PDECL_OP,
+    FUNC_ST,  // ✓
+    FUNC_ET,  // ✓
+    PDECL_OP, // ✓
+
     // Nullary operations
-    RET = 300,
-    LABEL_ST,
+    RET = 300, // ✓
+    LABEL_ST,  // ✓
     YLD,
+
     // print
     PRINTINT = 400,
     // null instruction as default

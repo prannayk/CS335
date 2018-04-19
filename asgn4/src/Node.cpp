@@ -81,6 +81,7 @@ STEntry::STEntry(string aName, Type* aType)
 {
     name = aName;
     type = aType;
+    global = false;
 }
 
 STEntry::STEntry(string aName, Type* aType, bool aConstant)
@@ -88,10 +89,13 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
     name = aName;
     type = aType;
     constant = aConstant;
+    global = false;
 }
 
 map<string, StructDefinitionType*> ST::structDefs;
 multimap<string, FuncType*> ST::funcDefs;
+map<string, ST*> ST::funcSTs;
+map<string, vector<string>> ST::funcParamNamesInOrder;
 vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
 

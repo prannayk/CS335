@@ -8,6 +8,7 @@
 #include "helpers.h"
 #include "Type.h"
 #include <typeinfo>
+#include "x86generator.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -19,6 +20,7 @@ void yyerror(const char *s);
 #include "Node.h"
 ST* root = new ST(0, nullptr);
 ST* curr = root;
+vector<Instruction*> finalInstList;
 
 %}
 
@@ -271,6 +273,7 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $3->printInstructionList();
+finalInstList = $3->instr_list;
 }
 
 ;
@@ -820,10 +823,10 @@ if(curr->rValueMode){
     $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
 
 } else {
-    cout << "pob" << ($1->children).size() << endl;
-    cout << ($1->children)[0]->content << endl;
-    cout << ($1->children)[1]->matched << endl;
-    cout << ($1->children)[2]->matched << endl;
+    /* cout << "pob" << ($1->children).size() << endl; */
+    /* cout << ($1->children)[0]->content << endl; */
+    /* cout << ($1->children)[1]->matched << endl; */
+    /* cout << ($1->children)[2]->matched << endl; */
 
 		Node* t = new Node("Literal", new BasicType("NOTYPE"));
     StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
@@ -1077,6 +1080,8 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
 
@@ -1110,7 +1115,7 @@ string * name = getCharFromString($4->children[0]->matched);
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
-curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
+/* curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType())); */
 }
 ;
 GeneratorDeclaration  :
@@ -1127,6 +1132,8 @@ populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
     ST::structPush = false;
@@ -2121,6 +2128,7 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
+int xgen(vector<Instruction*>, ST*);
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -2141,10 +2149,21 @@ int main(int argc, char** argv) {
       ;
     }
     printST(root);
-    cout << "fin" << endl;
-    return 0;
+    /* cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl; */
+    /* cout << "fin" << endl; */
+    return xgen(finalInstList, root);
 }
 
 void yyerror(const char *s) {
     syntaxError(s);
 }
+
+
+int
+xgen(vector<Instruction*> finalInstList, ST* glob)
+{
+    X86Generator gen(finalInstList, glob);
+    cout << gen.Generate();
+    return 0;
+}
+
