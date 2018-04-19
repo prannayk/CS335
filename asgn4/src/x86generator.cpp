@@ -394,6 +394,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
         // Unary ops start here --------------------------------------- //
         if (instruction->getOp() >= 200 && instruction->getOp() < 250) {
+            continue;
             if (instruction->getV1AddMode() != REGISTER) {
                 REPORTERR("Tried to write to non memory location");
             }
@@ -493,6 +494,64 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             }
         }
         // Sane arithmetic ops end here (not div/mod) ---------------- //
+
+        // Start memory operations
+        if (instruction->getOp() == GETADDR) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            if (instruction->getV2AddMode() != REGISTER) {
+                REPORTERR("Tried to address a non memory location");
+            }
+
+            STEntry* result = (STEntry*)instruction->getV1();
+            STEntry* target = (STEntry*)instruction->getV2();
+            MaybeGetRegister(result, false);
+            result->setDirty(1);
+            string op1 = registerOrConstant((void*)result, REGISTER);
+            INSTR2(this->text, leaq, FROMRBP(target->offset), op1);
+        }
+
+        if (instruction->getOp() == FOLLOWPTR) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            if (instruction->getV2AddMode() != REGISTER) {
+                REPORTERR("Tried to address a non memory location");
+            }
+
+            STEntry* result = (STEntry*)instruction->getV1();
+            STEntry* target = (STEntry*)instruction->getV2();
+            MaybeGetRegister(result, false);
+            result->setDirty(1);
+
+            maybeGetRegisterIfNotConstant((void*)target, REGISTER, true);
+            string op1 = registerOrConstant((void*)result, REGISTER);
+            string op2 = registerOrConstant((void*)target, REGISTER);
+            INSTR2(this->text, leaq, "(" + op2 + ")", op1);
+        }
+
+        if (instruction->getOp() == ADDRASSIGN) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            // Prepare the first operand.
+            STEntry* result = (STEntry*)instruction->getV1();
+            MaybeGetRegister(result, false);
+            result->setDirty(1);
+            string op1 = registerOrConstant((void*)result, REGISTER);
+
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV2(), instruction->getV2AddMode(), true);
+            string op2 = registerOrConstant((void*)instruction->getV2(),
+                                            instruction->getV2AddMode());
+            INSTR2(this->text, movq, op2, "(" + op1 + ")");
+        }
+
+        // End memory operations
     }
 }
 
