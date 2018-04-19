@@ -99,6 +99,9 @@ bool ST::structPush = false;
 string ST::structName = "";
 string ST::funcName = "";
 
+map<string, InterfaceType*> ST::interfaceList;
+map<string, FuncType*> ST::interfaceStack;
+
 ST::ST(int aDepth, ST* aParent)
 {
     depth = aDepth;

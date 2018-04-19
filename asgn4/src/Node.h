@@ -224,7 +224,7 @@ class STEntry
 
 class ST {
    public:
-    
+
      static map<string, StructDefinitionType*> structDefs;
      static multimap<string, FuncType*> funcDefs;
      static vector<STEntry*> paramEntryStack;
@@ -233,6 +233,9 @@ class ST {
      static bool structPush;
      static string structName;
      static string funcName;
+
+     static map<string, InterfaceType*> interfaceList;
+     static map<string, FuncType*> interfaceStack;
 
      bool rValueMode = false;
      Type* scopeReturnType = nullptr;
@@ -247,7 +250,7 @@ class ST {
      ST* parent;
      ST* global;
      // prefix method?
- 
+
      ST(int aDepth, ST* aParent);
      void addEntry(string aName, Type* aType, bool aConstant);
      void addStructEntry(string aName, string structName);
@@ -255,7 +258,7 @@ class ST {
      STEntry* getVar(string a);
      static vector<FuncType*> getFunc(string a);
      STEntry* getStructVar(string aName, string memberName);
-     
+
      bool checkEntry(string a);
      static bool checkEntryFunc(string a);
      static bool checkEntryStruct(string a);

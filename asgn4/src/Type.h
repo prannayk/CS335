@@ -128,8 +128,8 @@ class InterfaceType : public Type
 {
   public:
     string interfaceName;
-    vector<FuncType*> funcList;
-    InterfaceType(string, vector<FuncType*>);
+    map<string, FuncType*> funcList;
+    InterfaceType(string, map<string, FuncType*>);
 };
 
 extern map<string, Type*> TypeList;

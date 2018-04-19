@@ -589,6 +589,13 @@ if (!($2->children[0]->matched).compare("struct")) {
   ST::structDefs[$1->children[0]->matched] = (StructDefinitionType*)$2->getType();
 }
 
+if (!($2->children[0]->matched).compare("interface")) {
+  // Use stack to create a new interfacetype object
+  InterfaceType* t = new InterfaceType($1->children[0]->matched, ST::interfaceStack);
+  ST::interfaceStack.clear();
+  ST::interfaceList[$1->children[0]->matched] = t;
+}
+
 }
 
 ;
@@ -1072,6 +1079,17 @@ if (($4->children).size() == 5) {
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
+
+    // Check if the new function made the struct implement some new interface
+
+    /*map<string, InterfaceType*>::iterator it;*/
+    /*map<string, FuncType*>::iterator it2;*/
+    /*for (it = ST::interfaceList.begin(); it != ST::interfaceList.end(); it++) {*/
+      /*for (it2 = ((*it)->second).funcList.begin(); it2 != (*it)->second->funcList.end(); it2++) {*/
+        /*;*/
+      /*}*/
+    /*}*/
+
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
@@ -1854,6 +1872,13 @@ InterfaceDeclaration  :
 NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
+// Here is a function, add to stack
+
+vector<Type*> paramTypes = createParamList($2->children[1]);
+vector<string> paramNames = createNameList($2->children[1]);
+FuncType* t = new FuncType($2->children[3]->getType(), paramTypes);
+ST::interfaceStack[$1->content] = t;
+
 }
 	| PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);

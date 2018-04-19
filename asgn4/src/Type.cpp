@@ -293,7 +293,7 @@ StructType::GetStructMemberType(string a)
     return NULL;
 }
 
-InterfaceType::InterfaceType(string aInterfaceName, vector<FuncType*> aFuncList)
+InterfaceType::InterfaceType(string aInterfaceName, map<string, FuncType*> aFuncList)
   : interfaceName(aInterfaceName)
   , funcList(aFuncList)
 {
