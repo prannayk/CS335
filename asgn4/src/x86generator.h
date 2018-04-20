@@ -114,6 +114,7 @@ class X86Generator{
   int totalAllocatedSpace = 0; // Note: reset this at the start of every new func def
   string currentFName = "";
   map<string, ComplexBlock*> complexBlocks;
+  map<string, int> basicBlockMap;
   RegisterDescriptor regDesc;
   STEntry* dummyGetRegister(STEntry* old);
   void maybeGetRegisterIfNotConstant(void*, AddressingMode, bool);

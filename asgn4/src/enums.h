@@ -21,12 +21,12 @@ enum OpCode
     LNOT, // logical not
 
     // Binary relops
-    GT_OP = 50,
-    LT_OP,
-    GEQ_OP,
-    LEQ_OP,
-    EQ_OP,
-    NEQ_OP,
+    GT_OP = 50, // ✓
+    LT_OP,      // ✓
+    GEQ_OP,     // ✓
+    LEQ_OP,     // ✓
+    EQ_OP,      // ✓
+    NEQ_OP,     // ✓
 
     // Binary control flow ops
     GOTOEQ = 100,
@@ -37,11 +37,11 @@ enum OpCode
     GOTOGEQ,
 
     // Memory/vector ops
-    GETADDR = 150,
-    FOLLOWPTR,
-    EELEM,
-    IELEM,
-    ADDRASSIGN,
+    GETADDR = 150, // ✓
+    FOLLOWPTR,     // ✓
+    EELEM,         // ✓
+    IELEM,         // ✓
+    ADDRASSIGN,    // ✓
 
     // Unary math/bit operations
     NOT = 200, // ✓

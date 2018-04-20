@@ -543,7 +543,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             // Prepare the first operand.
             STEntry* result = (STEntry*)instruction->getV1();
-            MaybeGetRegister(result, false);
+            MaybeGetRegister(result, true);
             result->setDirty(1);
             string op1 = registerOrConstant((void*)result, REGISTER);
 
@@ -766,6 +766,62 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
         }
 
         // Sane relops end here  ---------------- //
+
+        if (instruction->getOp() == GOTO_OP) {
+            // This is an unconditional GOTO, and the easiest to work with
+            WriteBackAll();
+            FlushRegisters();
+            string label;
+            if (instruction->getV1AddMode() != STRING) {
+                REPORTERR("Tried to jump to non label");
+            }
+            label = *(string*)instruction->getV1();
+            if (this->basicBlockMap.count(label) == 0) {
+                REPORTERR("Simple block not found for label " + label);
+            }
+            int labelNum = this->basicBlockMap[label];
+            label = "labelm" + to_string(labelNum);
+            INSTR1(this->text, jmp, label);
+        }
+
+        if (instruction->getOp() == GOTOEQ) {
+            WriteBackAll();
+            FlushRegisters();
+            string label;
+            if (instruction->getV1AddMode() != STRING) {
+                REPORTERR("Tried to jump to non label");
+            }
+            label = *(string*)instruction->getV1();
+            if (this->basicBlockMap.count(label) == 0) {
+                REPORTERR("Simple block not found for label " + label);
+            }
+            int labelNum = this->basicBlockMap[label];
+            label = "labelm" + to_string(labelNum);
+            // Since we are flushing all registers anyway, let's use registers
+            // as per convinience
+            if (instruction->getV2AddMode() == REGISTER) {
+                STEntry* s = (STEntry*)instruction->getV2();
+                INSTR2(this->text, movq, FROMRBP(s->offset), "%rax");
+            } else if (instruction->getV2AddMode() == CONSTANT_VAL) {
+                long* l = (long*)instruction->getV2();
+                INSTR2(this->text, movq, NUM(*l), "%rax");
+            } else {
+                REPORTERR("Incorrect operand in gotoeq");
+            }
+
+            if (instruction->getV3AddMode() == REGISTER) {
+                STEntry* s = (STEntry*)instruction->getV3();
+                INSTR2(this->text, movq, FROMRBP(s->offset), "%rbx");
+            } else if (instruction->getV3AddMode() == CONSTANT_VAL) {
+                long* l = (long*)instruction->getV3();
+                INSTR2(this->text, movq, NUM(*l), "%rbx");
+            } else {
+                REPORTERR("Incorrect operand in gotoeq");
+            }
+
+            INSTR2(this->text, cmpq, "%rax", "%rbx");
+            INSTR1(this->text, je, label);
+        }
     }
 }
 
@@ -776,6 +832,7 @@ X86Generator::Generate()
     IR ir(this->instructionList, globalTable);
     ir.fillStructure();
     this->complexBlocks = ir.complexBlocks;
+    this->basicBlockMap = ir.basicBlockMap;
     // TODO: Global allocation.
     // TODO: Globals should be marked separately so that they can be written
     // back as per requirement.
