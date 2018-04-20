@@ -362,8 +362,15 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
                 REPORTERR("Incorrect name in function invocation");
             }
 
-            INSTR1(this->text, callq, *fName);
-
+            // If it is __print(), then treat it specially.
+            if (*fName == "__print") {
+                INSTR2(this->text, movq, "%rdi", "%rsi");
+                INSTR2(this->text, leaq, ".L.str(%rip)", "%rdi");
+                INSTR2(this->text, movb, NUM(0), "%al");
+                INSTR1(this->text, callq, "printf@PLT");
+            } else {
+                INSTR1(this->text, callq, *fName);
+            }
             functionCallMode = false;
             deferredArgs.clear();
             numParams = 0;
@@ -842,10 +849,18 @@ X86Generator::Generate()
     ir.fillStructure();
     this->complexBlocks = ir.complexBlocks;
     this->basicBlockMap = ir.basicBlockMap;
+
     // TODO: Global allocation.
     // TODO: Globals should be marked separately so that they can be written
     // back as per requirement.
-    return GenerateFunctions();
+
+    string footer = ".type  .L.str,@object          # @.str\n"
+                    ".section	.rodata.str1.1,\"aMS\",@progbits,1\n"
+                    ".L.str:\n"
+                    ".asciz	\"%ld\\n\"\n"
+                    ".size	.L.str, 5\n";
+    string header = ".text\n";
+    return header + GenerateFunctions() + footer;
 }
 
 STEntry*

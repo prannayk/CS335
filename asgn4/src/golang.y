@@ -845,7 +845,8 @@ if(curr->rValueMode){
     t->content = number;
     t->tmp = number;
 
-$1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
+$1->instr_list = mergeInstructions($1->instr_list,
+                 generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
 
 } else {
     /* cout << "pob" << ($1->children).size() << endl; */
@@ -2202,6 +2203,12 @@ Type* TypeForSymbol(char* input){
 }
 
 int main(int argc, char** argv) {
+        // Create function types for print etc.
+    vector<Type*> paramTypes;
+    paramTypes.push_back(new BasicType("int"));
+    FuncType* printType = new FuncType(new BasicType("int"), paramTypes);
+    ST::funcDefs.insert(pair<string, FuncType*>("__print", printType));
+    printType->SetFuncLabel("__print");
     filename = argv[1];
     FILE* myfile = fopen(filename, "r");
     yyin = myfile;
