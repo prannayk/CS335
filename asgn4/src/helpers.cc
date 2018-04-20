@@ -438,8 +438,8 @@ generateInstructionReadArray(Node* source, ST* curr)
             }
         }
     }
-    i_list.push_back(new Instruction(
-      PARAM, correctPointer(temp, curr), REGISTER, new BasicType("int")));
+    // i_list.push_back(new Instruction(
+    //   PARAM, correctPointer(temp, curr), REGISTER, new BasicType("int")));
     string* printName = new string;
     *printName = "__print";
     string tempstr = "temp" + to_string(number());

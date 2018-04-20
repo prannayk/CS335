@@ -1,8 +1,8 @@
-# CS335 Assignment 1
+# CS335 Project
 
 ## Prerequisites
 
-* g++ (we tested with g++ 7.2.1)
+* clang++ (we tested with clang++ 6.0.0)
 * bison (we tested with bison 3.0.4)
 * flex (we tested with flex 2.6.4)
 
@@ -11,7 +11,7 @@
 ``` shell
 $ cd asgn4
 $ make
-$ ./pogo filename
+$ ./pogo filename outputname
 ```
 
 Pogo calls scripts prepare.sh which adds semicolons, as is standard in go compilers. It then runs the parser on the file, stores the output x86 in a temp file, which is then compiled using clang, to generate the final output file.

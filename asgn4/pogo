@@ -1,0 +1,9 @@
+#!/bin/bash
+
+sed "s:\(\s\)*\(//.*\)$::" "$1"  | sed 's:\(.*\)[^{,:(]$:\0;:' > "/tmp/1.gop";
+bin/parser "/tmp/1.gop" 2>/dev/null | grep ".text" --after-context=1000000000000000000 > "/tmp/s.s";
+clang "/tmp/s.s" -o "$2";
+
+
+
+echo "compilersaregreat";
