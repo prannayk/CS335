@@ -80,6 +80,29 @@
   default:                                      \
     break;                                      \
   }
+#define JUMPINSTR2(v, operator, label)          \
+  switch (operator) {                           \
+  case GT_OP:                                   \
+    INSTR1(v, jg, label);                       \
+    break;                                      \
+  case LT_OP:                                   \
+    INSTR1(v, jl, label);                       \
+    break;                                      \
+  case GEQ_OP:                                  \
+    INSTR1(v, jge, label);                      \
+    break;                                      \
+  case LEQ_OP:                                  \
+    INSTR1(v, jle, label);                      \
+    break;                                      \
+  case EQ_OP:                                   \
+    INSTR1(v, je, label);                       \
+    break;                                      \
+  case NEQ_OP:                                  \
+    INSTR1(v, jne, label);                      \
+    break;                                      \
+  }
+
+
 
 using namespace std;
 
@@ -91,6 +114,7 @@ class X86Generator{
   int totalAllocatedSpace = 0; // Note: reset this at the start of every new func def
   string currentFName = "";
   map<string, ComplexBlock*> complexBlocks;
+  map<string, int> basicBlockMap;
   RegisterDescriptor regDesc;
   STEntry* dummyGetRegister(STEntry* old);
   void maybeGetRegisterIfNotConstant(void*, AddressingMode, bool);

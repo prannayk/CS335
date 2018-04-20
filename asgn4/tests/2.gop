@@ -2,12 +2,29 @@
 
 package main
 
-func foo() {
-    var i int = 1
-}
+// func factorial(n int) int {
+//      if n == 0 {
+//         return 1
+//      }
+//      var k int = factorial(n-1)
+//      return n*k
+// }
 
-func main() int {
-    foo()
-    return 0
+// func fibbonacci(a, b, n int) int {
+//      if n <= 0 {
+//         return b
+//      } else {
+//      var k int = fibbonacci(b, a+b, n-1)
+//      return k
+//      }
+// }
+
+
+func main(x int) int {
+
+     var i int
+    for i = 0; 1 != 2; i = i + 1 {
+    }
+    return 5
 }
 

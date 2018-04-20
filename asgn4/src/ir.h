@@ -19,11 +19,11 @@ class IR
     ST* rootST;
     vector<Instruction*> i_list;
     string globalComplexName;
-    map<string, int> basicBlockMap;
     vector<SimpleBlock*> simpleBlockList;
     RegisterDescriptor RegDescTable;
 
   public:
+    map<string, int> basicBlockMap;
     map<string, ComplexBlock*> complexBlocks;
     void addGlobalComplex(ComplexBlock* a);
     void addComplexBlock(ComplexBlock* a);

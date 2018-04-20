@@ -543,7 +543,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             // Prepare the first operand.
             STEntry* result = (STEntry*)instruction->getV1();
-            MaybeGetRegister(result, false);
+            MaybeGetRegister(result, true);
             result->setDirty(1);
             string op1 = registerOrConstant((void*)result, REGISTER);
 
@@ -662,6 +662,166 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             }
         }
         // End insane arithmetic ops
+
+        // Start LNOT -------------------------------------------- //
+        if (instruction->getOp() == LNOT) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("LNOT tried to be used on non memory location");
+            }
+            UnaryInstructionType iType = unaryInstructionType(instruction);
+            if (iType != AB) {
+                REPORTERR("LNOT can only handle AB instructions");
+            }
+            STEntry* result = (STEntry*)instruction->getV1();
+            MaybeGetRegister(result, false);
+            string op1 = registerOrConstant((void*)result, REGISTER);
+            result->setDirty(1);
+
+            maybeGetRegisterIfNotConstant(
+              (void*)instruction->getV2(), instruction->getV2AddMode(), true);
+            string toLnot = registerOrConstant((void*)instruction->getV2(),
+                                               instruction->getV2AddMode());
+
+            INSTR2(this->text, movq, NUM(1), op1);
+            INSTR2(this->text, xorq, toLnot, op1);
+        }
+        // End LNOT --------------------------------------------- //
+
+        // Sane relops start here ---------------- //
+        if (instruction->getOp() >= 50 && instruction->getOp() < 100) {
+            if (instruction->getV1AddMode() != REGISTER) {
+                REPORTERR("Tried to write to non memory location");
+            }
+
+            STEntry* result;
+            ArithmeticInstructionType iType =
+              arithmeticInstructionType(instruction);
+            if (iType == ABC || iType == ABB) {
+                // This is the most straightforward case. A = B op C
+                // Prepare the result register.
+                result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, false);
+                result->setDirty(1);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+
+                // Prepare the other two operands.
+                maybeGetRegisterIfNotConstant((void*)instruction->getV2(),
+                                              instruction->getV2AddMode(),
+                                              true);
+                maybeGetRegisterIfNotConstant((void*)instruction->getV3(),
+                                              instruction->getV3AddMode(),
+                                              true);
+                string op2 = registerOrConstant((void*)instruction->getV2(),
+                                                instruction->getV2AddMode());
+                string op3 = registerOrConstant((void*)instruction->getV3(),
+                                                instruction->getV3AddMode());
+                INSTR2(this->text, movq, op2, op1);
+                INSTR2(this->text, cmpq, op3, op1);
+            } else if (iType == AAB) {
+                // XXXmilindl: Untested because we never seem to generate ops of
+                // this kind in the IR.
+
+                // A = A op B, this requires one MOV less
+                // Prepare the result, A, and the first operand at once
+                result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, true);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+                result->setDirty(1);
+
+                // Prepare the other operand
+                maybeGetRegisterIfNotConstant((void*)instruction->getV3(),
+                                              instruction->getV3AddMode(),
+                                              true);
+                string op3 = registerOrConstant((void*)instruction->getV3(),
+                                                instruction->getV3AddMode());
+                INSTR2(this->text, cmpq, op3, op1);
+            } else if (iType == AAA) {
+                // XXXmilindl: Untested because we never seem to generate ops of
+                // this kind in the IR.
+
+                // A = A op A, this requires one MOV less
+                // Prepare the result, A, and the first operand at once
+                result = (STEntry*)instruction->getV1();
+                MaybeGetRegister(result, true);
+                string op1 = registerOrConstant((void*)result, REGISTER);
+                result->setDirty(1);
+
+                INSTR2(this->text, cmpq, op1, op1);
+            } else { // if iType == ABA
+                // XXXmilindl: IR never seems to generate these also, lucky for
+                // me.
+                REPORTERR("IR instruction is in ABA format, unimplemented");
+            }
+
+            // Now, generate jumps and labels
+            string op1 = registerOrConstant((void*)result, REGISTER);
+            string label1 = "jmpLabel" + to_string(clock());
+            string label2 = "jmpLabel" + to_string(clock());
+            JUMPINSTR2(this->text, instruction->getOp(), label1);
+            INSTR2(this->text, movq, NUM(0), op1);
+            INSTR1(this->text, jmp, label2);
+            APPEND(this->text, label1 + ":");
+            INSTR2(this->text, movq, NUM(1), op1);
+            APPEND(this->text, label2 + ":");
+        }
+
+        // Sane relops end here  ---------------- //
+
+        if (instruction->getOp() == GOTO_OP) {
+            // This is an unconditional GOTO, and the easiest to work with
+            WriteBackAll();
+            FlushRegisters();
+            string label;
+            if (instruction->getV1AddMode() != STRING) {
+                REPORTERR("Tried to jump to non label");
+            }
+            label = *(string*)instruction->getV1();
+            if (this->basicBlockMap.count(label) == 0) {
+                REPORTERR("Simple block not found for label " + label);
+            }
+            int labelNum = this->basicBlockMap[label];
+            label = "labelm" + to_string(labelNum);
+            INSTR1(this->text, jmp, label);
+        }
+
+        if (instruction->getOp() == GOTOEQ) {
+            WriteBackAll();
+            FlushRegisters();
+            string label;
+            if (instruction->getV1AddMode() != STRING) {
+                REPORTERR("Tried to jump to non label");
+            }
+            label = *(string*)instruction->getV1();
+            if (this->basicBlockMap.count(label) == 0) {
+                REPORTERR("Simple block not found for label " + label);
+            }
+            int labelNum = this->basicBlockMap[label];
+            label = "labelm" + to_string(labelNum);
+            // Since we are flushing all registers anyway, let's use registers
+            // as per convinience
+            if (instruction->getV2AddMode() == REGISTER) {
+                STEntry* s = (STEntry*)instruction->getV2();
+                INSTR2(this->text, movq, FROMRBP(s->offset), "%rax");
+            } else if (instruction->getV2AddMode() == CONSTANT_VAL) {
+                long* l = (long*)instruction->getV2();
+                INSTR2(this->text, movq, NUM(*l), "%rax");
+            } else {
+                REPORTERR("Incorrect operand in gotoeq");
+            }
+
+            if (instruction->getV3AddMode() == REGISTER) {
+                STEntry* s = (STEntry*)instruction->getV3();
+                INSTR2(this->text, movq, FROMRBP(s->offset), "%rbx");
+            } else if (instruction->getV3AddMode() == CONSTANT_VAL) {
+                long* l = (long*)instruction->getV3();
+                INSTR2(this->text, movq, NUM(*l), "%rbx");
+            } else {
+                REPORTERR("Incorrect operand in gotoeq");
+            }
+
+            INSTR2(this->text, cmpq, "%rax", "%rbx");
+            INSTR1(this->text, je, label);
+        }
     }
 }
 
@@ -672,6 +832,7 @@ X86Generator::Generate()
     IR ir(this->instructionList, globalTable);
     ir.fillStructure();
     this->complexBlocks = ir.complexBlocks;
+    this->basicBlockMap = ir.basicBlockMap;
     // TODO: Global allocation.
     // TODO: Globals should be marked separately so that they can be written
     // back as per requirement.

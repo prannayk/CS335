@@ -188,7 +188,8 @@ IR::fillStructure()
                 ((*instIter)->getOp() == GOTO_OP)) {
                 c = new long;
                 *c = basicBlockMap[(*(string*)(*instIter)->getV1())];
-                (*instIter)->setV1((void*)c);
+                // Also need to change the type there, but let's skip this step.
+                // (*instIter)->setV1((void*)c);
             }
         }
     }

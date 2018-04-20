@@ -1158,11 +1158,7 @@ string* name = new string;
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
-<<<<<<< HEAD
 //curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
-=======
-/* curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType())); */
->>>>>>> 5d27f60b79419d3ca980762bc14cf81c92f96225
 }
 ;
 GeneratorDeclaration  :
