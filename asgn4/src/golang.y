@@ -1576,16 +1576,20 @@ $$->instr_list.push_back(branch_goto);
 string s = *(string *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
 $$->instr_list.push_back(branch_goto);
 string s1 = $3->getType()->GetRepresentation();
+string end = "label" + to_string(clock());
+Instruction* endInstr = generateUnconditionalGoto(end, curr);
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
 $$->instr_list = mergeInstructions($$->instr_list, $5->instr_list);
+$$->instr_list.push_back(endInstr);
 for(int i=0; i< $6->count; ++i){
     $$->instr_list.push_back(generateLabelInstruction($6->children[i+1]->getType()->GetRepresentation()));
     $$->instr_list = mergeInstructions($$->instr_list,$6->children[i+1]->children[3]->instr_list);
-    $$->instr_list.push_back(branch_goto);
+    $$->instr_list.push_back(endInstr);
 }
 $$->instr_list.push_back(generateLabelInstruction(s));
 if($7->count > 0)
     $$->instr_list = mergeInstructions($$->instr_list, $7->children[1]->instr_list);
+ $$->instr_list.push_back(generateLabelInstruction(end));
 }
 
 ;
