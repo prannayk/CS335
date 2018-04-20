@@ -444,13 +444,13 @@ generateInstructionReadArray(Node* source, ST* curr)
     *printName = "__print";
     string tempstr = "temp" + to_string(number());
     curr->addEntry(tempstr, new BasicType("int"), false);
-    i_list.push_back(new Instruction(CALL,
-                                     correctPointer(tempstr, curr),
-                                     (void*)printName,
-                                     REGISTER,
-                                     STRING,
-                                     new BasicType("int"),
-                                     new BasicType("function_name")));
+    // i_list.push_back(new Instruction(CALL,
+    //                                  correctPointer(tempstr, curr),
+    //                                  (void*)printName,
+    //                                  REGISTER,
+    //                                  STRING,
+    //                                  new BasicType("int"),
+    //                                  new BasicType("function_name")));
     Type* currentType = type;
     source->tmp = "temp" + to_string(number());
     type = ((ArrayType*)source->getType())->GetArrayType();
@@ -530,7 +530,7 @@ generateInstructionWriteArray(Node* source, ST* curr)
         semanticError("Invalid operation for non-array type");
     }
     vector<string>::iterator it;
-    Type* type = ((ArrayType*)(((STEntry*)arg1)->getType()))->GetArrayType();
+    Type* type = ((ArrayType*)(((STEntry*)arg1)->getType()));
     vector<Instruction*> i_list;
     long* initVal = new long;
     *initVal = 0;
@@ -542,6 +542,10 @@ generateInstructionWriteArray(Node* source, ST* curr)
                                      new BasicType("int"),
                                      new BasicType("int")));
     for (it = source->str_child.begin(); it != source->str_child.end(); ++it) {
+        if (type->GetTypeClass() == 4)
+            type = ((ArrayType*)type)->GetArrayType();
+        else
+            break;
         void* arg2 = correctPointer(*it, curr);
         if (arg2 == NULL) {
             semanticError("Incorrect Temp name");
@@ -575,10 +579,6 @@ generateInstructionWriteArray(Node* source, ST* curr)
                   new BasicType("int"),
                   new BasicType("int"));
                 i_list.push_back(instr);
-                if (type->GetTypeClass() == 4)
-                    type = ((ArrayType*)type)->GetArrayType();
-                else
-                    break;
             }
         }
     }

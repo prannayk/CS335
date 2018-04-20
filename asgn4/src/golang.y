@@ -820,17 +820,19 @@ $$->tmp = getTemp($$);
 $$->addrMode = REGISTER;
 $$->setType($2->getType());
 }
-        | PrimaryExpr{$$ = $1;$$->setType($1->getType());}
-;
-PrimaryExpr  :
-             PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());
+        | PrimaryExpr{$$ = $1;$$->setType($1->getType());
 if (!$1->matched.compare("ArrayAccess")) { // shifted here to n-d array access
 if(curr->rValueMode){
     $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadArray($$, curr));
 } else {
-    $$->patchInstruction =  generateInstructionWriteArray($$, curr); 
+    $$->patchInstruction =  generateInstructionWriteArray($$, curr);
 }
 }
+
+}
+;
+PrimaryExpr  :
+             PrimaryExprNoParen{$$ = $1;$$->setType($1->getType());
 
 if (!$1->matched.compare("StructAccess")) { // shifted here to n-d array access
 if(curr->rValueMode){
