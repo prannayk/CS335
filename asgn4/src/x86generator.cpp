@@ -146,8 +146,11 @@ X86Generator::GenerateFunctions()
 {
     string gen = "";
     string s, p, e, fncode;
-    for (auto f : ST::funcDefs) {
+    for (auto f : this->complexBlocks) {
         this->currentFName = f.first;
+        if (this->currentFName == "$global") {
+            continue;
+        }
         this->totalAllocatedSpace = 0;
         // This order matters, because p depends on s's side effect.
         s = this->StackAlloc();
@@ -602,7 +605,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             // This instruction has the form (lvalue, offset, base)
 
             maybeGetRegisterIfNotConstant(
-              (void*)instruction->getV1(), instruction->getV2AddMode(), false);
+              (void*)instruction->getV1(), instruction->getV1AddMode(), false);
             maybeGetRegisterIfNotConstant(
               (void*)instruction->getV2(), instruction->getV2AddMode(), true);
             maybeGetRegisterIfNotConstant(
@@ -784,7 +787,7 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             INSTR1(this->text, jmp, label);
         }
 
-        if (instruction->getOp() == GOTOEQ) {
+        if (instruction->getOp() == GOTOEQ || instruction->getOp() == GOTONEQ) {
             WriteBackAll();
             FlushRegisters();
             string label;
@@ -820,9 +823,15 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
             }
 
             INSTR2(this->text, cmpq, "%rax", "%rbx");
-            INSTR1(this->text, je, label);
+            if (instruction->getOp() == GOTOEQ) {
+                INSTR1(this->text, je, label);
+            } else {
+                INSTR1(this->text, jne, label);
+            }
         }
     }
+    WriteBackAll();
+    FlushRegisters();
 }
 
 string

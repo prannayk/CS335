@@ -1105,10 +1105,16 @@ vector<string> paramNames = createNameList($4->children[2]);
 populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
-  t->SetFuncLabel("funclabel" + to_string(clock()));
+  if (($4->children[0]->matched) == "main") {
+      t->SetFuncLabel("main");
+  } else {
+     t->SetFuncLabel("funclabel" + to_string(clock()));
+  } 
+  // milindl:
+  $4->type = t;
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
-  ST::funcSTs[($4->children[0])->matched] = curr;
-  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
+  ST::funcSTs[t->GetFuncLabel()] = curr;
+  ST::funcParamNamesInOrder[t->GetFuncLabel()] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
 
@@ -1176,8 +1182,8 @@ if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   t->SetFuncLabel("funclabel" + to_string(clock()));
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
-  ST::funcSTs[($4->children[0])->matched] = curr;
-  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
+  ST::funcSTs[t->GetFuncLabel()] = curr;
+  ST::funcParamNamesInOrder[t->GetFuncLabel()] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
     ST::structPush = false;
@@ -1220,8 +1226,9 @@ vector<Type*> paramTypes;
 if($3->count > 1){
     paramTypes = createParamList($3->children[0]);
     $$->setType(new FuncType($5->getType(), paramTypes));
-} 
-$$->setType(new FuncType($5->getType(), paramTypes));
+} else {
+    $$->setType(new FuncType($5->getType(), paramTypes));
+}
 }
 | PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE ID PAREN_OPEN OArgumentTypeListOComma PAREN_CLOSE FunctionResult{
 $$ = new Node("FunctionHeader", new BasicType("NOTYPE"), $2->count, $2->flag);
@@ -2207,7 +2214,7 @@ int main(int argc, char** argv) {
 }
     printST(root);
     cout << "fin" << endl; 
-    /*return xgen(finalInstList, root);*/
+    return xgen(finalInstList, root);
     return 0;
 }
 

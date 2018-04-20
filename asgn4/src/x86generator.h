@@ -67,7 +67,7 @@
     INSTR2(v, notq, op1, op1);                  \
     break;                                      \
   case NEG:                                     \
-    INSTR2(v, neg, op1, op1);                   \
+    INSTR2(v, negq, op1, op1);                  \
     break;                                      \
   case INC_OP:                                  \
     INSTR1(v, incq, op1);                       \
