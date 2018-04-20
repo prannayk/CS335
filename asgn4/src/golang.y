@@ -597,6 +597,31 @@ if (!($2->children[0]->matched).compare("interface")) {
   InterfaceType* t = new InterfaceType($1->children[0]->matched, ST::interfaceStack);
   ST::interfaceStack.clear();
   ST::interfaceList[$1->children[0]->matched] = t;
+
+  // check if any existing structs implement this interface
+  // abhibhavmultimap
+  map<string, StructDefinitionType*>::iterator it;
+  map<string, FuncType*>::iterator it2;
+  bool failed = false;
+
+  for (it = ST::structDefs.begin(); it != ST::structDefs.end(); it++) {
+    failed = false;
+
+    for (it2 = t->funcList.begin(); it2 != t->funcList.end(); it2++) {
+      // We have to check if this struct implements them all now
+      if (!((it->second->structFunctions).count(it2->first))) {
+        failed = true;
+        break;
+      }
+    }
+    if ((! failed) && ((it->second->implemented).count(t->interfaceName) == 0)) {
+      // this is implemented
+      it->second->implemented[t->interfaceName] = t;
+      cout << "Struct " << it->first << " implements(2nd kind) " << t->interfaceName << endl;
+    }
+
+  }
+
 }
 
 }
@@ -1086,14 +1111,28 @@ if (($4->children).size() == 5) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
 
     // Check if the new function made the struct implement some new interface
+    // abhibhavmultimap 1
 
-    /*map<string, InterfaceType*>::iterator it;*/
-    /*map<string, FuncType*>::iterator it2;*/
-    /*for (it = ST::interfaceList.begin(); it != ST::interfaceList.end(); it++) {*/
-      /*for (it2 = ((*it)->second).funcList.begin(); it2 != (*it)->second->funcList.end(); it2++) {*/
-        /*;*/
-      /*}*/
-    /*}*/
+    map<string, InterfaceType*>::iterator it;
+    map<string, FuncType*>::iterator it2;
+    StructDefinitionType* t = ST::structDefs[ST::structName];
+    bool failed = false;
+
+    for (it = ST::interfaceList.begin(); it != ST::interfaceList.end(); it++) {
+      failed = false;
+      for (it2 = (it->second)->funcList.begin(); it2 != (it->second)->funcList.end(); it2++) {
+        // We have to check if this struct implements them all now
+        if (!((t->structFunctions).count(it2->first))) {
+          failed = true;
+          break;
+        }
+      }
+      if ((! failed) && ((t->implemented).count(it->second->interfaceName) == 0)) {
+        // this is implemented
+        t->implemented[it->second->interfaceName] = it->second;
+        cout << "Struct " << ST::structName << " implements " << it->second->interfaceName << endl;
+      }
+    }
 
     ST::structPush = false;
     ST::structName = "";
@@ -1395,6 +1434,7 @@ $$->Add($3);
 $$->Add($5);
 // In all fairness, scoping is done by the STable, no need to deal with that here
 // the add steps above are now redundant
+// True
 $$ = $3;
 }
 
@@ -2149,9 +2189,9 @@ int main(int argc, char** argv) {
       ;
     }
     printST(root);
-    /* cout << "Struct Info " << (ST::structDefs["person"]->fields).size() << endl; */
-    /* cout << "fin" << endl; */
-    return xgen(finalInstList, root);
+    cout << "fin" << endl; 
+    /*return xgen(finalInstList, root);*/
+    return 0;
 }
 
 void yyerror(const char *s) {
