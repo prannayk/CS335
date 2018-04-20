@@ -7,7 +7,7 @@ extern void
 fillTypeList()
 {
     TypeList["int"] = new BasicType("int");
-    TypeList["int"]->mem_size = 4;
+    TypeList["int"]->mem_size = 8; // ints are int64
     TypeList["float"] = new BasicType("float");
     TypeList["float"]->mem_size = 8;
     TypeList["char"] = new BasicType("char");
@@ -256,6 +256,7 @@ PointerType::PointerType(Type* aUnderlyingType)
 {
     this->underlyingType = aUnderlyingType;
     this->representation = "*" + this->underlyingType->GetRepresentation();
+    this->mem_size = 8; // Pointers are 8 bytes in x64
 }
 
 Type*
@@ -294,7 +295,7 @@ StructType::GetStructMemberType(string a)
     return NULL;
 }
 
-InterfaceType::InterfaceType(string aInterfaceName, vector<FuncType*> aFuncList)
+InterfaceType::InterfaceType(string aInterfaceName, map<string, FuncType*> aFuncList)
   : interfaceName(aInterfaceName)
   , funcList(aFuncList)
 {

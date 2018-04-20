@@ -8,6 +8,7 @@
 #include "helpers.h"
 #include "Type.h"
 #include <typeinfo>
+#include "x86generator.h"
 using namespace std;
 #define YY_DECL extern "C" int yylex()
 #define YYDEBUG 1
@@ -19,6 +20,7 @@ void yyerror(const char *s);
 #include "Node.h"
 ST* root = new ST(0, nullptr);
 ST* curr = root;
+vector<Instruction*> finalInstList;
 
 %}
 
@@ -271,6 +273,7 @@ $$->Add($1);
 $$->Add($2);
 $$->Add($3);
 $3->printInstructionList();
+finalInstList = $3->instr_list;
 }
 
 ;
@@ -589,6 +592,38 @@ if (!($2->children[0]->matched).compare("struct")) {
   ST::structDefs[$1->children[0]->matched] = (StructDefinitionType*)$2->getType();
 }
 
+if (!($2->children[0]->matched).compare("interface")) {
+  // Use stack to create a new interfacetype object
+  InterfaceType* t = new InterfaceType($1->children[0]->matched, ST::interfaceStack);
+  ST::interfaceStack.clear();
+  ST::interfaceList[$1->children[0]->matched] = t;
+
+  // check if any existing structs implement this interface
+  // abhibhavmultimap
+  map<string, StructDefinitionType*>::iterator it;
+  map<string, FuncType*>::iterator it2;
+  bool failed = false;
+
+  for (it = ST::structDefs.begin(); it != ST::structDefs.end(); it++) {
+    failed = false;
+
+    for (it2 = t->funcList.begin(); it2 != t->funcList.end(); it2++) {
+      // We have to check if this struct implements them all now
+      if (!((it->second->structFunctions).count(it2->first))) {
+        failed = true;
+        break;
+      }
+    }
+    if ((! failed) && ((it->second->implemented).count(t->interfaceName) == 0)) {
+      // this is implemented
+      it->second->implemented[t->interfaceName] = t;
+      cout << "Struct " << it->first << " implements(2nd kind) " << t->interfaceName << endl;
+    }
+
+  }
+
+}
+
 }
 
 ;
@@ -813,10 +848,10 @@ if(curr->rValueMode){
 $1->instr_list = mergeInstructions($1->instr_list, generateInstructionReadStruct($$, $$->children[0], t, ty, curr));
 
 } else {
-    cout << "pob" << ($1->children).size() << endl;
-    cout << ($1->children)[0]->content << endl;
-    cout << ($1->children)[1]->matched << endl;
-    cout << ($1->children)[2]->matched << endl;
+    /* cout << "pob" << ($1->children).size() << endl; */
+    /* cout << ($1->children)[0]->content << endl; */
+    /* cout << ($1->children)[1]->matched << endl; */
+    /* cout << ($1->children)[2]->matched << endl; */
 
 Node* t = new Node("Literal", new BasicType("NOTYPE"));
     StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
@@ -1072,8 +1107,35 @@ if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes);
   t->SetFuncLabel("funclabel" + to_string(clock()));
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
+
+    // Check if the new function made the struct implement some new interface
+    // abhibhavmultimap 1
+
+    map<string, InterfaceType*>::iterator it;
+    map<string, FuncType*>::iterator it2;
+    StructDefinitionType* t = ST::structDefs[ST::structName];
+    bool failed = false;
+
+    for (it = ST::interfaceList.begin(); it != ST::interfaceList.end(); it++) {
+      failed = false;
+      for (it2 = (it->second)->funcList.begin(); it2 != (it->second)->funcList.end(); it2++) {
+        // We have to check if this struct implements them all now
+        if (!((t->structFunctions).count(it2->first))) {
+          failed = true;
+          break;
+        }
+      }
+      if ((! failed) && ((t->implemented).count(it->second->interfaceName) == 0)) {
+        // this is implemented
+        t->implemented[it->second->interfaceName] = it->second;
+        cout << "Struct " << ST::structName << " implements " << it->second->interfaceName << endl;
+      }
+    }
+
     ST::structPush = false;
     ST::structName = "";
     ST::funcName = "";
@@ -1096,7 +1158,11 @@ string* name = new string;
 $$->instr_list.push_back(new Instruction(  FUNC_ST  , name, STRING, new BasicType("function_name")));
 $$->instr_list = mergeInstructions($$->instr_list, mergeInstructions($4->instr_list, $6->instr_list));
 $$->instr_list.push_back(new Instruction(  FUNC_ET));
+<<<<<<< HEAD
 //curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType()));
+=======
+/* curr->funcDefs.insert(pair<string, FuncType*> ($4->content , (FuncType*)$4->getType())); */
+>>>>>>> 5d27f60b79419d3ca980762bc14cf81c92f96225
 }
 ;
 GeneratorDeclaration  :
@@ -1114,6 +1180,8 @@ if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
   t->SetFuncLabel("funclabel" + to_string(clock()));
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
+  ST::funcSTs[($4->children[0])->matched] = curr;
+  ST::funcParamNamesInOrder[($4->children[0])->matched] = paramNames;
   if (ST::structPush) {
     (ST::structDefs[ST::structName]->structFunctions)[ST::funcName] = t;
     ST::structPush = false;
@@ -1377,6 +1445,7 @@ $$->Add($3);
 $$->Add($5);
 // In all fairness, scoping is done by the STable, no need to deal with that here
 // the add steps above are now redundant
+// True
 $$ = $3;
 }
 
@@ -1862,6 +1931,13 @@ InterfaceDeclaration  :
                       NewName InterfaceDecl{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
 $$->Add($2);
+// Here is a function, add to stack
+
+vector<Type*> paramTypes = createParamList($2->children[1]);
+vector<string> paramNames = createNameList($2->children[1]);
+FuncType* t = new FuncType($2->children[3]->getType(), paramTypes);
+ST::interfaceStack[$1->content] = t;
+
 }
     | PAREN_OPEN PackName PAREN_CLOSE{$$ = new Node("InterfaceDeclaration", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -2113,6 +2189,7 @@ if((($3->count + 1) != $$->type_child.size())
 };
 
 %%
+int xgen(vector<Instruction*>, ST*);
 Type* TypeForSymbol(char* input){
     // returns only INT for now
     if(strlen(input) > 0)
@@ -2133,10 +2210,21 @@ int main(int argc, char** argv) {
       ;
 }
     printST(root);
-    cout << "fin" << endl;
+    cout << "fin" << endl; 
+    /*return xgen(finalInstList, root);*/
     return 0;
 }
 
 void yyerror(const char *s) {
     syntaxError(s);
 }
+
+
+int
+xgen(vector<Instruction*> finalInstList, ST* glob)
+{
+    X86Generator gen(finalInstList, glob);
+    cout << gen.Generate();
+    return 0;
+}
+
