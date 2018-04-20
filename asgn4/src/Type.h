@@ -43,6 +43,7 @@ class BasicType : public Type
 class FuncType : public Type
 {
   private:
+    string fName;
     Type* returnType;
     vector<Type*> paramTypes;
     bool generator;
@@ -52,6 +53,8 @@ class FuncType : public Type
     vector<Type*> GetParamTypes() const;
     FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag);
     FuncType(Type* aReturnType, vector<Type*> aParamTypes);
+    string GetFuncLabel();
+    void SetFuncLabel(string );
 };
 
 class InterfaceType;

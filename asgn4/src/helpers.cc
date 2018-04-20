@@ -44,6 +44,25 @@ correctPointer(string s, ST* curr){
     }
 }
 
+extern Type*
+correctType(string s, ST* curr){
+    if (curr->getVar(s))    return curr->getVar(s)->getType();
+    else {
+        semanticError("Variable or temporary not found");
+    }
+}
+
+extern Type*
+correctType(Node* ptr, ST* curr)
+{
+    Type* arg1;
+    if (ptr->matched != "Literal")
+        arg1 = curr->getVar(ptr->tmp)->getType();
+    else {
+        arg1 = ptr->getType();
+    }
+    return arg1;
+}
 extern void*
 correctPointer(Node* ptr, ST* curr)
 {
@@ -594,21 +613,8 @@ generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, S
 }
 
 extern void
-generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
+generateCall(Node* source, string fname, Type* fntype, vector<Node*> args, ST* curr)
 {
-    if (fn->matched != "Name") {
-        semanticError(
-          "Cannot deal with anything but the simplest of functions.");
-        return;
-        // exit(1);
-    }
-
-    if ((curr->checkEntryFunc(fn->content))) {
-        semanticError("Cannot deal with function not in function table yet");
-        return;
-        // exit(1);
-    }
-
     // This function call has no arguments, so just call and store.
     vector<Instruction*> pre_i_list;
     vector<Instruction*> i_list;
@@ -667,14 +673,15 @@ generateCall(Node* source, Node* fn, vector<Node*> args, ST* curr)
     Instruction* instr;
     // TODOmilindl: Change codegen to switch it around as well, since it is more
     // uniform this way, to have it with the STE before the function name.
-    string* nm = &(fn->content);
+    string * nm =  new string;
+    *nm = fname;
     instr = new Instruction(CALL,
                             arg3,
                             nm,
                             REGISTER,
                             STRING,
-                            fn->getType(),
-                            new BasicType(fn->content));
+                            fntype,
+                            new BasicType(fname));
     i_list.push_back(instr);
 
     source->instr_list = mergeInstructions(pre_i_list, i_list);
@@ -752,7 +759,7 @@ getCharFromString(string s)
 }
 
 extern Instruction*
-generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
+generateGotoInstruction(Node* n1, string label, ST* curr, bool cond)
 {
     STEntry* arg1 = curr->getVar(n1->tmp);
     if (arg1 == NULL) {
@@ -770,7 +777,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond = true)
         op = GOTOEQ;
     else
         op = GOTONEQ;
-    instr = new Instruction(GOTOEQ,
+    instr = new Instruction(op,
                             (void*)branch,
                             (void*)arg1,
                             (void*)i,
@@ -1066,20 +1073,41 @@ semanticError(string aMessage)
     semanticError(aMessage, false);
 }
 
+bool 
+typeEqual(vector<Type*> a, vector<Type*> b){
+    vector<Type*>::iterator it = a.begin();
+    vector<Type*>::iterator jt = b.begin();
+    for(;it != a.end() && jt != b.end(); (++it) ){
+        if(**it != **jt)    return false;
+        ++jt;
+    }
+    return true;
+}
+
 extern vector<Type*>
-verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args ){
+verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args, ST* curr ){
     vector<Type*> types;
     if (count){
         vector<Node*>::iterator it = args->children.begin();
+        if(!args->matched.compare("StructAccess")){
+            if (!curr->checkEntry(args->tmp))
+                types.push_back(curr->getVar(args->tmp)->getType());
+            else {
+                semanticError("Variable not found");
+                exit(1);
+            }
+        }
         for(;it!=args->children.end(); ++it){
-            types.push_back((*it)->getType());
+            fixNodeForExpression(*it,curr);
+            types.push_back(correctType(*it, curr));
         }
     }
     vector<FuncType*>::iterator cand = cand_list.begin();
     for(;cand!=cand_list.end();++cand){
-        if(count == (*cand)->GetParamTypes().size() && (equal(types.begin(), types.begin()+types.size(), (*cand)->GetParamTypes().begin()))){
+        if(count == (*cand)->GetParamTypes().size() && (typeEqual(types, (*cand)->GetParamTypes()))){
             vector<Type*> type_list = (*cand)->GetParamTypes();
             type_list.push_back((*cand)->GetReturnType());
+            type_list.push_back(*cand);
             return type_list;
         }
     }

@@ -109,6 +109,7 @@ FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag)
     this->type = 2;
     this->mem_size = 8; // store function type variables as function pointers
                         // and therefore take pointer amount of memory
+    fName = "unimplemented";
 }
 
 FuncType::FuncType(Type* aReturnType, vector<Type*> aParamTypes)
@@ -299,3 +300,16 @@ InterfaceType::InterfaceType(string aInterfaceName, vector<FuncType*> aFuncList)
 {
     this->representation = interfaceName;
 }
+
+string
+FuncType :: GetFuncLabel()
+{
+    return fName;
+}
+
+void 
+FuncType :: SetFuncLabel(string aName)
+{
+    fName = aName;
+}
+

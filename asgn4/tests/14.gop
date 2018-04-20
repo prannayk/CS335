@@ -5,8 +5,13 @@ func foo(x int) int {
     return bar
 }
 
+func foo() int {
+    var bar int
+    return bar
+}
 func main() {
-    var a int
-    a = foo(a)
+    var a,b int
+    b = foo()
+    a = foo(b)
 }
 

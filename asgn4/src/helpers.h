@@ -100,7 +100,7 @@ extern vector<Instruction*>
 generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, ST* curr);
 
 extern void
-generateCall(Node* source, Node* fn, vector<Node*> args, ST*);
+generateCall(Node* source, string fname, Type* fntype, vector<Node*> args, ST* curr);
 extern void setScopeReturnType(Type* aReturnType, ST* aST);
 extern Type* getScopeReturnType(ST* aST);
 extern void generateReturn(Node* source, Node* retVal, ST* curr);
@@ -122,5 +122,7 @@ extern void semanticError(string aMessage, bool aCrash);
 extern vector<Instruction*> 
 copyInstruction(vector<Instruction*> i_list, int offset );
 extern vector<Type*>
-verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args = new Node("bullshit", new BasicType("Empty")));
+verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args, ST*);
+extern Type* correctType(Node* ptr, ST* curr);
+extern Type* correctType(string s, ST* curr);
 

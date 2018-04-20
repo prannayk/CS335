@@ -3,6 +3,6 @@
 package main
 
 func other() {
-     var y int = -5
-     var x int = -y
+     var y[10] int
+     y[0] = 5
 }
