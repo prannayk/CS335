@@ -41,6 +41,11 @@ X86Generator::StackAlloc()
             STEntry* s1 = x.second;
             s1->setReg(NONE);
             s1->offset = totalSpace;
+            // Temporary
+            // cout << s1->getName() << "\t\t" << FROMRBP(s1->offset) << "\t\t"
+            //      << s1->getType()->mem_size << "\t\t"
+            //      << s1->getType()->GetRepresentation() << endl;
+
             if (s1->getType()->GetTypeClass() == 5 ||
                 s1->getType()->GetTypeClass() == 4) {
                 // This is a struct or an array, so deal with it by mallocing
@@ -53,6 +58,10 @@ X86Generator::StackAlloc()
                 // Note that any register is located at
                 // -(offset + RBPSaveSpace) from rbp
                 // RBPSaveSpace = 8 for x64
+                // Hacky fix for some temps haveing zero size
+                if (s1->getType()->mem_size == 0) {
+                    s1->getType()->mem_size = PTRSIZE; // best guess
+                }
                 totalSpace += s1->getType()->mem_size;
             }
         }
@@ -364,10 +373,21 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             // If it is __print(), then treat it specially.
             if (*fName == "__print") {
+                // Write everything back cos this might involve things that have
+                // changed in memory but not in registers yet, due to scanf.
+                WriteBackAll();
+                FlushRegisters();
                 INSTR2(this->text, movq, "%rdi", "%rsi");
                 INSTR2(this->text, leaq, ".L.str(%rip)", "%rdi");
                 INSTR2(this->text, movb, NUM(0), "%al");
                 INSTR1(this->text, callq, "printf@PLT");
+            } else if (*fName == "__scan") {
+                INSTR2(this->text, movq, "%rdi", "%rsi");
+                INSTR2(this->text, leaq, ".L.strs(%rip)", "%rdi");
+                INSTR2(this->text, movb, NUM(0), "%al");
+                INSTR1(this->text, callq, "scanf@PLT");
+                WriteBackAll();
+                FlushRegisters();
             } else {
                 INSTR1(this->text, callq, *fName);
             }
@@ -859,6 +879,11 @@ X86Generator::Generate()
                     ".L.str:\n"
                     ".asciz	\"%ld\\n\"\n"
                     ".size	.L.str, 5\n";
+    footer += ".type  .L.strs,@object          # @.str\n"
+              ".section	.rodata.str1.1,\"aMS\",@progbits,1\n"
+              ".L.strs:\n"
+              ".asciz	\"%ld\"\n"
+              ".size	.L.str, 4\n";
     string header = ".text\n";
     return header + GenerateFunctions() + footer;
 }

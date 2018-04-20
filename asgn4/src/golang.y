@@ -2203,12 +2203,19 @@ Type* TypeForSymbol(char* input){
 }
 
 int main(int argc, char** argv) {
-        // Create function types for print etc.
-    vector<Type*> paramTypes;
-    paramTypes.push_back(new BasicType("int"));
-    FuncType* printType = new FuncType(new BasicType("int"), paramTypes);
+     // Create function types for print etc.
+    vector<Type*> printParamTypes;
+    printParamTypes.push_back(new BasicType("int"));
+    FuncType* printType = new FuncType(new BasicType("int"), printParamTypes);
     ST::funcDefs.insert(pair<string, FuncType*>("__print", printType));
     printType->SetFuncLabel("__print");
+
+    vector<Type*> scanParamTypes;
+    scanParamTypes.push_back(new PointerType(new BasicType("int")));
+    FuncType* scanType = new FuncType(new BasicType("int"), scanParamTypes);
+    ST::funcDefs.insert(pair<string, FuncType*>("__scan", scanType));
+    scanType->SetFuncLabel("__scan");
+
     filename = argv[1];
     FILE* myfile = fopen(filename, "r");
     yyin = myfile;
