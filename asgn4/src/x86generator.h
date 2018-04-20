@@ -4,6 +4,7 @@
 #include "Type.h"
 #include "enums.h"
 #include "ir.h"
+#include "helpers.h"
 #include <queue>
 #include <vector>
 #include <algorithm>

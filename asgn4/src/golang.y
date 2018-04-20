@@ -936,7 +936,7 @@ $$->content = $1->content;
 $$->instr_list = mergeInstructions($1->instr_list, $3->instr_list);
 $$->str_child = $1->str_child;
 if(!$3->matched.compare("Literal")){
-    string str = "temp" + to_string(clock());
+    string str = "temp" + to_string(number());
     curr->addEntry(str,$3->getType() ,false);
     $$->instr_list.push_back(new Instruction(ASG, correctPointer(str, curr),
                             correctPointer($3,curr),
@@ -1109,7 +1109,7 @@ if (($4->children).size() == 5) {
   if (($4->children[0]->matched) == "main") {
       t->SetFuncLabel("main");
   } else {
-     t->SetFuncLabel("funclabel" + to_string(clock()));
+     t->SetFuncLabel("funclabel" + to_string(number()));
   } 
   // milindl:
   $4->type = t;
@@ -1181,7 +1181,7 @@ vector<string> paramNames = createNameList($4->children[2]);
 populateSTTypeList(paramNames, paramTypes, curr);
 if (($4->children).size() == 5) {
   FuncType* t = new FuncType($4->children[4]->getType(), paramTypes, true);
-  t->SetFuncLabel("funclabel" + to_string(clock()));
+  t->SetFuncLabel("funclabel" + to_string(number()));
   ST::funcDefs.insert(pair<string, FuncType*>( ($4->children[0])->matched, t));
   ST::funcSTs[t->GetFuncLabel()] = curr;
   ST::funcParamNamesInOrder[t->GetFuncLabel()] = paramNames;
@@ -1483,7 +1483,7 @@ $$->Add($3);
 $$->instr_list.push_back(generateLabelInstruction($1->content));
 $$->instr_list = mergeInstructions($$->instr_list, $3->instr_list);
 string s = "label";
-s = s + to_string(clock());
+s = s + to_string(number());
 goto_label_map[$1->content] = s;
 if($3->matched == "ForStatement"){
     break_label_map[$1->content] = $3->tmp;
@@ -1576,7 +1576,7 @@ $$->instr_list.push_back(branch_goto);
 string s = *(string *)$$->instr_list[$$->instr_list.size() - 1]->getV1();
 $$->instr_list.push_back(branch_goto);
 string s1 = $3->getType()->GetRepresentation();
-string end = "label" + to_string(clock());
+string end = "label" + to_string(number());
 Instruction* endInstr = generateUnconditionalGoto(end, curr);
 $$->instr_list.push_back(generateLabelInstruction(s1 ));
 $$->instr_list = mergeInstructions($$->instr_list, $5->instr_list);
@@ -1666,8 +1666,8 @@ ForBody  :
 $$->Add($1);
 $$->Add($3);
 if(($1->matched == "ForHeader")){
-    string s1 = "forlabel" + to_string(clock());
-    string s2 = "forlabel" + to_string(clock());
+    string s1 = "forlabel" + to_string(number());
+    string s2 = "forlabel" + to_string(number());
     $$->tmp = s2;
     $$->content = s1;
     $$->instr_list = mergeInstructions($$->instr_list, $1->children[0]->instr_list);
@@ -1680,8 +1680,8 @@ if(($1->matched == "ForHeader")){
     $$->instr_list.push_back(generateLabelInstruction(s2));
 } else if ($1->matched == "RangeStatement"){
     // TODO : handle range expression Milind
-    string s1 = "forlabel" + to_string(clock());
-    string s2 = "forlabel" + to_string(clock());
+    string s1 = "forlabel" + to_string(number());
+    string s2 = "forlabel" + to_string(number());
     $$->tmp = s2;
     $$->content = s1;
     if($1->count == 0){
@@ -1694,7 +1694,7 @@ if(($1->matched == "ForHeader")){
                                                     new BasicType("int")));
         $$->instr_list.push_back(generateLabelInstruction(s1));
         long *ptr2 = new long; *ptr2 = 1;
-        $1->tmp = "temp" + to_string(clock());
+        $1->tmp = "temp" + to_string(number());
         curr->addEntry($1->tmp, new BasicType("bool"), false);
         void* arg2 = curr->getVar($1->tmp);
         $$->instr_list.push_back(new Instruction(LT_OP, arg2, arg1, ptr2,
@@ -1723,8 +1723,8 @@ if(($1->matched == "ForHeader")){
                 if(ste->getType()->GetTypeClass() != 4 || ((PointerType*)ste->getType())->GetUnderlyingType()->GetTypeClass() != 4 || *ste->getType() == *(new BasicType("string"))){
                     // handling array type
                     // strings not handled yet 
-                    string s = "index" + to_string(clock()); // Index variable
-                    string s3 = "value" + to_string(clock()); // Value variable
+                    string s = "index" + to_string(number()); // Index variable
+                    string s3 = "value" + to_string(number()); // Value variable
                     curr->addEntry(s, new BasicType("int"),false );
                     Node* mainChild = fixNodeForExpression($1->children[3], curr); // TODO : Milind add translation from pointer to array to array, so that it can be handled similarily in mainChild
                     Node* varChild = $1->children[0];
@@ -1744,7 +1744,7 @@ if(($1->matched == "ForHeader")){
                     long *ptr2 = new long; *ptr2 = ((STEntry*)arg1)->getType()->GetMemSize();
                     long *ptr3 = new long;
                     *ptr3 = ((ArrayType*)mainChild->getType())->GetSize();
-                    $1->tmp = "temp" + to_string(clock()); // temporary var for keeping the LT_OP result
+                    $1->tmp = "temp" + to_string(number()); // temporary var for keeping the LT_OP result
                     curr->addEntry($1->tmp, new BasicType("bool"), false);
                     void* arg2 = curr->getVar($1->tmp);
                     $$->instr_list.push_back(new Instruction(LT_OP, arg2, arg1, ptr3,
@@ -1794,8 +1794,8 @@ if(($1->matched == "ForHeader")){
        }
     }
 } else {
-    string s1 = "label" + to_string(clock());
-    string s2 = "label" + to_string(clock());
+    string s1 = "label" + to_string(number());
+    string s2 = "label" + to_string(number());
     $$->instr_list.push_back(generateLabelInstruction(s1));
     $$->instr_list = mergeInstructions($$->instr_list, $1->instr_list);
     $$->instr_list.push_back(generateGotoInstruction($1,s2  ,curr, false));
@@ -1842,7 +1842,7 @@ setRValueMode(false, curr);
 $$ = new Node("RangeStatement", new BasicType("int"), 0);
 $$->Add($1);
 $$->Add($3);
-string temp = "temp" + to_string(clock());
+string temp = "temp" + to_string(number());
 curr->addEntry(temp, $$->getType(), false);
 $$->tmp = temp;
 
@@ -1859,9 +1859,9 @@ $$->Add($5);
 $$->Add($6);
 $$->instr_list = copyInstruction($2->instr_list,1);
 vector<string> caseblock_label_list;
-string end = "label" + to_string(clock());
+string end = "label" + to_string(number());
 for(int i=0; i<$5->count; ++i){
-    string s = "label" + to_string(clock());
+    string s = "label" + to_string(number());
     caseblock_label_list.push_back(s);
     if($5->children[i+1]->children[0]->matched == "Default")
         continue;

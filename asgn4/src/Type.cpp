@@ -145,7 +145,7 @@ FuncType::GetParamTypes() const
 
 StructDefinitionType::StructDefinitionType(map<string, Type*> aFields)
   : fields(aFields)
-  , randomSuffix(to_string(clock()))
+  , randomSuffix(to_string(number()))
 {
     this->representation = structRepr(this->fields);
     this->type = 3;
@@ -162,7 +162,7 @@ StructDefinitionType::StructDefinitionType(map<string, Type*> aFields)
 StructDefinitionType::StructDefinitionType(vector<string> fieldNames,
                                            vector<Type*> fieldTypes)
   : fields()
-  , randomSuffix(to_string(clock()))
+  , randomSuffix(to_string(number()))
 {
 
     vector<string>::iterator ni;
@@ -295,7 +295,8 @@ StructType::GetStructMemberType(string a)
     return NULL;
 }
 
-InterfaceType::InterfaceType(string aInterfaceName, map<string, FuncType*> aFuncList)
+InterfaceType::InterfaceType(string aInterfaceName,
+                             map<string, FuncType*> aFuncList)
   : interfaceName(aInterfaceName)
   , funcList(aFuncList)
 {
@@ -303,14 +304,19 @@ InterfaceType::InterfaceType(string aInterfaceName, map<string, FuncType*> aFunc
 }
 
 string
-FuncType :: GetFuncLabel()
+FuncType ::GetFuncLabel()
 {
     return fName;
 }
 
-void 
-FuncType :: SetFuncLabel(string aName)
+void
+FuncType ::SetFuncLabel(string aName)
 {
     fName = aName;
 }
-
+extern unsigned long int
+number()
+{
+    static unsigned long int labNum = 0;
+    return ++labNum;
+}

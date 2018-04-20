@@ -10,6 +10,7 @@
 using namespace std;
 
 
+extern unsigned long int number();
 class Type
 {
   protected:

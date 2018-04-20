@@ -785,8 +785,8 @@ X86Generator::GenerateSimpleBlock(SimpleBlock* aSb)
 
             // Now, generate jumps and labels
             string op1 = registerOrConstant((void*)result, REGISTER);
-            string label1 = "jmpLabel" + to_string(clock());
-            string label2 = "jmpLabel" + to_string(clock());
+            string label1 = "jmpLabel" + to_string(number());
+            string label2 = "jmpLabel" + to_string(number());
             JUMPINSTR2(this->text, instruction->getOp(), label1);
             INSTR2(this->text, movq, NUM(0), op1);
             INSTR1(this->text, jmp, label2);

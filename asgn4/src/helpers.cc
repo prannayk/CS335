@@ -373,8 +373,8 @@ extern vector<Instruction*>
 generateInstructionReadArray(Node* source, ST* curr)
 {
     Instruction* instr;
-    string temp = "temp" + to_string(clock());
-    string temp2 = "temp" + to_string(clock());
+    string temp = "temp" + to_string(number());
+    string temp2 = "temp" + to_string(number());
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
     curr->addEntry(temp2, new BasicType("int"), false);
@@ -436,7 +436,7 @@ generateInstructionReadArray(Node* source, ST* curr)
         }
     }
     Type* currentType = type;
-    source->tmp = "temp" + to_string(clock());
+    source->tmp = "temp" + to_string(number());
     type = ((ArrayType*)source->getType())->GetArrayType();
     curr->addEntry(
       source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
@@ -462,7 +462,7 @@ generateInstructionReadArray(Node* source, ST* curr)
     /* //TODO : convert back patching to multi map */
     /* n1 = fixNodeForExpression(n1, curr); */
     /* n2 = fixNodeForExpression(n2, curr); */
-    /* string s = "temp" + to_string(clock()); */
+    /* string s = "temp" + to_string(number()); */
     /* string* str = new string; */
     /* *str = s; */
     /* void* arg1 = correctPointer(n1, curr); */
@@ -504,8 +504,8 @@ extern vector<Instruction*>
 generateInstructionWriteArray(Node* source, ST* curr)
 {
     Instruction* instr;
-    string temp = "temp" + to_string(clock());
-    string temp2 = "temp" + to_string(clock());
+    string temp = "temp" + to_string(number());
+    string temp2 = "temp" + to_string(number());
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
     curr->addEntry(temp2, new BasicType("int"), false);
@@ -567,7 +567,7 @@ generateInstructionWriteArray(Node* source, ST* curr)
         }
     }
     Type* currentType = type;
-    source->tmp = "temp" + to_string(clock());
+    source->tmp = "temp" + to_string(number());
     type = ((ArrayType*)source->getType())->GetArrayType();
     curr->addEntry(
       source->tmp, ((ArrayType*)source->getType())->GetArrayType(), false);
@@ -603,7 +603,7 @@ generateInstructionReadStruct(Node* source,
 
     n1 = fixNodeForExpression(n1, curr);
     // n2 = fixNodeForExpression(n2, curr);
-    string s = "temp" + to_string(clock());
+    string s = "temp" + to_string(number());
     string* str = new string;
     *str = s;
     void* arg1 =
@@ -620,7 +620,7 @@ generateInstructionReadStruct(Node* source,
     }
     vector<Instruction*> i_list;
 
-    source->tmp = "temp" + to_string(clock());
+    source->tmp = "temp" + to_string(number());
     curr->addEntry(source->tmp, ty, false);
     long* offset = new long;
     *offset = atol(n2->content.c_str());
@@ -651,7 +651,7 @@ generateInstructionWriteStruct(Node* source,
                                ST* curr)
 {
     Instruction* instr;
-    string temp = "temp" + to_string(clock());
+    string temp = "temp" + to_string(number());
     source->tmp = temp;
     curr->addEntry(source->tmp, new BasicType("int"), false);
 
@@ -663,7 +663,7 @@ generateInstructionWriteStruct(Node* source,
     Type* type = ((StructType*)source->getType())->GetStructType();
     vector<Instruction*> i_list;
 
-    source->tmp = "temp" + to_string(clock());
+    source->tmp = "temp" + to_string(number());
 
     curr->addEntry(
       source->tmp, ((StructType*)source->getType())->GetStructType(), false);
@@ -742,7 +742,7 @@ generateCall(Node* source,
         }
     }
     string st = "temp";
-    string str = st + to_string(clock());
+    string str = st + to_string(number());
     curr->addEntry(str, source->getType(), false);
     STEntry* arg3;
     if (!(arg3 = curr->getVar(str))) {
@@ -795,7 +795,7 @@ generateInstructionBIN(OpCode op, Node* n1, Node* n2, ST* curr)
         arg2 = (void*)i;
     }
     string st = "temp";
-    string str = st + to_string(clock());
+    string str = st + to_string(number());
     curr->addEntry(str, n1->getType(), false);
     STEntry* arg3;
     if (!(arg3 = curr->getVar(str))) {
@@ -838,7 +838,7 @@ generateGotoInstruction(Node* n1, string label, ST* curr, bool cond)
 {
     STEntry* arg1 = curr->getVar(n1->tmp);
     if (arg1 == NULL) {
-        string s = "label" + to_string(clock());
+        string s = "label" + to_string(number());
         n1->tmp = s;
         curr->addEntry(n1->tmp, new BasicType("GOTO"), false);
         arg1 = curr->getVar(n1->tmp);
@@ -874,7 +874,7 @@ generateGotoInstruction(Node* n1, ST* curr)
         arg1 = curr->getVar(n1->tmp);
     }
     string s = "label";
-    s = s + to_string(clock());
+    s = s + to_string(number());
     string* branch = getCharFromString(s);
     long* i = new long;
     *i = 1;
@@ -905,7 +905,7 @@ extern Instruction*
 generateUnconditionalGoto(ST* curr)
 {
     string s = "label";
-    s = s + to_string(clock());
+    s = s + to_string(number());
     string* branch = getCharFromString(s);
     Instruction* instr;
     instr = new Instruction(GOTO_OP, branch, STRING, new BasicType(s));
@@ -961,7 +961,7 @@ generateUnaryInstruction(OpCode op, Node* source, ST* curr)
 {
     source = fixNodeForExpression(source, curr);
     string st = "temp";
-    string str = st + to_string(clock());
+    string str = st + to_string(number());
     curr->addEntry(str, source->getType(), false);
     void* target = curr->getVar(str);
     void* src = correctPointer(source, curr);
