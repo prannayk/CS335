@@ -14,8 +14,11 @@ enum OpCode
     BAND_OP,      //  ✓  bitwise AND
     MUL_OPER,     // ✓
     NAND_OP,      // TODO: After implementing NEG
+    AND_OP,       // logical AND
+    OR_OP,        // logical OR
     DIV_OP = 30,
     MOD_OP,
+    LNOT, // logical not
 
     // Binary relops
     GT_OP = 50,
@@ -24,9 +27,6 @@ enum OpCode
     LEQ_OP,
     EQ_OP,
     NEQ_OP,
-    AND_OP, // logical AND
-    OR_OP,  // logical OR
-    LNOT,   // logical not
 
     // Binary control flow ops
     GOTOEQ = 100,
