@@ -165,6 +165,19 @@ ST::getStructVar(string aName, string memberName)
     return getVar(temp);
 }
 
+StructDefinitionType*
+ST::getStruct(string a)
+{
+    if (structs.count(a)) {
+        return ST::structDefs[structs[a]];
+    }
+
+    if (depth == 0) {
+        return nullptr;
+    }
+    return parent->getStruct(a);
+}
+
 STEntry*
 ST::getVar(string a)
 {

@@ -276,6 +276,9 @@ populateSTTypeList(vector<string> names, vector<Type*> types, ST* curr)
          (itn != names.end()) && (itt != types.end());
          itn++, itt++) {
         curr->addEntry(*itn, *itt, false);
+        if ((*itt)->GetTypeClass() == 5) {
+            curr->structs[*itn] = ((StructType*)(*itt))->structName;
+        }
     }
 }
 
@@ -435,6 +438,19 @@ generateInstructionReadArray(Node* source, ST* curr)
             }
         }
     }
+    i_list.push_back(new Instruction(
+      PARAM, correctPointer(temp, curr), REGISTER, new BasicType("int")));
+    string* printName = new string;
+    *printName = "__print";
+    string tempstr = "temp" + to_string(number());
+    curr->addEntry(tempstr, new BasicType("int"), false);
+    i_list.push_back(new Instruction(CALL,
+                                     correctPointer(tempstr, curr),
+                                     (void*)printName,
+                                     REGISTER,
+                                     STRING,
+                                     new BasicType("int"),
+                                     new BasicType("function_name")));
     Type* currentType = type;
     source->tmp = "temp" + to_string(number());
     type = ((ArrayType*)source->getType())->GetArrayType();
@@ -727,6 +743,15 @@ generateCall(Node* source,
 
             i_list.push_back(
               new Instruction(PARAM, (void*)s, REGISTER, n->getType()));
+        } else if (n->matched == "StructAccess") {
+            STEntry* s;
+            if (curr->checkEntry(n->contentStruct)) {
+                semanticError("Cannot find Struct");
+                return;
+            }
+            s = (STEntry*)curr->getVar(n->contentStruct);
+            i_list.push_back(
+              new Instruction(PARAM, (void*)s, REGISTER, s->getType()));
         } else {
             // matched value is something complex, so we need a pre-list.
             STEntry* s;
@@ -1164,20 +1189,31 @@ typeEqual(vector<Type*> a, vector<Type*> b)
 extern vector<Type*>
 verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args, ST* curr)
 {
+    return verifyFunctionType(cand_list, count, args, curr, "");
+}
+
+extern vector<Type*>
+verifyFunctionType(vector<FuncType*> cand_list,
+                   int count,
+                   Node* args,
+                   ST* curr,
+                   string structName)
+{
     vector<Type*> types;
     if (count) {
         vector<Node*>::iterator it = args->children.begin();
-        if (!args->matched.compare("StructAccess")) {
-            if (!curr->checkEntry(args->tmp))
-                types.push_back(curr->getVar(args->tmp)->getType());
-            else {
-                semanticError("Variable not found");
-                exit(1);
-            }
-        }
         for (; it != args->children.end(); ++it) {
             fixNodeForExpression(*it, curr);
             types.push_back(correctType(*it, curr));
+        }
+    }
+    if (structName.compare("") != 0) { // unequal
+        count++;
+        if (!curr->checkEntry(structName))
+            types.insert(types.begin(), curr->getVar(structName)->getType());
+        else {
+            semanticError("Variable not found");
+            exit(1);
         }
     }
     vector<FuncType*>::iterator cand = cand_list.begin();

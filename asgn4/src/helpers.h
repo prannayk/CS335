@@ -123,6 +123,12 @@ extern vector<Instruction*>
 copyInstruction(vector<Instruction*> i_list, int offset );
 extern vector<Type*>
 verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args, ST*);
+extern vector<Type*>
+verifyFunctionType(vector<FuncType*> cand_list,
+                   int count,
+                   Node* args,
+                   ST* curr,
+                   string structName);
 extern Type* correctType(Node* ptr, ST* curr);
 extern Type* correctType(string s, ST* curr);
 

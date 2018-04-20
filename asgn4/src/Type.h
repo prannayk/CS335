@@ -109,10 +109,10 @@ class StructType : public Type
 {
   private:
     Type* structType;
-    string structName;
     StructDefinitionType* baseType;
 
   public:
+    string structName;
     Type* GetStructType() const;
     Type* GetStructMemberType(string a);
     StructType(Type* aStructType, string aName, int aMem);

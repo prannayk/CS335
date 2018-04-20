@@ -837,7 +837,7 @@ if(curr->rValueMode){
         Node* t = new Node("Literal", new BasicType("NOTYPE"));
     // Need to extract the array offset
     /*$1->children[2] is the member variable and children[0] the name*/
-    StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
+    StructDefinitionType* n = curr->getStruct($$->children[0]->content);
     string number = to_string((n->offset)[$$->children[2]->matched]);
     Type* ty = (n->fields)[$$->children[2]->matched];
     t->Add(number);
@@ -855,15 +855,20 @@ $1->instr_list = mergeInstructions($1->instr_list,
     /* cout << ($1->children)[2]->matched << endl; */
 
 Node* t = new Node("Literal", new BasicType("NOTYPE"));
-    StructDefinitionType* n = ST::structDefs[(curr->structs)[$$->children[0]->content]];
+    StructDefinitionType* n = curr->getStruct($$->children[0]->content);
+    if (n->fields.count($$->children[2]->matched) == 0 ||
+        n->fields[$$->children[2]->matched] == nullptr) {
+        ;;
+    } else {
     Type* ty = (n->fields)[$$->children[2]->matched];
     string number = to_string((n->offset)[$$->children[2]->matched]);
     t->Add(number);
     t->setType(new BasicType("int"));
     t->content = number;
     t->tmp = number;
+    $$->patchInstruction =  generateInstructionWriteStruct($$, $$->children[0], t, ty, curr);
+    }
 
-$$->patchInstruction =  generateInstructionWriteStruct($$, $$->children[0], t, ty, curr);
 }
 }
 
@@ -910,6 +915,8 @@ string s1 = $3;
 s = s + s1 ;
 s = $1->getType()->GetRepresentation() + s;
 $$->setType(new BasicType(s));
+$$->contentStruct = $1->content;
+$$->content = $3;
 }
 | PrimaryExpr DOT PAREN_OPEN ExpressionOrType PAREN_CLOSE{$$ = new Node("PrimaryExprNoParen", new BasicType("NOTYPE"));
 $$->Add($1);
@@ -2086,20 +2093,27 @@ $$->Add($2);
 $$->Add($3);
 Type* fntype; string fname;
 vector<FuncType*> cand_list;
+vector<Node*> emptyVector;
 if($1->matched.compare("PseudoCall")){
 if(!curr->checkEntryFunc($1->content)) {
   cand_list = curr->getFunc($1->content);
 } else {
   semanticError("Cannot find function " + $1->content, true);
 }
+if ($1->matched.compare("StructAccess") == 0) {
+$$->type_child = verifyFunctionType(cand_list, 0, new Node("bullshit",
+                                                  new BasicType("Empty")),
+                                    curr, $1->contentStruct);
+ emptyVector.insert(emptyVector.begin(), $1);
+} else {
 $$->type_child = verifyFunctionType(cand_list, 0, new Node("bullshit",
                                                     new BasicType("Empty")),
-                                                    curr);
+                                    curr);
+ }
 fname = ((FuncType*)$$->type_child.back())->GetFuncLabel();
 $$->type_child.pop_back();
 $$->setType($$->type_child.back());
 $$->type_child.pop_back();
-vector<Node*> emptyVector;
 } else {
     if($1->getType()->GetTypeClass() != 2){
         semanticError("Return type is not function type");
@@ -2109,7 +2123,6 @@ vector<Node*> emptyVector;
     fname = ((FuncType*)$1->getType())->GetFuncLabel();
     $$->setType(((FuncType*)$1->getType())->GetReturnType());
 }
-    vector<Node*> emptyVector;
     fntype = $$->getType();
     generateCall($$, fname, fntype, emptyVector, curr);
 }
@@ -2127,7 +2140,13 @@ if(!curr->checkEntryFunc($1->content)) {
 } else {
   semanticError("Cannot find function " + $1->content, true);
 }
-$$->type_child = verifyFunctionType(cand_list, $3->count, $3, curr);
+if ($1->matched.compare("StructAccess") == 0) {
+    $$->type_child = verifyFunctionType(cand_list, $3->count, $3,
+                                    curr, $1->contentStruct);
+    $3->children.insert($3->children.begin(), $1);
+ } else {
+   $$->type_child = verifyFunctionType(cand_list, $3->count, $3, curr);
+ }
 fname = ((FuncType*)$$->type_child.back())->GetFuncLabel();
 $$->type_child.pop_back();
 $$->setType($$->type_child.back());
@@ -2148,6 +2167,9 @@ $$->type_child.pop_back();
     }
     vector<Type*>::iterator it = $$->type_child.begin();
     int i=0;
+    if (!$1->matched.compare("StructAccess")) {
+        ++it;
+    }
     for(; it!=$$->type_child.end(); ++it){
         if(!(*(*it) == *$3->children[i++]->getType())){
             semanticError("Mismatched return types");
@@ -2155,6 +2177,7 @@ $$->type_child.pop_back();
     }
     fntype = $$->getType();
     generateCall($$, fname, fntype, $3->children, curr);
+    $3->children.erase($3->children.begin());
 }
 | PrimaryExpr PAREN_OPEN ExpressionOrTypeList VARIADIC OComma PAREN_CLOSE{$$ = new Node("PseudoCall", new BasicType("NOTYPE"), $3->count+1, true);
 $$->Add($1);

@@ -144,6 +144,7 @@ class Node
   public:
     string matched;
     string content;
+    string contentStruct; // This is for structs only
     Type *type;
     vector<Instruction*> instr_list;
     AddressingMode addrMode;
@@ -259,6 +260,7 @@ class ST {
      void addStructEntry(string aName, string structName);
      void addChild(ST* aChild);
      STEntry* getVar(string a);
+     StructDefinitionType* getStruct(string a);
      static vector<FuncType*> getFunc(string a);
      STEntry* getStructVar(string aName, string memberName);
 
@@ -272,6 +274,6 @@ class ST {
 
     // Setters
     void setParentScope(ST* a) { parent = a; }
-		void setGlobalScope(ST* a) { global = a; }
+    void setGlobalScope(ST* a) { global = a; }
 
 };

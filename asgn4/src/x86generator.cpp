@@ -24,6 +24,7 @@ X86Generator::StackAlloc()
     queue<ST*> sts;
     sts.push(fnTable);
 
+    vector<string> args = ST::funcParamNamesInOrder[this->currentFName];
     // Start BFS through the table.
     while (!sts.empty()) {
         ST* s = sts.front();
@@ -52,8 +53,14 @@ X86Generator::StackAlloc()
                 // and storing a pointer. We shall defer this to after this
                 // whole BFS, because we might need to use the registers edi and
                 // eax, which might be occupied at this point
+
                 totalSpace += PTRSIZE;
-                deferredMallocs.push_back(s1);
+
+                // Do not malloc if it is an argument.
+                if (find(args.begin(), args.end(), x.first) == args.end()) {
+                    deferredMallocs.push_back(s1);
+                }
+
             } else {
                 // Note that any register is located at
                 // -(offset + RBPSaveSpace) from rbp
@@ -68,7 +75,6 @@ X86Generator::StackAlloc()
     }
 
     // Move arguments to their designated places
-    vector<string> args = ST::funcParamNamesInOrder[this->currentFName];
     auto argSize = args.size();
 
     // Any argument after the 6th one is on the stack
