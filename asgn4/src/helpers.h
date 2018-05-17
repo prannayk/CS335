@@ -27,6 +27,7 @@ extern map<string, Instruction*> break_map;
 extern map<string, string> goto_label_map;
 extern map<string, string> cont_label_map;
 extern map<string, string> break_label_map;
+extern multimap<string, FuncType*> fn_map;
 extern void
 inferListType(Node* target, Node* source);
 extern vector<Type*>
@@ -86,19 +87,26 @@ extern void
 setRValueMode(bool, ST* aST);
 extern bool
 isRValueMode(ST* aST);
-extern Instruction*
-generateInstructionReadArray(Node*, Node*, Node*, ST*);
-extern Instruction*
-generateInstructionWriteArray(Node*, Node*, Node*, ST*);
+extern vector<Instruction*>
+generateInstructionReadArray(Node*, ST*);
+extern vector<Instruction*>
+generateInstructionReadStruct(Node* source, Node* n1, Node* n2, Type* ty, ST* curr);
+extern vector<Instruction*>
+generateInstructionWriteArray(Node*, ST*);
 extern void 
 checkListType(vector<Type*> source, Node * target);
+
+extern vector<Instruction*>
+generateInstructionWriteStruct(Node* source, Node* base, Node* addr, Type* ty, ST* curr);
+
 extern void
-generateCall(Node* source, Node* fn, vector<Node*> args, ST*);
+generateCall(Node* source, string fname, Type* fntype, vector<Node*> args, ST* curr);
 extern void setScopeReturnType(Type* aReturnType, ST* aST);
 extern Type* getScopeReturnType(ST* aST);
 extern void generateReturn(Node* source, Node* retVal, ST* curr);
 extern void generateYield(Node* source, Node* retVal, ST* curr);
 extern void* correctPointer(Node * ptr, ST* curr);
+extern void* correctPointer(string , ST*);
 extern string*
 getCharFromString(string s);
 extern void 
@@ -113,4 +121,14 @@ extern void semanticError(string aMessage, bool aCrash);
 
 extern vector<Instruction*> 
 copyInstruction(vector<Instruction*> i_list, int offset );
+extern vector<Type*>
+verifyFunctionType(vector<FuncType*> cand_list, int count, Node* args, ST*);
+extern vector<Type*>
+verifyFunctionType(vector<FuncType*> cand_list,
+                   int count,
+                   Node* args,
+                   ST* curr,
+                   string structName);
+extern Type* correctType(Node* ptr, ST* curr);
+extern Type* correctType(string s, ST* curr);
 

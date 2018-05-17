@@ -1,0 +1,10 @@
+package main
+
+func main() {
+    // Go does not allow i++ to be an expression
+    var a, i int
+    for i = 0; i < 100; i = i + 1 {
+          a = a + 1
+    }
+}
+

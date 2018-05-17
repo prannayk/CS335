@@ -1,0 +1,17 @@
+package main
+
+func foo(x int) int {
+    var bar int
+    return bar
+}
+
+func foo() int {
+    var bar int
+    return bar
+}
+func main() {
+    var a,b int
+    b = foo()
+    a = foo(b)
+}
+

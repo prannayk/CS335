@@ -42,7 +42,7 @@ void
 Node::Print()
 {
     stringstream ss;
-    ss << quoted(this->matched);
+    ss << quoted(this->matched + "_" + this->tmp);
     cerr << "{ \"name\" : " << ss.str() << ", \"children\" : [";
     for (int i = 0; i < this->children.size(); ++i) {
         this->children[i]->Print();
@@ -81,6 +81,7 @@ STEntry::STEntry(string aName, Type* aType)
 {
     name = aName;
     type = aType;
+    global = false;
 }
 
 STEntry::STEntry(string aName, Type* aType, bool aConstant)
@@ -88,12 +89,22 @@ STEntry::STEntry(string aName, Type* aType, bool aConstant)
     name = aName;
     type = aType;
     constant = aConstant;
+    global = false;
 }
 
 map<string, StructDefinitionType*> ST::structDefs;
-map<string, FuncType*> ST::funcDefs;
+multimap<string, FuncType*> ST::funcDefs;
+map<string, ST*> ST::funcSTs;
+map<string, vector<string>> ST::funcParamNamesInOrder;
 vector<STEntry*> ST::paramEntryStack;
 bool ST::paramPush = false;
+
+bool ST::structPush = false;
+string ST::structName = "";
+string ST::funcName = "";
+
+map<string, InterfaceType*> ST::interfaceList;
+map<string, FuncType*> ST::interfaceStack;
 
 ST::ST(int aDepth, ST* aParent)
 {
@@ -111,13 +122,13 @@ ST::addEntry(string aName, Type* aType, bool aConstant)
 void
 ST::addStructEntry(string aName, string structName)
 {
-    StructDefinitionType* t = ST::structDefs[structName];
-    map<string, Type*>::iterator iter;
-    string temp;
-    for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
-        temp = aName + t->randomSuffix + iter->first;
-        addEntry(temp, iter->second, 0);
-    }
+    // StructDefinitionType* t = ST::structDefs[structName];
+    // map<string, Type*>::iterator iter;
+    // string temp;
+    // for (iter = (t->fields).begin(); iter != (t->fields).end(); iter++) {
+    // temp = aName + t->randomSuffix + iter->first;
+    // addEntry(temp, iter->second, 0);
+    //}
     structs[aName] = structName;
 }
 
@@ -152,6 +163,19 @@ ST::getStructVar(string aName, string memberName)
     StructDefinitionType* t = ST::structDefs[structs[aName]];
     string temp = aName + t->randomSuffix + memberName;
     return getVar(temp);
+}
+
+StructDefinitionType*
+ST::getStruct(string a)
+{
+    if (structs.count(a)) {
+        return ST::structDefs[structs[a]];
+    }
+
+    if (depth == 0) {
+        return nullptr;
+    }
+    return parent->getStruct(a);
 }
 
 STEntry*
@@ -339,7 +363,7 @@ Instruction::printInstruction()
 
     if (op == FUNC_ST) {
         cout << "Starting function: " << endl;
-            return;
+        return;
     } else if (op == FUNC_ET) {
         cout << "Ending function" << endl;
         return;
@@ -348,7 +372,10 @@ Instruction::printInstruction()
     }
     if (v1 != nullptr) {
         cout << castAsPerType(v1, v1AddMode) + " ";
-        if(op == LABEL_ST || op == GOTO_OP) { cout << endl;  return;}
+        if (op == LABEL_ST || op == GOTO_OP) {
+            cout << endl;
+            return;
+        }
     }
     if (v2 != nullptr) {
         cout << castAsPerType(v2, v2AddMode) << " ";
@@ -362,27 +389,44 @@ Instruction::printInstruction()
 bool
 ST::checkEntryFunc(string a)
 {
-    if (getFunc(a) == NULL) {
+    if (getFunc(a).size() == 0) {
         return true;
     }
     return false;
 }
 
-FuncType*
+bool
+ST::checkEntryStruct(string a)
+{
+    if (structDefs.count(a)) {
+        return true;
+    }
+    return false;
+}
+
+bool
+checkEqual(string a, pair<string, FuncType*> p)
+{
+    return (p.first == a);
+}
+vector<FuncType*>
 ST::getFunc(string a)
 {
 
-    if (funcDefs.count(a)) {
-        return funcDefs[a];
+    vector<FuncType*> list;
+    map<string, FuncType*>::iterator it = funcDefs.begin();
+    for (; it != funcDefs.end(); ++it) {
+        if ((*it).first == a)
+            list.push_back((*it).second);
     }
-    return nullptr;
+    return list;
 }
 
 void
 Node::printInstructionList()
 {
     for (auto i : this->instr_list) {
-        if(i!=NULL)
+        if (i != NULL)
             i->printInstruction();
     }
 }

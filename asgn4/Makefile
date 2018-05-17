@@ -1,5 +1,5 @@
-CC=g++
-FLAGS=-lfl -std=c++14 -g
+CC=clang++
+FLAGS=-lfl -std=c++14 -g -O0
 TESTS=tests
 BISON_FLAGS=-d -Wall -v -Werror=conflicts-sr -Werror=conflicts-rr -g
 
@@ -30,7 +30,10 @@ $(SRC)/golang.yy.c: $(SRC)/golang.l $(SRC)/golang.tab.c
 	flex -o golang.yy.c golang.l
 
 $(BIN)/parser: $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/*.cpp $(SRC)/*.h $(SRC)/*.cc
-	$(CC) $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(SRC)/Type.cpp $(FLAGS) -o $(BIN)/parser
+	$(CC) $(SRC)/x86generator.cpp $(SRC)/registerdescriptor.cpp $(SRC)/block.cpp $(SRC)/ir.cpp $(SRC)/Node.cpp $(SRC)/golang.tab.c $(SRC)/golang.yy.c $(SRC)/helpers.cc $(SRC)/Type.cpp $(FLAGS) -o $(BIN)/parser
+
+$(BIN)/codegen: $(SRC)/*.h $(SRC)/*.cc $(SRC)/*.cpp
+	$(CC) $(SRC)/Type.cpp $(SRC)/Node.cpp $(SRC)/x86generator.cpp $(FLAGS) -o $(BIN)/codegen
 
 $(BIN):
 	mkdir -p $(BIN)

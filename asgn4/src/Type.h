@@ -9,6 +9,8 @@
 
 using namespace std;
 
+
+extern unsigned long int number();
 class Type
 {
   protected:
@@ -16,17 +18,20 @@ class Type
     int type;
 
   public:
+    int mem_size;
     Type();
     string GetRepresentation() const;
     bool operator==(const Type& rhs);
     bool operator!=(const Type& rhs);
     int GetTypeClass() const;
+    int GetMemSize() const;
 };
 
 class BasicType : public Type
 {
   private:
     string name;
+    int size;
 
   public:
     bool variadic;
@@ -39,6 +44,7 @@ class BasicType : public Type
 class FuncType : public Type
 {
   private:
+    string fName;
     Type* returnType;
     vector<Type*> paramTypes;
     bool generator;
@@ -48,24 +54,30 @@ class FuncType : public Type
     vector<Type*> GetParamTypes() const;
     FuncType(Type* aReturnType, vector<Type*> aParamTypes, bool flag);
     FuncType(Type* aReturnType, vector<Type*> aParamTypes);
+    string GetFuncLabel();
+    void SetFuncLabel(string );
 };
+
+class InterfaceType;
 
 class StructDefinitionType : public Type
 {
 
   public:
+    map<string, InterfaceType*> implemented;
     map<string, Type*> fields;
     string randomSuffix;
-    string name;
+    map<string, int> mem_size_list;
+    map<string, int> offset;
+    map<string, FuncType*> structFunctions;
 
     map<string, Type*> GetFields() const;
     string Hoist(string aStructVariableName,
                  string aFieldName,
                  string aSuffix) const;
     Type* GetTypeFor(string aFieldName);
-    StructDefinitionType(string aName, map<string, Type*> aFields);
-    StructDefinitionType(string aName,
-                         vector<string> fieldNames,
+    StructDefinitionType(map<string, Type*> aFields);
+    StructDefinitionType(vector<string> fieldNames,
                          vector<Type*> fieldTypes);
 };
 
@@ -93,6 +105,19 @@ class ArrayType : public Type
     ArrayType(Type* aArrayType, int aSize, bool flag);
 };
 
+class StructType : public Type
+{
+  private:
+    Type* structType;
+    StructDefinitionType* baseType;
+
+  public:
+    string structName;
+    Type* GetStructType() const;
+    Type* GetStructMemberType(string a);
+    StructType(Type* aStructType, string aName, int aMem);
+};
+
 class PointerType : public Type
 {
   private:
@@ -102,3 +127,14 @@ class PointerType : public Type
     Type* GetUnderlyingType() const;
     PointerType(Type* aUnderlyingType);
 };
+
+class InterfaceType : public Type
+{
+  public:
+    string interfaceName;
+    map<string, FuncType*> funcList;
+    InterfaceType(string, map<string, FuncType*>);
+};
+
+extern map<string, Type*> TypeList;
+extern void fillTypeList();
